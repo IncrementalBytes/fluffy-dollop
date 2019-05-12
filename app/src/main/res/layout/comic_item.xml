@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/comic_item_text_product_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/placeholder"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <ImageView
+        android:id="@+id/comic_image_own"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_view_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/comic_item_text_product_code"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:src="@drawable/ic_owned_light"
+        android:contentDescription="@string/user_owns_this_comic" />
+
+    <ImageView
+        android:id="@+id/comic_image_wishlist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_view_margin"
+        app:layout_constraintStart_toEndOf="@id/comic_image_own"
+        app:layout_constraintTop_toBottomOf="@id/comic_item_text_product_code"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:src="@drawable/ic_wishlist_light"
+        android:contentDescription="@string/comic_on_wish_list" />
+
+</android.support.constraint.ConstraintLayout>
