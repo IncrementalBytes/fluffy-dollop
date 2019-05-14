@@ -16,7 +16,5 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String DEFAULT_PRODUCT_CODE = "0000000000";
     public static final String DEFAULT_USER_ID = "0000000000000000000000000000";
 
-    public static final int SCHEMA_FIELDS = 4;
-
     public static final String BASE_TAG = "ComicCollector::";
 }

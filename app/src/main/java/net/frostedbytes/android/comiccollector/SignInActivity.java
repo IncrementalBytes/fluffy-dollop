@@ -60,8 +60,7 @@ public class SignInActivity extends BaseActivity implements OnClickListener {
         mAccount = GoogleSignIn.getLastSignedInAccount(this);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            //.requestIdToken(getString(R.string.default_web_client_id))
-            .requestIdToken("1079143607884-n6m9tirs482fdn65bf54lnvfrk4u8e54.apps.googleusercontent.com")
+            .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build();
 

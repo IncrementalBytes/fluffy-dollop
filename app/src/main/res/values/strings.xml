@@ -35,12 +35,19 @@
     <string name="product_code">Product Code:</string>
     <string name="not_owned">Not Owned</string>
     <string name="owned">Owned</string>
-    <string name="wishlist">Wishlist</string>
-    <string name="not_wishlist">Not on Wishlist</string>
+    <string name="add_to_wishlist">Add to Wishlist</string>
+    <string name="not_on_wishlist">Not on Wishlist</string>
     <string name="add_to_library">Add to Library?</string>
     <string name="update">Update</string>
     <string name="remove_from_library">Remove from Library?</string>
     <string name="err_add_comic_book">Could not add comic book to library, please try again later.</string>
     <string name="err_remove_comic_book">Could not remove comic book from library, please try again later.</string>
     <string name="err_update_comic_book">Could not update comic book, please try again later.</string>
+    <string name="add">Add</string>
+    <string name="err_no_data">No comic books found, try adding some.</string>
+    <string name="series">Series:</string>
+    <string name="publisher">Publisher:</string>
+    <string name="volume">Volume:</string>
+    <string name="issue">Issue:</string>
+    <string name="issue_code">Issue Code:</string>
 </resources>

@@ -38,12 +38,19 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
             for (ComicBook comicBook : mComicBooks) {
                 String lineContents = String.format(
                     Locale.US,
-                    "%s|%s|%s|%s|%s\r\n",
+                    "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\r\n",
                     comicBook.ProductCode,
+                    comicBook.SeriesName,
                     comicBook.Title,
-                    String.valueOf(comicBook.AddedDate),
                     String.valueOf(comicBook.IsOwned),
-                    String.valueOf(comicBook.OnWishlist));
+                    String.valueOf(comicBook.OnWishlist),
+                    String.valueOf(comicBook.AddedDate),
+                    comicBook.Volume,
+                    String.valueOf(comicBook.Issue),
+                    comicBook.IssueCode,
+                    String.valueOf(comicBook.PublishedDate),
+                    comicBook.Publisher,
+                    String.valueOf(comicBook.UpdatedDate));
                 outputStream.write(lineContents.getBytes());
                 booksWritten.add(comicBook);
             }

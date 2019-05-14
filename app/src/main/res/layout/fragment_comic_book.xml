@@ -6,58 +6,175 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/comic_book_text_title"
+        android:id="@+id/comic_book_text_series"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
-        android:text="@string/title"
+        android:layout_margin="8dp"
+        android:text="@string/series"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/comic_book_text_product_code"
+        android:labelFor="@id/comic_book_edit_series"
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_series"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/comic_book_edit_series" />
+
+    <EditText
+        android:id="@+id/comic_book_edit_series"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:gravity="center_vertical|end"
+        android:textAlignment="gravity"
+        app:layout_constraintBottom_toTopOf="@id/comic_book_edit_title"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/comic_book_text_title_value"
+        android:id="@+id/comic_book_text_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
-        android:text="@string/placeholder"
-        android:textColor="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="@id/comic_book_text_title"
+        android:layout_margin="8dp"
+        android:text="@string/title"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:labelFor="@id/comic_book_edit_title"
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/comic_book_edit_title" />
+
+    <EditText
+        android:id="@+id/comic_book_edit_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:gravity="center_vertical|end"
+        android:textAlignment="gravity"
+        app:layout_constraintBottom_toTopOf="@id/comic_book_edit_publisher"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/comic_book_text_title" />
+        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_series" />
+
+    <TextView
+        android:id="@+id/comic_book_text_publisher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/publisher"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_publisher"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/comic_book_edit_publisher" />
+
+    <EditText
+        android:id="@+id/comic_book_edit_publisher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:gravity="center_vertical|end"
+        android:textAlignment="gravity"
+        app:layout_constraintBottom_toTopOf="@id/comic_book_edit_volume"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_title" />
+
+    <TextView
+        android:id="@+id/comic_book_text_volume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/volume"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_volume"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/comic_book_edit_volume" />
+
+    <EditText
+        android:id="@+id/comic_book_edit_volume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:gravity="center_vertical|end"
+        android:textAlignment="gravity"
+        app:layout_constraintBottom_toTopOf="@id/comic_book_edit_issue"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_publisher" />
+
+    <TextView
+        android:id="@+id/comic_book_text_issue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/issue"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_issue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/comic_book_edit_issue" />
+
+    <EditText
+        android:id="@+id/comic_book_edit_issue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:gravity="center_vertical|end"
+        android:textAlignment="gravity"
+        app:layout_constraintBottom_toTopOf="@id/comic_book_text_issue_code"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_volume" />
+
+    <TextView
+        android:id="@+id/comic_book_text_issue_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/issue_code"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_issue_code"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/comic_book_edit_issue_code" />
+
+    <EditText
+        android:id="@+id/comic_book_edit_issue_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:gravity="center_vertical|end"
+        android:textAlignment="gravity"
+        app:layout_constraintBottom_toTopOf="@id/comic_book_text_product_code_value"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_issue" />
 
     <TextView
         android:id="@+id/comic_book_text_product_code"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
+        android:layout_margin="8dp"
         android:text="@string/product_code"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/comic_book_toggle_owned"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/comic_book_text_title" />
+        app:layout_constraintTop_toBottomOf="@id/comic_book_text_issue_code" />
 
     <TextView
         android:id="@+id/comic_book_text_product_code_value"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
+        android:layout_margin="8dp"
         android:gravity="center_vertical|end"
         android:text="@string/placeholder"
         android:textAlignment="gravity"
-        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="@id/comic_book_text_product_code"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/comic_book_text_product_code"
         app:layout_constraintTop_toTopOf="@id/comic_book_text_product_code" />
 
     <ToggleButton
         android:id="@+id/comic_book_toggle_owned"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
+        android:layout_margin="8dp"
         android:text=""
         android:textOff="@string/not_owned"
         android:textOn="@string/owned"
@@ -68,10 +185,10 @@
         android:id="@+id/comic_book_toggle_wishlist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
+        android:layout_margin="8dp"
         android:text=""
-        android:textOff="@string/not_wishlist"
-        android:textOn="@string/wishlist"
+        android:textOff="@string/not_on_wishlist"
+        android:textOn="@string/add_to_wishlist"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/comic_book_text_product_code" />
 
@@ -79,7 +196,7 @@
         android:id="@+id/comic_book_button_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
+        android:layout_margin="8dp"
         android:text="@string/add_to_library"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -89,8 +206,7 @@
         android:id="@+id/comic_book_button_update"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
-        android:layout_marginTop="8dp"
+        android:layout_margin="8dp"
         android:text="@string/update"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -100,7 +216,7 @@
         android:id="@+id/comic_book_button_remove"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
+        android:layout_margin="8dp"
         android:text="@string/remove_from_library"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

@@ -89,7 +89,6 @@ public class ComicBookListFragment extends Fragment {
         mRecyclerView = view.findViewById(R.id.comic_list_view);
         FloatingActionButton mSyncButton = view.findViewById(R.id.comic_fab_sync);
 
-
         final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(manager);
 
@@ -162,7 +161,10 @@ public class ComicBookListFragment extends Fragment {
     private class ComicHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private final TextView mProductCodeTextView;
+        private final TextView mPublisherTextView;
         private final ImageView mOwnImage;
+        private final TextView mSeriesNameTextView;
+        private final TextView mTitleTextView;
         private final ImageView mWishListImage;
 
         private ComicBook mComicBook;
@@ -171,8 +173,11 @@ public class ComicBookListFragment extends Fragment {
             super(inflater.inflate(R.layout.comic_item, parent, false));
 
             mProductCodeTextView = itemView.findViewById(R.id.comic_item_text_product_code);
-            mOwnImage = itemView.findViewById(R.id.comic_image_own);
-            mWishListImage = itemView.findViewById(R.id.comic_image_wishlist);
+            mPublisherTextView = itemView.findViewById(R.id.comic_item_text_publisher);
+            mOwnImage = itemView.findViewById(R.id.comic_item_image_own);
+            mSeriesNameTextView = itemView.findViewById(R.id.comic_item_text_series);
+            mTitleTextView = itemView.findViewById(R.id.comic_item_text_title);
+            mWishListImage = itemView.findViewById(R.id.comic_item_image_wishlist);
 
             itemView.setOnClickListener(this);
         }
@@ -182,12 +187,15 @@ public class ComicBookListFragment extends Fragment {
             mComicBook = comicBook;
 
             mProductCodeTextView.setText(mComicBook.ProductCode);
+            mPublisherTextView.setText(mComicBook.Publisher);
             if (mComicBook.IsOwned) {
                 mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_owned_light, null));
             } else {
                 mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_not_owned_light, null));
             }
 
+            mSeriesNameTextView.setText(mComicBook.SeriesName);
+            mTitleTextView.setText(mComicBook.Title);
             mWishListImage.setVisibility(mComicBook.OnWishlist? View.VISIBLE : View.INVISIBLE);
         }
 

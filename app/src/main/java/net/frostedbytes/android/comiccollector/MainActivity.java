@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements
 
         Toolbar toolbar = findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
+
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_container);
             if (fragment != null) {
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements
                 replaceFragment(ComicBookListFragment.newInstance(mComicBooks));
                 break;
             case R.id.action_add:
-                takePictureIntent();
+                checkDevicePermission(Manifest.permission.CAMERA, CAMERA_PERMISSIONS_REQUEST);
                 break;
             case R.id.action_logout:
                 AlertDialog dialog = new AlertDialog.Builder(this)
@@ -236,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements
             case CAMERA_PERMISSIONS_REQUEST:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     LogUtils.debug(TAG, "CAMERA_PERMISSIONS_REQUEST permission granted.");
-                    takePictureIntent();
+                    checkDevicePermission(Manifest.permission.CAMERA, CAMERA_PERMISSIONS_REQUEST);
                 } else {
                     LogUtils.debug(TAG, "CAMERA_PERMISSIONS_REQUEST permission denied.");
                 }
@@ -326,23 +327,30 @@ public class MainActivity extends AppCompatActivity implements
     public void onComicListAddBook() {
 
         LogUtils.debug(TAG, "++onComicListAddBook()");
-        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            checkDevicePermission(Manifest.permission.CAMERA, CAMERA_PERMISSIONS_REQUEST);
-        } else {
-            showDismissableSnackbar(getString(R.string.err_no_camera_detected));
-        }
     }
 
     @Override
     public void onComicListItemSelected(ComicBook comicBook) {
 
         LogUtils.debug(TAG, "++onComicListItemSelected(%s)", comicBook.toString());
+        replaceFragment(ComicBookFragment.newInstance(mUser.Id, comicBook));
     }
 
     @Override
     public void onComicListPopulated(int size) {
 
         LogUtils.debug(TAG, "++onComicListPopulated(%d)", size);
+        mProgressBar.setIndeterminate(false);
+        if (size == 0) {
+            mSnackbar = Snackbar.make(
+                findViewById(R.id.main_fragment_container),
+                getString(R.string.err_no_data),
+                Snackbar.LENGTH_INDEFINITE)
+                .setAction(
+                    getString(R.string.add),
+                    view -> checkDevicePermission(Manifest.permission.CAMERA, CAMERA_PERMISSIONS_REQUEST));
+            mSnackbar.show();
+        }
     }
 
     @Override
@@ -442,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements
     private void queryInUserComicBooks(ComicBook comicBook) {
 
         LogUtils.debug(TAG, "++queryInUserComicBooks(%s)", comicBook.toString());
-        ComicBook foundBook = new ComicBook();
+        ComicBook foundBook = null;
         if (mComicBooks != null) {
             for (ComicBook comic : mComicBooks) {
                 if (comic.ProductCode.equalsIgnoreCase(comicBook.ProductCode)) {
@@ -453,7 +461,11 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         mProgressBar.setIndeterminate(false);
-        replaceFragment(ComicBookFragment.newInstance(mUser.Id, foundBook));
+        if (foundBook != null) {
+            replaceFragment(ComicBookFragment.newInstance(mUser.Id, foundBook));
+        } else {
+            replaceFragment(ComicBookFragment.newInstance(mUser.Id, comicBook));
+        }
     }
 
     private void readLocalLibrary() {
@@ -473,21 +485,28 @@ public class MainActivity extends AppCompatActivity implements
                     }
 
                     List<String> elements = new ArrayList<>(Arrays.asList(parsableString.split("\\|")));
-                    if (elements.size() != BaseActivity.SCHEMA_FIELDS) {
+                    if (elements.size() != ComicBook.SCHEMA_FIELDS) {
                         LogUtils.debug(
                             TAG,
                             "Local library schema mismatch. Got: %d Expected: %d",
                             elements.size(),
-                            BaseActivity.SCHEMA_FIELDS);
+                            ComicBook.SCHEMA_FIELDS);
                         continue;
                     }
 
                     ComicBook comicBook = new ComicBook();
                     comicBook.ProductCode = elements.remove(0);
+                    comicBook.SeriesName = elements.remove(0);
                     comicBook.Title = elements.remove(0);
                     comicBook.IsOwned = Boolean.parseBoolean(elements.remove(0));
                     comicBook.OnWishlist = Boolean.parseBoolean(elements.remove(0));
                     comicBook.AddedDate = Long.parseLong(elements.remove(0));
+                    comicBook.Volume = Integer.parseInt(elements.remove(0));
+                    comicBook.Issue = Integer.parseInt(elements.remove(0));
+                    comicBook.IssueCode = elements.remove(0);
+                    comicBook.PublishedDate = Long.parseLong(elements.remove(0));
+                    comicBook.Publisher = elements.remove(0);
+                    comicBook.UpdatedDate = Long.parseLong(elements.remove(0));
 
                     // attempt to locate this book in existing list
                     boolean comicFound = false;
@@ -544,6 +563,7 @@ public class MainActivity extends AppCompatActivity implements
                 new WriteToLocalLibraryTask(this, mComicBooks).execute();
             } else {
                 LogUtils.debug(TAG, "Could not get user book list: %s", queryPath);
+                onComicListPopulated(0);
             }
         });
     }
@@ -634,6 +654,10 @@ public class MainActivity extends AppCompatActivity implements
     private void takePictureIntent() {
 
         LogUtils.debug(TAG, "++takePictureIntent()");
+        if (mSnackbar.isShown()) {
+            mSnackbar.dismiss();
+        }
+
         deleteImageFile();
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {

@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -91,8 +92,18 @@ public class ComicBookFragment extends Fragment {
 
         LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
         final View view = inflater.inflate(R.layout.fragment_comic_book, container, false);
-        TextView titleText = view.findViewById(R.id.comic_book_text_title_value);
+        EditText seriesText = view.findViewById(R.id.comic_book_edit_series);
+        seriesText.setText(mComicBook.SeriesName);
+        EditText titleText = view.findViewById(R.id.comic_book_edit_title);
         titleText.setText(mComicBook.Title);
+        EditText publisherText = view.findViewById(R.id.comic_book_edit_publisher);
+        publisherText.setText(mComicBook.Publisher);
+        EditText volumeText = view.findViewById(R.id.comic_book_edit_volume);
+        volumeText.setText(String.valueOf(mComicBook.Volume));
+        EditText issueText = view.findViewById(R.id.comic_book_edit_issue);
+        issueText.setText(String.valueOf(mComicBook.Issue));
+        EditText issueCodeText = view.findViewById(R.id.comic_book_edit_issue_code);
+        issueCodeText.setText(mComicBook.IssueCode);
         TextView productCodeText = view.findViewById(R.id.comic_book_text_product_code_value);
         productCodeText.setText(mComicBook.ProductCode);
 
@@ -115,9 +126,14 @@ public class ComicBookFragment extends Fragment {
                 ComicBook updatedBook = new ComicBook();
                 updatedBook.AddedDate = Calendar.getInstance().getTimeInMillis();
                 updatedBook.IsOwned = ownedToggle.isChecked();
+                updatedBook.Issue = Integer.parseInt(issueText.getText().toString());
+                updatedBook.IssueCode = issueCodeText.getText().toString();
                 updatedBook.OnWishlist = wishlistToggle.isChecked();
                 updatedBook.ProductCode = mComicBook.ProductCode;
+                updatedBook.Publisher = publisherText.getText().toString();
+                updatedBook.SeriesName = seriesText.getText().toString();
                 updatedBook.Title = titleText.getText().toString();
+                updatedBook.Volume = Integer.parseInt(volumeText.getText().toString());
 
                 String comicBookQueryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, updatedBook.ProductCode);
                 FirebaseFirestore.getInstance().document(comicBookQueryPath).set(updatedBook, SetOptions.merge())
@@ -143,6 +159,7 @@ public class ComicBookFragment extends Fragment {
                 mCallback.onComicBookStarted();
                 ComicBook updatedBook = new ComicBook(mComicBook);
                 updatedBook.IsOwned = ownedToggle.isChecked();
+                updatedBook.OnWishlist = wishlistToggle.isChecked();
                 updatedBook.UpdatedDate = Calendar.getInstance().getTimeInMillis();
                 String comicBookQueryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, updatedBook.ProductCode);
                 FirebaseFirestore.getInstance().document(comicBookQueryPath).set(updatedBook, SetOptions.merge())
