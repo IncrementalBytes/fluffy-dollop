@@ -7,17 +7,17 @@
 
     <item
         android:id="@+id/action_home"
-        android:icon="@drawable/ic_home_light"
+        android:icon="@drawable/ic_home_dark"
         android:title="@string/menu_home"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_add"
-        android:icon="@drawable/ic_add_light"
+        android:icon="@drawable/ic_add_dark"
         android:title="@string/menu_add"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_logout"
-        android:icon="@drawable/ic_logout_light"
+        android:icon="@drawable/ic_logout_dark"
         android:title="@string/menu_logout"
         app:showAsAction="ifRoom" />
 

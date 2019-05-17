@@ -1,2 +1,5 @@
 <resources>
+    <dimen name="image_height_thumbnail">@android:dimen/thumbnail_height</dimen>
+    <dimen name="image_width_thumbnail">@android:dimen/thumbnail_width</dimen>
+    <dimen name="default_view_margin">8dp</dimen>
 </resources>

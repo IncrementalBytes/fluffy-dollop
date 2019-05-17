@@ -170,7 +170,7 @@ public class ComicBookListFragment extends Fragment {
         private ComicBook mComicBook;
 
         ComicHolder(LayoutInflater inflater, ViewGroup parent) {
-            super(inflater.inflate(R.layout.comic_item, parent, false));
+            super(inflater.inflate(R.layout.comic_book_item, parent, false));
 
             mProductCodeTextView = itemView.findViewById(R.id.comic_item_text_product_code);
             mPublisherTextView = itemView.findViewById(R.id.comic_item_text_publisher);
@@ -186,7 +186,7 @@ public class ComicBookListFragment extends Fragment {
 
             mComicBook = comicBook;
 
-            mProductCodeTextView.setText(mComicBook.ProductCode);
+            mProductCodeTextView.setText(mComicBook.getUniqueId());
             mPublisherTextView.setText(mComicBook.Publisher);
             if (mComicBook.IsOwned) {
                 mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_owned_light, null));

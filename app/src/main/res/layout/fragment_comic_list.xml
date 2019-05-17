@@ -14,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/comic_item" />
+        tools:listitem="@layout/comic_book_item" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/comic_fab_sync"
@@ -27,7 +27,7 @@
         android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/comic_fab_add"
-        app:srcCompat="@drawable/ic_sync_light" />
+        app:srcCompat="@drawable/ic_sync_dark" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/comic_fab_add"
@@ -40,6 +40,6 @@
         android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_add_light" />
+        app:srcCompat="@drawable/ic_add_dark" />
 
 </android.support.constraint.ConstraintLayout>

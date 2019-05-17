@@ -21,6 +21,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 
+import java.util.Calendar;
 import java.util.Locale;
 
 public class SignInActivity extends BaseActivity implements OnClickListener {
@@ -133,6 +134,7 @@ public class SignInActivity extends BaseActivity implements OnClickListener {
 
         if (mAuth.getCurrentUser() != null && mAccount != null) {
             LogUtils.debug(TAG, "++onAuthenticateSuccess(%s)", mAuth.getCurrentUser().getDisplayName());
+            LogUtils.debug(TAG, "Timestamp: %d", Calendar.getInstance().getTimeInMillis());
 //            Crashlytics.setUserIdentifier(mAuth.getCurrentUser().getUid());
             Bundle bundle = new Bundle();
             bundle.putString(FirebaseAnalytics.Param.METHOD, "onAuthenticateSuccess");

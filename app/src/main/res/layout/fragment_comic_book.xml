@@ -6,21 +6,18 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/comic_book_text_series"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:text="@string/series"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:labelFor="@id/comic_book_edit_series"
-        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_series"
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_spinner_series"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/comic_book_edit_series" />
-
-    <EditText
-        android:id="@+id/comic_book_edit_series"
-        android:layout_width="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/comic_book_spinner_series" />
+    <Spinner
+        android:id="@+id/comic_book_spinner_series"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:gravity="center_vertical|end"
@@ -30,7 +27,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/comic_book_text_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
@@ -41,17 +37,42 @@
         app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/comic_book_edit_title" />
-
     <EditText
         android:id="@+id/comic_book_edit_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
+        android:autofillHints="text"
         android:gravity="center_vertical|end"
+        android:inputType="text"
         android:textAlignment="gravity"
-        app:layout_constraintBottom_toTopOf="@id/comic_book_edit_publisher"
+        app:layout_constraintBottom_toTopOf="@id/comic_book_edit_published_date"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_series" />
+        app:layout_constraintTop_toBottomOf="@id/comic_book_spinner_series" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/published_date"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:labelFor="@id/comic_book_edit_published_date"
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_published_date"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/comic_book_edit_published_date" />
+    <EditText
+        android:id="@+id/comic_book_edit_published_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:autofillHints="date"
+        android:gravity="center_vertical|end"
+        android:inputType="date"
+        android:textAlignment="gravity"
+        app:layout_constraintBottom_toTopOf="@id/comic_book_text_publisher"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_title" />
 
     <TextView
         android:id="@+id/comic_book_text_publisher"
@@ -61,20 +82,19 @@
         android:text="@string/publisher"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_publisher"
+        app:layout_constraintBottom_toTopOf="@id/comic_book_text_volume"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/comic_book_edit_publisher" />
-
-    <EditText
-        android:id="@+id/comic_book_edit_publisher"
+        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_published_date" />
+    <TextView
+        android:id="@+id/comic_book_text_publisher_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:gravity="center_vertical|end"
         android:textAlignment="gravity"
-        app:layout_constraintBottom_toTopOf="@id/comic_book_edit_volume"
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_text_publisher"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_title" />
+        app:layout_constraintTop_toTopOf="@id/comic_book_text_publisher" />
 
     <TextView
         android:id="@+id/comic_book_text_volume"
@@ -84,21 +104,20 @@
         android:text="@string/volume"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_volume"
+        app:layout_constraintBottom_toTopOf="@id/comic_book_text_product_code"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/comic_book_edit_volume" />
-
-    <EditText
-        android:id="@+id/comic_book_edit_volume"
+        app:layout_constraintTop_toBottomOf="@id/comic_book_text_publisher" />
+    <TextView
+        android:id="@+id/comic_book_text_volume_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:gravity="center_vertical|end"
+        android:text="@string/placeholder"
         android:textAlignment="gravity"
-        app:layout_constraintBottom_toTopOf="@id/comic_book_edit_issue"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_publisher" />
-
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_text_volume"
+        app:layout_constraintStart_toEndOf="@id/comic_book_text_volume"
+        app:layout_constraintTop_toTopOf="@id/comic_book_text_volume" />
     <TextView
         android:id="@+id/comic_book_text_issue"
         android:layout_width="wrap_content"
@@ -107,43 +126,20 @@
         android:text="@string/issue"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_issue"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/comic_book_edit_issue" />
-
-    <EditText
-        android:id="@+id/comic_book_edit_issue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:gravity="center_vertical|end"
-        android:textAlignment="gravity"
-        app:layout_constraintBottom_toTopOf="@id/comic_book_text_issue_code"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_volume" />
-
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_text_volume"
+        app:layout_constraintStart_toEndOf="@id/comic_book_text_volume_value"
+        app:layout_constraintTop_toTopOf="@id/comic_book_text_volume" />
     <TextView
-        android:id="@+id/comic_book_text_issue_code"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:text="@string/issue_code"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_issue_code"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/comic_book_edit_issue_code" />
-
-    <EditText
-        android:id="@+id/comic_book_edit_issue_code"
+        android:id="@+id/comic_book_text_issue_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:gravity="center_vertical|end"
+        android:text="@string/placeholder"
         android:textAlignment="gravity"
-        app:layout_constraintBottom_toTopOf="@id/comic_book_text_product_code_value"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/comic_book_edit_issue" />
+        app:layout_constraintBottom_toBottomOf="@id/comic_book_text_volume"
+        app:layout_constraintStart_toEndOf="@id/comic_book_text_issue"
+        app:layout_constraintTop_toTopOf="@id/comic_book_text_volume" />
 
     <TextView
         android:id="@+id/comic_book_text_product_code"
@@ -155,8 +151,7 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/comic_book_toggle_owned"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/comic_book_text_issue_code" />
-
+        app:layout_constraintTop_toBottomOf="@id/comic_book_text_issue" />
     <TextView
         android:id="@+id/comic_book_text_product_code_value"
         android:layout_width="0dp"

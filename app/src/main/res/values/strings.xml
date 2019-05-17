@@ -49,5 +49,17 @@
     <string name="publisher">Publisher:</string>
     <string name="volume">Volume:</string>
     <string name="issue">Issue:</string>
-    <string name="issue_code">Issue Code:</string>
+    <string name="scan_photo">Scan Photo</string>
+    <string name="search_manual">Manual Search</string>
+    <string name="search">Search</string>
+    <string name="search_series_hint">Enter Series UPC</string>
+    <string name="search_issue_hint">Enter Issue Code</string>
+    <string name="err_invalid_series_code">Unexpected Series UPC, please try again.</string>
+    <string name="err_invalid_issue_code">Unexpected Issue Code, please try again.</string>
+    <string name="query_for_comic_book">Query for Comic Book</string>
+    <string name="comic_book">Comic Book</string>
+    <string name="published_date">Published:</string>
+    <string name="err_comic_series_data_load_failed">Unable to load Comic Series data, please try again later.</string>
+    <string name="err_comic_series_data_cleanup_failed">Unable to clean up Comic Series data, please try again later.</string>
+    <string name="enter_issue_code">Enter Issue Code:</string>
 </resources>

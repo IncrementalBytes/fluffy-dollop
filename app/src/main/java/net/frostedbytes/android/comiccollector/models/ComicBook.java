@@ -7,13 +7,16 @@ import com.google.firebase.firestore.Exclude;
 
 import net.frostedbytes.android.comiccollector.BaseActivity;
 
+import java.util.Calendar;
+import java.util.Locale;
+
 public class ComicBook implements Parcelable {
 
     @Exclude
     public static final String ROOT = "ComicBooks";
 
     @Exclude
-    public static final int SCHEMA_FIELDS = 12;
+    public static final int SCHEMA_FIELDS = 11;
 
     /**
      * Date comic was added to user's library.
@@ -26,12 +29,7 @@ public class ComicBook implements Parcelable {
     public boolean IsOwned;
 
     /**
-     * Issue number of comic (can be in conjunction with Volume).
-     */
-    public int Issue;
-
-    /**
-     * Unique code for issue.
+     * Unique code for issue (paired with SeriesCode).
      */
     public String IssueCode;
 
@@ -39,12 +37,6 @@ public class ComicBook implements Parcelable {
      * Whether or not comic is on user's wishlist.
      */
     public boolean OnWishlist;
-
-    /**
-     * Unique produce code (UPC) of comic.
-     */
-    @Exclude
-    public String ProductCode;
 
     /**
      * Date comic was published.
@@ -57,7 +49,12 @@ public class ComicBook implements Parcelable {
     public String Publisher;
 
     /**
-     * Series name of issue.
+     * Unique produce code (UPC) of comic series.
+     */
+    public String SeriesCode;
+
+    /**
+     * Name of series; e.g. character or story arc
      */
     public String SeriesName;
 
@@ -72,59 +69,59 @@ public class ComicBook implements Parcelable {
     public long UpdatedDate;
 
     /**
-     * Unique volume comic is include in (may be 0).
+     * Unique volume of series.
      */
     public int Volume;
 
     public ComicBook() {
 
-        this.AddedDate = 0;
-        this.IsOwned = false;
-        this.Issue = 0;
-        this.IssueCode = "";
-        this.OnWishlist = false;
-        this.ProductCode = BaseActivity.DEFAULT_PRODUCT_CODE;
-        this.PublishedDate = 0;
-        this.Publisher = "";
-        this.SeriesName = "";
-        this.Title = "";
-        this.UpdatedDate = 0;
-        this.Volume = 0;
-    }
-
-    public ComicBook(ComicBook comicBook) {
-
-        this.AddedDate = comicBook.AddedDate;
-        this.IsOwned = comicBook.IsOwned;
-        this.Issue = comicBook.Issue;
-        this.IssueCode = comicBook.IssueCode;
-        this.OnWishlist = comicBook.OnWishlist;
-        this.ProductCode = comicBook.ProductCode;
-        this.PublishedDate = comicBook.PublishedDate;
-        this.Publisher = comicBook.Publisher;
-        this.SeriesName = comicBook.SeriesName;
-        this.Title = comicBook.Title;
-        this.UpdatedDate = comicBook.UpdatedDate;
-        this.Volume = comicBook.Volume;
+        AddedDate = 0;
+        IsOwned = false;
+        IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
+        OnWishlist = false;
+        PublishedDate = Calendar.getInstance().getTimeInMillis();
+        Publisher = "";
+        SeriesCode = BaseActivity.DEFAULT_SERIES_CODE;
+        SeriesName = "";
+        Title = "";
+        UpdatedDate = 0;
+        Volume = 0;
     }
 
     protected ComicBook(Parcel in) {
 
         AddedDate = in.readLong();
         IsOwned = in.readInt() != 0;
-        Issue = in.readInt();
         IssueCode = in.readString();
         OnWishlist = in.readInt() != 0;
-        ProductCode = in.readString();
         PublishedDate = in.readLong();
         Publisher = in.readString();
+        SeriesCode = in.readString();
         SeriesName = in.readString();
         Title = in.readString();
         UpdatedDate = in.readLong();
         Volume = in.readInt();
     }
 
+    @Exclude
+    public int getIssueNumber() {
+
+        if (IssueCode != null && IssueCode.length() > 3) {
+            String temp = IssueCode.substring(0, IssueCode.length() - 2);
+            return Integer.parseInt(temp);
+        }
+
+        return 0;
+    }
+
+    @Exclude
+    public String getUniqueId() {
+
+        return String.format(Locale.US, "%s-%s", SeriesCode, IssueCode);
+    }
+
     public static final Creator<ComicBook> CREATOR = new Creator<ComicBook>() {
+
         @Override
         public ComicBook createFromParcel(Parcel in) { return new ComicBook(in); }
 
@@ -139,7 +136,7 @@ public class ComicBook implements Parcelable {
     public String toString() {
         return "ComicBook{" +
             "Title=" + Title +
-            " (ProductCode=" + ProductCode +
+            " (Series=" + getUniqueId() +
             ", IsOwned=" + IsOwned +
             ", OnWishlist=" + OnWishlist +
             ")}";
@@ -150,12 +147,11 @@ public class ComicBook implements Parcelable {
 
         dest.writeLong(AddedDate);
         dest.writeByte((byte) (IsOwned ? 1 : 0));
-        dest.writeInt(Issue);
         dest.writeString(IssueCode);
         dest.writeByte((byte) (OnWishlist ? 1 : 0));
-        dest.writeString(ProductCode);
         dest.writeLong(PublishedDate);
         dest.writeString(Publisher);
+        dest.writeString(SeriesCode);
         dest.writeString(SeriesName);
         dest.writeString(Title);
         dest.writeLong(UpdatedDate);

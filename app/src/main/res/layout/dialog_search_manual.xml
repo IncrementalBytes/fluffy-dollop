@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/manual_dialog_text_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_margin="@dimen/default_view_margin"
+        android:text="@string/search"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <EditText
+        android:id="@+id/manual_dialog_edit_series"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_view_margin"
+        android:autofillHints="@string/search"
+        android:hint="@string/search_series_hint"
+        android:inputType="number"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/manual_dialog_edit_issue"
+        app:layout_constraintTop_toBottomOf="@id/manual_dialog_text_search"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+    <EditText
+        android:id="@+id/manual_dialog_edit_issue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_view_margin"
+        android:autofillHints="@string/search"
+        android:hint="@string/search_issue_hint"
+        android:inputType="number"
+        app:layout_constraintStart_toEndOf="@id/manual_dialog_edit_series"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/manual_dialog_text_search"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</android.support.constraint.ConstraintLayout>

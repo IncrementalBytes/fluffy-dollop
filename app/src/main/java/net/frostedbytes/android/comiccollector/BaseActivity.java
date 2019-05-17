@@ -12,8 +12,9 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String ARG_USER_ID = "user_id";
     public static final String ARG_USER_NAME = "user_name";
 
+    public static final String DEFAULT_ISSUE_CODE = "00000";
     public static final String DEFAULT_LIBRARY_FILE = "localLibrary.txt";
-    public static final String DEFAULT_PRODUCT_CODE = "0000000000";
+    public static final String DEFAULT_SERIES_CODE = "000000000000";
     public static final String DEFAULT_USER_ID = "0000000000000000000000000000";
 
     public static final String BASE_TAG = "ComicCollector::";
