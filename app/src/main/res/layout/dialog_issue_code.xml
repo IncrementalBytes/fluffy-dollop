@@ -9,13 +9,11 @@
         android:id="@+id/issue_code_image_code"
         android:layout_width="@dimen/image_width_thumbnail"
         android:layout_height="@dimen/image_height_thumbnail"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_margin="@dimen/default_image_margin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_search_light" />
+        app:srcCompat="@drawable/ic_search_dark" />
 
     <TextView
         android:id="@+id/issue_code_text_instructions"
@@ -45,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
         android:gravity="center"
-        android:text="-"
+        android:text="@string/separator"
         app:layout_constraintBottom_toBottomOf="@+id/issue_code_edit_series_code"
         app:layout_constraintEnd_toStartOf="@id/issue_code_edit_issue_code"
         app:layout_constraintStart_toEndOf="@+id/issue_code_edit_series_code"

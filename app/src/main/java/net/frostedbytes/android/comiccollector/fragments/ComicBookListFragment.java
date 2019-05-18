@@ -17,6 +17,7 @@ import android.widget.TextView;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
+import net.frostedbytes.android.comiccollector.common.SortUtils;
 import net.frostedbytes.android.comiccollector.models.ComicBook;
 
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ public class ComicBookListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-        final View view = inflater.inflate(R.layout.fragment_comic_list, container, false);
+        final View view = inflater.inflate(R.layout.fragment_comic_book_list, container, false);
 
         FloatingActionButton mAddButton = view.findViewById(R.id.comic_fab_add);
         mRecyclerView = view.findViewById(R.id.comic_list_view);
@@ -116,6 +117,7 @@ public class ComicBookListFragment extends Fragment {
             mCallback.onComicListPopulated(0);
         } else {
             LogUtils.debug(TAG, "++updateUI()");
+            mComicBooks.sort(new SortUtils.ByPublicationDate());
             ComicBookAdapter comicAdapter = new ComicBookAdapter(mComicBooks);
             mRecyclerView.setAdapter(comicAdapter);
             mCallback.onComicListPopulated(comicAdapter.getItemCount());
@@ -165,7 +167,6 @@ public class ComicBookListFragment extends Fragment {
         private final ImageView mOwnImage;
         private final TextView mSeriesNameTextView;
         private final TextView mTitleTextView;
-        private final ImageView mWishListImage;
 
         private ComicBook mComicBook;
 
@@ -177,7 +178,6 @@ public class ComicBookListFragment extends Fragment {
             mOwnImage = itemView.findViewById(R.id.comic_item_image_own);
             mSeriesNameTextView = itemView.findViewById(R.id.comic_item_text_series);
             mTitleTextView = itemView.findViewById(R.id.comic_item_text_title);
-            mWishListImage = itemView.findViewById(R.id.comic_item_image_wishlist);
 
             itemView.setOnClickListener(this);
         }
@@ -188,15 +188,14 @@ public class ComicBookListFragment extends Fragment {
 
             mProductCodeTextView.setText(mComicBook.getUniqueId());
             mPublisherTextView.setText(mComicBook.Publisher);
-            if (mComicBook.IsOwned) {
-                mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_owned_light, null));
+            if (mComicBook.OwnedState) {
+                mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_owned_dark, null));
             } else {
-                mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_not_owned_light, null));
+                mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_wishlist_dark, null));
             }
 
             mSeriesNameTextView.setText(mComicBook.SeriesName);
             mTitleTextView.setText(mComicBook.Title);
-            mWishListImage.setVisibility(mComicBook.OnWishlist? View.VISIBLE : View.INVISIBLE);
         }
 
         @Override

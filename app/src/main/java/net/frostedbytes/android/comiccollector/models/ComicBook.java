@@ -16,7 +16,7 @@ public class ComicBook implements Parcelable {
     public static final String ROOT = "ComicBooks";
 
     @Exclude
-    public static final int SCHEMA_FIELDS = 11;
+    public static final int SCHEMA_FIELDS = 10;
 
     /**
      * Date comic was added to user's library.
@@ -24,19 +24,14 @@ public class ComicBook implements Parcelable {
     public long AddedDate;
 
     /**
-     * Whether or not comic is owned by user.
-     */
-    public boolean IsOwned;
-
-    /**
      * Unique code for issue (paired with SeriesCode).
      */
     public String IssueCode;
 
     /**
-     * Whether or not comic is on user's wishlist.
+     * Whether or not comic is owned by the user, otherwise it's on their wishlist.
      */
-    public boolean OnWishlist;
+    public boolean OwnedState;
 
     /**
      * Date comic was published.
@@ -76,24 +71,36 @@ public class ComicBook implements Parcelable {
     public ComicBook() {
 
         AddedDate = 0;
-        IsOwned = false;
         IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
-        OnWishlist = false;
+        OwnedState = false;
         PublishedDate = Calendar.getInstance().getTimeInMillis();
         Publisher = "";
         SeriesCode = BaseActivity.DEFAULT_SERIES_CODE;
         SeriesName = "";
         Title = "";
         UpdatedDate = 0;
-        Volume = 0;
+        Volume = -1;
+    }
+
+    public ComicBook(ComicBook comicBook) {
+
+        AddedDate = comicBook.AddedDate;
+        IssueCode = comicBook.IssueCode;
+        OwnedState = comicBook.OwnedState;
+        PublishedDate = comicBook.PublishedDate;
+        Publisher = comicBook.Publisher;
+        SeriesCode = comicBook.SeriesCode;
+        SeriesName = comicBook.SeriesName;
+        Title = comicBook.Title;
+        UpdatedDate = comicBook.UpdatedDate;
+        Volume = comicBook.Volume;
     }
 
     protected ComicBook(Parcel in) {
 
         AddedDate = in.readLong();
-        IsOwned = in.readInt() != 0;
         IssueCode = in.readString();
-        OnWishlist = in.readInt() != 0;
+        OwnedState = in.readInt() != 0;
         PublishedDate = in.readLong();
         Publisher = in.readString();
         SeriesCode = in.readString();
@@ -134,21 +141,16 @@ public class ComicBook implements Parcelable {
 
     @Override
     public String toString() {
-        return "ComicBook{" +
-            "Title=" + Title +
-            " (Series=" + getUniqueId() +
-            ", IsOwned=" + IsOwned +
-            ", OnWishlist=" + OnWishlist +
-            ")}";
+
+        return String.format("ComicBook { Title=%s, Series=%s, %s }", Title, getUniqueId(), OwnedState ? "Owned=true" : "OnWishlist=true");
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
 
         dest.writeLong(AddedDate);
-        dest.writeByte((byte) (IsOwned ? 1 : 0));
         dest.writeString(IssueCode);
-        dest.writeByte((byte) (OnWishlist ? 1 : 0));
+        dest.writeByte((byte) (OwnedState ? 1 : 0));
         dest.writeLong(PublishedDate);
         dest.writeString(Publisher);
         dest.writeString(SeriesCode);
@@ -156,5 +158,26 @@ public class ComicBook implements Parcelable {
         dest.writeString(Title);
         dest.writeLong(UpdatedDate);
         dest.writeInt(Volume);
+    }
+
+    public boolean IsValid() {
+
+        if (IssueCode.isEmpty() || IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE)) {
+            return false;
+        }
+
+        if (Publisher.isEmpty()) {
+            return false;
+        }
+
+        if (SeriesCode.isEmpty() || SeriesCode.equals(BaseActivity.DEFAULT_SERIES_CODE)) {
+            return false;
+        }
+
+        if (SeriesName.isEmpty()) {
+            return false;
+        }
+
+        return Volume >= 0;
     }
 }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <TextView
+    android:id="@+id/comic_series_text_code"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/series_code"
+    app:layout_constraintBottom_toBottomOf="@id/comic_series_edit_code"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@id/comic_series_edit_code"/>
+  <EditText
+    android:id="@+id/comic_series_edit_code"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:text="@string/placeholder"
+    android:enabled="false"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"/>
+
+  <TextView
+    android:id="@+id/comic_series_text_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/series_name"
+    android:labelFor="@id/comic_series_edit_name"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintBottom_toBottomOf="@id/comic_series_edit_name"
+    app:layout_constraintTop_toTopOf="@id/comic_series_edit_name"/>
+  <EditText
+    android:id="@+id/comic_series_edit_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:ems="10"
+    android:inputType="textPersonName"
+    android:hint="@string/hint_series_name"
+    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_code"
+    app:layout_constraintEnd_toEndOf="parent"/>
+
+  <TextView
+    android:id="@+id/comic_series_text_volume"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/volume_number"
+    android:labelFor="@id/comic_series_edit_volume"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintBottom_toBottomOf="@id/comic_series_edit_volume"
+    app:layout_constraintTop_toTopOf="@id/comic_series_edit_volume"/>
+  <EditText
+    android:id="@+id/comic_series_edit_volume"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:ems="3"
+    android:inputType="number"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_name"/>
+
+  <TextView
+    android:id="@+id/comic_series_text_publisher"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/publisher"
+    android:labelFor="@id/comic_series_edit_publisher"
+    app:layout_constraintBottom_toBottomOf="@id/comic_series_edit_publisher"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@id/comic_series_edit_publisher"/>
+  <EditText
+    android:id="@+id/comic_series_edit_publisher"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:ems="10"
+    android:hint="@string/hint_publisher"
+    android:inputType="textPersonName"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_volume"/>
+
+</android.support.constraint.ConstraintLayout>

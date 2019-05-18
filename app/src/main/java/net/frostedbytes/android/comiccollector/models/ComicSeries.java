@@ -3,13 +3,18 @@ package net.frostedbytes.android.comiccollector.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.firebase.firestore.Exclude;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 
 public class ComicSeries implements Parcelable {
 
+    @Exclude
+    public static final String ROOT = "ComicSeries";
+
     /**
      * Unique UPC code for series
      */
+    @Exclude
     public String Code;
 
     /**
