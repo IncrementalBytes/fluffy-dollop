@@ -18,8 +18,8 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
 
     private static final String TAG = BASE_TAG + WriteToLocalLibraryTask.class.getSimpleName();
 
-    private WeakReference<MainActivity> mFragmentWeakReference;
-    private ArrayList<ComicBook> mComicBooks;
+    private final WeakReference<MainActivity> mFragmentWeakReference;
+    private final ArrayList<ComicBook> mComicBooks;
 
     public WriteToLocalLibraryTask(MainActivity context, ArrayList<ComicBook> comicBooks) {
 

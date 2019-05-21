@@ -6,8 +6,10 @@ public class BaseActivity  extends AppCompatActivity {
 
     public static final String ARG_COMIC_BOOK = "comic_book";
     public static final String ARG_COMIC_LIST = "comic_list";
+    public static final String ARG_COMIC_SERIES_CODE = "comic_series";
     public static final String ARG_EMAIL = "email";
     public static final String ARG_FIREBASE_USER_ID = "firebase_user_id";
+    public static final String ARG_PUBLISHERS = "publishers";
     public static final String ARG_SCAN_RESULTS = "scan_results";
     public static final String ARG_USER_ID = "user_id";
     public static final String ARG_USER_NAME = "user_name";

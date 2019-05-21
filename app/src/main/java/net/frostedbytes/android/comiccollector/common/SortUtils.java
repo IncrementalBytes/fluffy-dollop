@@ -37,4 +37,12 @@ public class SortUtils {
             return Long.compare(b.PublishedDate, a.PublishedDate);
         }
     }
+
+    public static class ByStringValue implements Comparator<String> {
+
+        public int compare(String a, String b) {
+
+            return a.compareTo(b);
+        }
+    }
 }

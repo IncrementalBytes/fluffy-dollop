@@ -70,12 +70,14 @@
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:ellipsize="end"
     android:gravity="center_vertical|end"
+    android:singleLine="true"
     android:text="@string/placeholder"
-    android:textSize="24sp"
     android:textAlignment="gravity"
+    android:textSize="24sp"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_book_edit_published_date" />
+    app:layout_constraintTop_toBottomOf="@id/comic_book_edit_published_date"/>
 
   <TextView
     android:id="@+id/comic_book_text_publisher"
@@ -93,13 +95,15 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:ellipsize="end"
     android:gravity="center_vertical|end"
-    android:textAlignment="gravity"
+    android:singleLine="true"
     android:text="@string/placeholder"
+    android:textAlignment="gravity"
     android:textSize="24sp"
     app:layout_constraintBottom_toTopOf="@id/comic_book_text_issue_value"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_book_text_series_value" />
+    app:layout_constraintTop_toBottomOf="@id/comic_book_text_series_value"/>
 
   <TextView
     android:id="@+id/comic_book_text_volume"
