@@ -2,6 +2,7 @@ package net.frostedbytes.android.comiccollector.common;
 
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import net.frostedbytes.android.comiccollector.BuildConfig;
 
 import java.util.Locale;
@@ -21,7 +22,7 @@ public class LogUtils {
         if (BuildConfig.DEBUG) {
             Log.d(tag, String.format(Locale.US, messageFormat, args));
         } else {
-//            Crashlytics.log(Log.DEBUG, tag, String.format(Locale.US, messageFormat, args));
+            Crashlytics.log(Log.DEBUG, tag, String.format(Locale.US, messageFormat, args));
         }
     }
 
@@ -35,7 +36,7 @@ public class LogUtils {
         if (BuildConfig.DEBUG) {
             Log.e(tag, String.format(Locale.US, messageFormat, args));
         } else {
-//            Crashlytics.log(Log.ERROR, tag, String.format(Locale.US, messageFormat, args));
+            Crashlytics.log(Log.ERROR, tag, String.format(Locale.US, messageFormat, args));
         }
     }
 
@@ -49,7 +50,7 @@ public class LogUtils {
         if (BuildConfig.DEBUG) {
             Log.w(tag, String.format(Locale.US, messageFormat, args));
         } else {
-//            Crashlytics.log(Log.WARN, tag, String.format(Locale.US, messageFormat, args));
+            Crashlytics.log(Log.WARN, tag, String.format(Locale.US, messageFormat, args));
         }
     }
 }

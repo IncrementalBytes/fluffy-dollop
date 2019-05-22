@@ -3,6 +3,7 @@ package net.frostedbytes.android.comiccollector.common;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.crashlytics.android.Crashlytics;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.MainActivity;
 import net.frostedbytes.android.comiccollector.models.ComicBook;
@@ -54,7 +55,7 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
             }
         } catch (Exception e) {
             LogUtils.warn(TAG, "Exception when writing local library.");
-//            Crashlytics.logException(e);
+            Crashlytics.logException(e);
         }
 
         return booksWritten;

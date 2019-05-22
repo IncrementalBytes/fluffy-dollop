@@ -14,22 +14,6 @@ public class SortUtils {
         }
     }
 
-    public static class ByDateAdded implements Comparator<ComicBook> {
-
-        public int compare(ComicBook a, ComicBook b) {
-
-            return Long.compare(a.AddedDate, b.AddedDate);
-        }
-    }
-
-    public static class ByIssueNumber implements Comparator<ComicBook> {
-
-        public int compare(ComicBook a, ComicBook b) {
-
-            return Integer.compare(a.getIssueNumber(), b.getIssueNumber());
-        }
-    }
-
     public static class ByPublicationDate implements Comparator<ComicBook> {
 
         public int compare(ComicBook a, ComicBook b) {

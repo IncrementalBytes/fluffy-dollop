@@ -6,47 +6,54 @@
   android:layout_height="match_parent">
 
   <TextView
+    android:id="@+id/comic_book_text_title"
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:labelFor="@id/comic_book_edit_title"
     android:text="@string/title"
     android:textSize="24sp"
-    android:textStyle="bold"
-    android:labelFor="@id/comic_book_edit_title"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_title"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@id/comic_book_edit_title" />
+    app:layout_constraintTop_toTopOf="@id/comic_book_edit_title"/>
   <EditText
     android:id="@+id/comic_book_edit_title"
-    android:layout_width="wrap_content"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:layout_marginStart="8dp"
     android:autofillHints="text"
     android:gravity="center_vertical|end"
     android:inputType="text"
+    android:maxLines="1"
     android:textAlignment="gravity"
     android:textColor="?attr/colorAccent"
     app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@+id/comic_book_text_title"
     app:layout_constraintTop_toTopOf="parent"/>
 
   <TextView
+    android:id="@+id/comic_book_text_published_date"
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:labelFor="@id/comic_book_edit_published_date"
     android:text="@string/published_date"
     android:textSize="24sp"
-    android:textStyle="bold"
-    android:labelFor="@id/comic_book_edit_published_date"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_edit_published_date"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@id/comic_book_edit_published_date" />
+    app:layout_constraintTop_toTopOf="@id/comic_book_edit_published_date"/>
   <EditText
     android:id="@+id/comic_book_edit_published_date"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:layout_marginStart="8dp"
     android:autofillHints="date"
     android:gravity="center_vertical|end"
+    android:ems="7"
     android:inputType="date"
     android:textAlignment="gravity"
     android:textColor="?attr/colorAccent"
@@ -70,13 +77,16 @@
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:layout_marginStart="8dp"
     android:ellipsize="end"
     android:gravity="center_vertical|end"
-    android:singleLine="true"
+    android:maxLines="1"
     android:text="@string/placeholder"
     android:textAlignment="gravity"
+    android:textColor="?attr/colorAccent"
     android:textSize="24sp"
     app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@+id/comic_book_text_series"
     app:layout_constraintTop_toBottomOf="@id/comic_book_edit_published_date"/>
 
   <TextView
@@ -92,17 +102,20 @@
     app:layout_constraintTop_toTopOf="@id/comic_book_text_publisher_value" />
   <TextView
     android:id="@+id/comic_book_text_publisher_value"
-    android:layout_width="wrap_content"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:layout_marginStart="8dp"
     android:ellipsize="end"
     android:gravity="center_vertical|end"
-    android:singleLine="true"
+    android:maxLines="1"
     android:text="@string/placeholder"
     android:textAlignment="gravity"
+    android:textColor="?attr/colorAccent"
     android:textSize="24sp"
     app:layout_constraintBottom_toTopOf="@id/comic_book_text_issue_value"
     app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@+id/comic_book_text_publisher"
     app:layout_constraintTop_toBottomOf="@id/comic_book_text_series_value"/>
 
   <TextView
@@ -122,11 +135,12 @@
     android:layout_margin="8dp"
     android:gravity="center_vertical|end"
     android:text="@string/placeholder"
-    android:textSize="24sp"
     android:textAlignment="gravity"
+    android:textColor="?attr/colorAccent"
+    android:textSize="24sp"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_text_volume"
     app:layout_constraintStart_toEndOf="@id/comic_book_text_volume"
-    app:layout_constraintTop_toTopOf="@id/comic_book_text_volume" />
+    app:layout_constraintTop_toTopOf="@id/comic_book_text_volume"/>
 
   <TextView
     android:id="@+id/comic_book_text_issue"
@@ -147,11 +161,12 @@
     android:layout_margin="8dp"
     android:gravity="center_vertical|end"
     android:text="@string/placeholder"
-    android:textSize="24sp"
     android:textAlignment="gravity"
+    android:textColor="?attr/colorAccent"
+    android:textSize="24sp"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_text_volume"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="@id/comic_book_text_volume" />
+    app:layout_constraintTop_toTopOf="@id/comic_book_text_volume"/>
 
   <TextView
     android:id="@+id/comic_book_text_product_code"
@@ -171,12 +186,13 @@
     android:layout_margin="8dp"
     android:gravity="center_vertical|end"
     android:text="@string/placeholder"
-    android:textSize="24sp"
     android:textAlignment="gravity"
+    android:textColor="?attr/colorAccent"
+    android:textSize="24sp"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_text_product_code"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/comic_book_text_product_code"
-    app:layout_constraintTop_toTopOf="@id/comic_book_text_product_code" />
+    app:layout_constraintTop_toTopOf="@id/comic_book_text_product_code"/>
 
   <ToggleButton
     android:id="@+id/comic_book_toggle_owned"

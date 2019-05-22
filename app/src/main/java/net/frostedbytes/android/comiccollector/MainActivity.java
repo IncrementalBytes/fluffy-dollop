@@ -30,6 +30,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -209,13 +210,13 @@ public class MainActivity extends AppCompatActivity implements
         try {
           mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
         } catch (FileNotFoundException e) {
-//                    Crashlytics.logException(e);
+          Crashlytics.logException(e);
         }
       } else {
         try {
           mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(mCurrentImageFile));
         } catch (FileNotFoundException e) {
-//                    Crashlytics.logException(e);
+          Crashlytics.logException(e);
         }
       }
 
@@ -417,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements
         (!issueCode.isEmpty() && issueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length())) {
       ComicBook comicBook = new ComicBook();
       comicBook.SeriesCode = seriesCode;
-      comicBook.IssueCode = issueCode;
+      comicBook.setIssueCode(issueCode);
       queryInUserComicBooks(comicBook);
     } else {
       showDismissableSnackbar(getString(R.string.err_manual_search));
@@ -464,9 +465,9 @@ public class MainActivity extends AppCompatActivity implements
   public void onScanResultsItemSelected(String searchText) {
 
     LogUtils.debug(TAG, "++onScanResultsItemSelected(%s)", searchText);
-//        ComicBook comicBook = new ComicBook();
-//        comicBook.Title = searchText;
-//        queryInUserComicBooks(comicBook);
+    ComicBook comicBook = new ComicBook();
+    comicBook.SeriesName = searchText;
+    queryInUserComicBooks(comicBook);
   }
 
   /*
@@ -644,7 +645,8 @@ public class MainActivity extends AppCompatActivity implements
     ComicBook foundBook = null;
     if (mComicBooks != null) {
       for (ComicBook comic : mComicBooks) {
-        if (comic.getUniqueId().equals(comicBook.getUniqueId())) {
+        if ((!comicBook.getUniqueId().isEmpty() && comic.getUniqueId().equals(comicBook.getUniqueId())) ||
+          (!comicBook.SeriesName.isEmpty() && comic.SeriesName.equalsIgnoreCase(comicBook.SeriesName))) {
           foundBook = comic;
           break;
         }
@@ -695,11 +697,13 @@ public class MainActivity extends AppCompatActivity implements
 
           ComicBook comicBook = new ComicBook();
           comicBook.SeriesCode = elements.remove(0);
-          comicBook.IssueCode = elements.remove(0);
+          comicBook.SeriesName = elements.remove(0);
+          comicBook.Volume = Integer.parseInt(elements.remove(0));
+          comicBook.setIssueCode(elements.remove(0));
           comicBook.Title = elements.remove(0);
           comicBook.OwnedState = Boolean.parseBoolean(elements.remove(0));
           comicBook.AddedDate = Long.parseLong(elements.remove(0));
-          comicBook.IssueCode = elements.remove(0);
+          comicBook.Publisher = elements.remove(0);
           comicBook.PublishedDate = Long.parseLong(elements.remove(0));
           comicBook.UpdatedDate = Long.parseLong(elements.remove(0));
 
@@ -722,7 +726,7 @@ public class MainActivity extends AppCompatActivity implements
       }
     } catch (Exception e) {
       LogUtils.warn(TAG, "Exception when reading local library data.");
-//            Crashlytics.logException(e);
+      Crashlytics.logException(e);
       mProgressBar.setIndeterminate(false);
     } finally {
       if (mComicBooks == null || mComicBooks.size() == 0) {
@@ -749,7 +753,7 @@ public class MainActivity extends AppCompatActivity implements
           if (comicBook != null) {
             String[] segments = document.getId().split("-");
             comicBook.SeriesCode = segments[0];
-            comicBook.IssueCode = segments[1];
+            comicBook.setIssueCode(segments[1]);
             mComicBooks.add(comicBook);
           } else {
             LogUtils.warn(TAG, "Unable to convert user book: %s", queryPath);
@@ -865,7 +869,7 @@ public class MainActivity extends AppCompatActivity implements
       try {
         mCurrentImageFile = createImageFile();
       } catch (IOException e) {
-//                Crashlytics.logException(e);
+        Crashlytics.logException(e);
       }
 
       if (mCurrentImageFile != null) {

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -135,7 +136,7 @@ public class SignInActivity extends BaseActivity implements OnClickListener {
         if (mAuth.getCurrentUser() != null && mAccount != null) {
             LogUtils.debug(TAG, "++onAuthenticateSuccess(%s)", mAuth.getCurrentUser().getDisplayName());
             LogUtils.debug(TAG, "Timestamp: %d", Calendar.getInstance().getTimeInMillis());
-//            Crashlytics.setUserIdentifier(mAuth.getCurrentUser().getUid());
+            Crashlytics.setUserIdentifier(mAuth.getCurrentUser().getUid());
             Bundle bundle = new Bundle();
             bundle.putString(FirebaseAnalytics.Param.METHOD, "onAuthenticateSuccess");
             mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle);
@@ -166,7 +167,7 @@ public class SignInActivity extends BaseActivity implements OnClickListener {
                 mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle);
                 onAuthenticateSuccess();
             } else {
-//                Crashlytics.logException(task.getException());
+                Crashlytics.logException(task.getException());
                 String message = "Authenticating with Google account failed.";
                 showErrorInSnackBar(message);
             }

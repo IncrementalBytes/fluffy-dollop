@@ -12,172 +12,191 @@ import java.util.Locale;
 
 public class ComicBook implements Parcelable {
 
-    @Exclude
-    public static final String ROOT = "ComicBooks";
+  @Exclude
+  public static final String ROOT = "ComicBooks";
 
-    @Exclude
-    public static final int SCHEMA_FIELDS = 10;
+  @Exclude
+  public static final int SCHEMA_FIELDS = 10;
 
-    /**
-     * Date comic was added to user's library.
-     */
-    public long AddedDate;
+  /**
+   * Date comic was added to user's library.
+   */
+  public long AddedDate;
 
-    /**
-     * Unique code for issue (paired with SeriesCode).
-     */
-    public String IssueCode;
+  /**
+   * Unique code for issue (paired with SeriesCode).
+   */
+  public String IssueCode;
 
-    /**
-     * Whether or not comic is owned by the user, otherwise it's on their wishlist.
-     */
-    public boolean OwnedState;
+  @Exclude
+  public int IssueNumber;
 
-    /**
-     * Date comic was published.
-     */
-    public long PublishedDate;
+  /**
+   * Whether or not comic is owned by the user, otherwise it's on their wishlist.
+   */
+  public boolean OwnedState;
 
-    /**
-     * Publishing house of comic.
-     */
-    public String Publisher;
+  /**
+   * Date comic was published.
+   */
+  public long PublishedDate;
 
-    /**
-     * Unique produce code (UPC) of comic series.
-     */
-    public String SeriesCode;
+  /**
+   * Publishing house of comic.
+   */
+  public String Publisher;
 
-    /**
-     * Name of series; e.g. character or story arc
-     */
-    public String SeriesName;
+  /**
+   * Unique produce code (UPC) of comic series.
+   */
+  public String SeriesCode;
 
-    /**
-     * Title of comic; can be blank.
-     */
-    public String Title;
+  /**
+   * Name of series; e.g. character or story arc
+   */
+  public String SeriesName;
 
-    /**
-     * Date this comic instance was updated in user's library.
-     */
-    public long UpdatedDate;
+  /**
+   * Title of comic; can be blank.
+   */
+  public String Title;
 
-    /**
-     * Unique volume of series.
-     */
-    public int Volume;
+  /**
+   * Date this comic instance was updated in user's library.
+   */
+  public long UpdatedDate;
 
-    public ComicBook() {
+  /**
+   * Unique volume of series.
+   */
+  public int Volume;
 
-        AddedDate = 0;
-        IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
-        OwnedState = false;
-        PublishedDate = Calendar.getInstance().getTimeInMillis();
-        Publisher = "";
-        SeriesCode = BaseActivity.DEFAULT_SERIES_CODE;
-        SeriesName = "";
-        Title = "";
-        UpdatedDate = 0;
-        Volume = -1;
-    }
+  public ComicBook() {
 
-    public ComicBook(ComicBook comicBook) {
+    AddedDate = 0;
+    IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
+    IssueNumber = -1;
+    OwnedState = false;
+    PublishedDate = Calendar.getInstance().getTimeInMillis();
+    Publisher = "";
+    SeriesCode = BaseActivity.DEFAULT_SERIES_CODE;
+    SeriesName = "";
+    Title = "";
+    UpdatedDate = 0;
+    Volume = -1;
+  }
 
-        AddedDate = comicBook.AddedDate;
-        IssueCode = comicBook.IssueCode;
-        OwnedState = comicBook.OwnedState;
-        PublishedDate = comicBook.PublishedDate;
-        Publisher = comicBook.Publisher;
-        SeriesCode = comicBook.SeriesCode;
-        SeriesName = comicBook.SeriesName;
-        Title = comicBook.Title;
-        UpdatedDate = comicBook.UpdatedDate;
-        Volume = comicBook.Volume;
-    }
+  public ComicBook(ComicBook comicBook) {
 
-    protected ComicBook(Parcel in) {
+    AddedDate = comicBook.AddedDate;
+    IssueCode = comicBook.IssueCode;
+    IssueNumber = comicBook.IssueNumber;
+    OwnedState = comicBook.OwnedState;
+    PublishedDate = comicBook.PublishedDate;
+    Publisher = comicBook.Publisher;
+    SeriesCode = comicBook.SeriesCode;
+    SeriesName = comicBook.SeriesName;
+    Title = comicBook.Title;
+    UpdatedDate = comicBook.UpdatedDate;
+    Volume = comicBook.Volume;
+  }
 
-        AddedDate = in.readLong();
-        IssueCode = in.readString();
-        OwnedState = in.readInt() != 0;
-        PublishedDate = in.readLong();
-        Publisher = in.readString();
-        SeriesCode = in.readString();
-        SeriesName = in.readString();
-        Title = in.readString();
-        UpdatedDate = in.readLong();
-        Volume = in.readInt();
-    }
+  protected ComicBook(Parcel in) {
 
-    @Exclude
-    public int getIssueNumber() {
+    AddedDate = in.readLong();
+    IssueCode = in.readString();
+    IssueNumber = in.readInt();
+    OwnedState = in.readInt() != 0;
+    PublishedDate = in.readLong();
+    Publisher = in.readString();
+    SeriesCode = in.readString();
+    SeriesName = in.readString();
+    Title = in.readString();
+    UpdatedDate = in.readLong();
+    Volume = in.readInt();
+  }
 
-        if (IssueCode != null && IssueCode.length() > 3) {
-            String temp = IssueCode.substring(0, IssueCode.length() - 2);
-            return Integer.parseInt(temp);
-        }
+  @Exclude
+  public String getUniqueId() {
 
-        return 0;
-    }
+    return String.format(Locale.US, "%s-%s", SeriesCode, IssueCode);
+  }
 
-    @Exclude
-    public String getUniqueId() {
-
-        return String.format(Locale.US, "%s-%s", SeriesCode, IssueCode);
-    }
-
-    public static final Creator<ComicBook> CREATOR = new Creator<ComicBook>() {
-
-        @Override
-        public ComicBook createFromParcel(Parcel in) { return new ComicBook(in); }
-
-        @Override
-        public ComicBook[] newArray(int size) { return new ComicBook[size]; }
-    };
+  public static final Creator<ComicBook> CREATOR = new Creator<ComicBook>() {
 
     @Override
-    public int describeContents() { return 0; }
+    public ComicBook createFromParcel(Parcel in) { return new ComicBook(in); }
 
     @Override
-    public String toString() {
+    public ComicBook[] newArray(int size) { return new ComicBook[size]; }
+  };
 
-        return String.format("ComicBook { Title=%s, Series=%s, %s }", Title, getUniqueId(), OwnedState ? "Owned=true" : "OnWishlist=true");
+  @Override
+  public int describeContents() { return 0; }
+
+  @Override
+  public String toString() {
+
+    return String.format(
+      Locale.US,
+      "ComicBook { Title=%s, Series=%s, Issue=%d, %s }",
+      Title,
+      getUniqueId(),
+      IssueNumber,
+      OwnedState ? "Owned" : "OnWishlist");
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+
+    dest.writeLong(AddedDate);
+    dest.writeString(IssueCode);
+    dest.writeInt(IssueNumber);
+    dest.writeByte((byte) (OwnedState ? 1 : 0));
+    dest.writeLong(PublishedDate);
+    dest.writeString(Publisher);
+    dest.writeString(SeriesCode);
+    dest.writeString(SeriesName);
+    dest.writeString(Title);
+    dest.writeLong(UpdatedDate);
+    dest.writeInt(Volume);
+  }
+
+  @Exclude
+  public void setIssueCode(String issueCode) {
+
+    IssueCode = issueCode;
+    if (IssueCode != null && IssueCode.length() > 3) {
+      String temp = IssueCode.substring(0, IssueCode.length() - 2);
+      IssueNumber = Integer.parseInt(temp);
+    } else {
+        IssueCode = "";
+        IssueNumber = -1;
+    }
+  }
+
+  public boolean IsValid() {
+
+    if (IssueCode.isEmpty() || IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE)) {
+      return false;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
-        dest.writeLong(AddedDate);
-        dest.writeString(IssueCode);
-        dest.writeByte((byte) (OwnedState ? 1 : 0));
-        dest.writeLong(PublishedDate);
-        dest.writeString(Publisher);
-        dest.writeString(SeriesCode);
-        dest.writeString(SeriesName);
-        dest.writeString(Title);
-        dest.writeLong(UpdatedDate);
-        dest.writeInt(Volume);
+    if (IssueNumber < 0) {
+      return false;
     }
 
-    public boolean IsValid() {
-
-        if (IssueCode.isEmpty() || IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE)) {
-            return false;
-        }
-
-        if (Publisher.isEmpty()) {
-            return false;
-        }
-
-        if (SeriesCode.isEmpty() || SeriesCode.equals(BaseActivity.DEFAULT_SERIES_CODE)) {
-            return false;
-        }
-
-        if (SeriesName.isEmpty()) {
-            return false;
-        }
-
-        return Volume >= 0;
+    if (Publisher.isEmpty()) {
+      return false;
     }
+
+    if (SeriesCode.isEmpty() || SeriesCode.equals(BaseActivity.DEFAULT_SERIES_CODE)) {
+      return false;
+    }
+
+    if (SeriesName.isEmpty()) {
+      return false;
+    }
+
+    return Volume >= 0;
+  }
 }

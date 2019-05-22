@@ -28,181 +28,184 @@ import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
 public class ComicBookListFragment extends Fragment {
 
-    private static final String TAG = BASE_TAG + ComicBookListFragment.class.getSimpleName();
+  private static final String TAG = BASE_TAG + ComicBookListFragment.class.getSimpleName();
 
-    public interface OnComicBookListListener {
+  public interface OnComicBookListListener {
 
-        void onComicListAddBook();
+    void onComicListAddBook();
 
-        void onComicListItemSelected(ComicBook comicBook);
+    void onComicListItemSelected(ComicBook comicBook);
 
-        void onComicListPopulated(int size);
+    void onComicListPopulated(int size);
 
-        void onComicListSynchronize();
+    void onComicListSynchronize();
+  }
+
+  private OnComicBookListListener mCallback;
+
+  private RecyclerView mRecyclerView;
+
+  private ArrayList<ComicBook> mComicBooks;
+
+  public static ComicBookListFragment newInstance(ArrayList<ComicBook> comicBooks) {
+
+    LogUtils.debug(TAG, "++newInstance(%d)", comicBooks.size());
+    ComicBookListFragment fragment = new ComicBookListFragment();
+    Bundle args = new Bundle();
+    args.putParcelableArrayList(BaseActivity.ARG_COMIC_LIST, comicBooks);
+    fragment.setArguments(args);
+    return fragment;
+  }
+
+  /*
+    Fragment Override(s)
+   */
+  @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+
+    LogUtils.debug(TAG, "++onAttach(Context)");
+    try {
+      mCallback = (OnComicBookListListener) context;
+    } catch (ClassCastException e) {
+      throw new ClassCastException(
+        String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
     }
 
-    private OnComicBookListListener mCallback;
+    Bundle arguments = getArguments();
+    if (arguments != null) {
+      mComicBooks = arguments.getParcelableArrayList(BaseActivity.ARG_COMIC_LIST);
+    } else {
+      LogUtils.error(TAG, "Arguments were null.");
+    }
+  }
 
-    private RecyclerView mRecyclerView;
+  @Override
+  public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    private ArrayList<ComicBook> mComicBooks;
+    LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
+    final View view = inflater.inflate(R.layout.fragment_comic_book_list, container, false);
 
-    public static ComicBookListFragment newInstance(ArrayList<ComicBook> comicBooks) {
+    FloatingActionButton mAddButton = view.findViewById(R.id.comic_fab_add);
+    mRecyclerView = view.findViewById(R.id.comic_list_view);
+    FloatingActionButton mSyncButton = view.findViewById(R.id.comic_fab_sync);
 
-        LogUtils.debug(TAG, "++newInstance(%d)", comicBooks.size());
-        ComicBookListFragment fragment = new ComicBookListFragment();
-        Bundle args = new Bundle();
-        args.putParcelableArrayList(BaseActivity.ARG_COMIC_LIST, comicBooks);
-        fragment.setArguments(args);
-        return fragment;
+    final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+    mRecyclerView.setLayoutManager(manager);
+
+    mAddButton.setOnClickListener(pickView -> mCallback.onComicListAddBook());
+    mSyncButton.setOnClickListener(pickView -> mCallback.onComicListSynchronize());
+
+    updateUI();
+    return view;
+  }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+
+    LogUtils.debug(TAG, "++onDestroy()");
+    mComicBooks = null;
+  }
+
+  /*
+    Private Method(s)
+   */
+  private void updateUI() {
+
+    if (mComicBooks == null || mComicBooks.size() == 0) {
+      mCallback.onComicListPopulated(0);
+    } else {
+      LogUtils.debug(TAG, "++updateUI()");
+      mComicBooks.sort(new SortUtils.ByPublicationDate());
+      ComicBookAdapter comicAdapter = new ComicBookAdapter(mComicBooks);
+      mRecyclerView.setAdapter(comicAdapter);
+      mCallback.onComicListPopulated(comicAdapter.getItemCount());
+    }
+  }
+
+  /**
+   * Adapter class for ComicBook objects
+   */
+  private class ComicBookAdapter extends RecyclerView.Adapter<ComicHolder> {
+
+    private final List<ComicBook> mComicBooks;
+
+    ComicBookAdapter(List<ComicBook> comicBooks) {
+
+      mComicBooks = comicBooks;
     }
 
-    /*
-        Fragment Override(s)
-     */
+    @NonNull
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    public ComicHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        LogUtils.debug(TAG, "++onAttach(Context)");
-        try {
-            mCallback = (OnComicBookListListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(
-                String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
-        }
-
-        Bundle arguments = getArguments();
-        if (arguments != null) {
-            mComicBooks = arguments.getParcelableArrayList(BaseActivity.ARG_COMIC_LIST);
-        } else {
-            LogUtils.error(TAG, "Arguments were null.");
-        }
+      LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+      return new ComicHolder(layoutInflater, parent);
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public void onBindViewHolder(@NonNull ComicHolder holder, int position) {
 
-        LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-        final View view = inflater.inflate(R.layout.fragment_comic_book_list, container, false);
-
-        FloatingActionButton mAddButton = view.findViewById(R.id.comic_fab_add);
-        mRecyclerView = view.findViewById(R.id.comic_list_view);
-        FloatingActionButton mSyncButton = view.findViewById(R.id.comic_fab_sync);
-
-        final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(manager);
-
-        mAddButton.setOnClickListener(pickView -> mCallback.onComicListAddBook());
-        mSyncButton.setOnClickListener(pickView -> mCallback.onComicListSynchronize());
-
-        updateUI();
-        return view;
+      ComicBook comicBook = mComicBooks.get(position);
+      holder.bind(comicBook);
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public int getItemCount() {
+      return mComicBooks.size();
+    }
+  }
 
-        LogUtils.debug(TAG, "++onDestroy()");
-        mComicBooks = null;
+  /**
+   * Holder class for Comic objects
+   */
+  private class ComicHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+    private final TextView mIssueTextView;
+    private final ImageView mOwnImage;
+    private final TextView mPublisherTextView;
+    private final TextView mSeriesNameTextView;
+    private final TextView mTitleTextView;
+    private final TextView mVolumeTextView;
+
+    private ComicBook mComicBook;
+
+    ComicHolder(LayoutInflater inflater, ViewGroup parent) {
+      super(inflater.inflate(R.layout.comic_book_item, parent, false));
+
+      mIssueTextView = itemView.findViewById(R.id.comic_item_text_issue_value);
+      mPublisherTextView = itemView.findViewById(R.id.comic_item_text_publisher);
+      mOwnImage = itemView.findViewById(R.id.comic_item_image_own);
+      mSeriesNameTextView = itemView.findViewById(R.id.comic_item_text_series);
+      mTitleTextView = itemView.findViewById(R.id.comic_item_text_title);
+      mVolumeTextView = itemView.findViewById(R.id.comic_item_text_volume_value);
+
+      itemView.setOnClickListener(this);
     }
 
-    /*
-        Private Method(s)
-     */
-    private void updateUI() {
+    void bind(ComicBook comicBook) {
 
-        if (mComicBooks == null || mComicBooks.size() == 0) {
-            mCallback.onComicListPopulated(0);
-        } else {
-            LogUtils.debug(TAG, "++updateUI()");
-            mComicBooks.sort(new SortUtils.ByPublicationDate());
-            ComicBookAdapter comicAdapter = new ComicBookAdapter(mComicBooks);
-            mRecyclerView.setAdapter(comicAdapter);
-            mCallback.onComicListPopulated(comicAdapter.getItemCount());
-        }
+      mComicBook = comicBook;
+
+      mPublisherTextView.setText(mComicBook.Publisher);
+      if (mComicBook.OwnedState) {
+        mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_owned_dark, null));
+      } else {
+        mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_wishlist_dark, null));
+      }
+
+      mSeriesNameTextView.setText(mComicBook.SeriesName);
+      mTitleTextView.setText(mComicBook.Title);
+      mVolumeTextView.setText(String.valueOf(mComicBook.Volume));
+      mIssueTextView.setText(String.valueOf(mComicBook.IssueNumber));
     }
 
-    /**
-     * Adapter class for ComicBook objects
-     */
-    private class ComicBookAdapter extends RecyclerView.Adapter<ComicHolder> {
+    @Override
+    public void onClick(View view) {
 
-        private final List<ComicBook> mComicBooks;
-
-        ComicBookAdapter(List<ComicBook> comicBooks) {
-
-            mComicBooks = comicBooks;
-        }
-
-        @NonNull
-        @Override
-        public ComicHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
-            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            return new ComicHolder(layoutInflater, parent);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ComicHolder holder, int position) {
-
-            ComicBook comicBook = mComicBooks.get(position);
-            holder.bind(comicBook);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mComicBooks.size();
-        }
+      LogUtils.debug(TAG, "++ComicHolder::onClick(View)");
+      mCallback.onComicListItemSelected(mComicBook);
     }
-
-    /**
-     * Holder class for Comic objects
-     */
-    private class ComicHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-        private final TextView mProductCodeTextView;
-        private final TextView mPublisherTextView;
-        private final ImageView mOwnImage;
-        private final TextView mSeriesNameTextView;
-        private final TextView mTitleTextView;
-
-        private ComicBook mComicBook;
-
-        ComicHolder(LayoutInflater inflater, ViewGroup parent) {
-            super(inflater.inflate(R.layout.comic_book_item, parent, false));
-
-            mProductCodeTextView = itemView.findViewById(R.id.comic_item_text_product_code);
-            mPublisherTextView = itemView.findViewById(R.id.comic_item_text_publisher);
-            mOwnImage = itemView.findViewById(R.id.comic_item_image_own);
-            mSeriesNameTextView = itemView.findViewById(R.id.comic_item_text_series);
-            mTitleTextView = itemView.findViewById(R.id.comic_item_text_title);
-
-            itemView.setOnClickListener(this);
-        }
-
-        void bind(ComicBook comicBook) {
-
-            mComicBook = comicBook;
-
-            mProductCodeTextView.setText(mComicBook.getUniqueId());
-            mPublisherTextView.setText(mComicBook.Publisher);
-            if (mComicBook.OwnedState) {
-                mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_owned_dark, null));
-            } else {
-                mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_wishlist_dark, null));
-            }
-
-            mSeriesNameTextView.setText(mComicBook.SeriesName);
-            mTitleTextView.setText(mComicBook.Title);
-        }
-
-        @Override
-        public void onClick(View view) {
-
-            LogUtils.debug(TAG, "++ComicHolder::onClick(View)");
-            mCallback.onComicListItemSelected(mComicBook);
-        }
-    }
+  }
 }
