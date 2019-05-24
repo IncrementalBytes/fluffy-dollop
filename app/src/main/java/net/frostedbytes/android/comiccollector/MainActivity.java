@@ -49,6 +49,8 @@ import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.common.SortUtils;
+import net.frostedbytes.android.comiccollector.common.SortUtils.ByStringValue;
+import net.frostedbytes.android.comiccollector.common.WriteToLocalComicSeriesTask;
 import net.frostedbytes.android.comiccollector.common.WriteToLocalLibraryTask;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookListFragment;
@@ -130,7 +132,6 @@ public class MainActivity extends AppCompatActivity implements
     setSupportActionBar(mainToolbar);
 
     mProgressBar = findViewById(R.id.main_progress);
-    mProgressBar.setIndeterminate(true);
     getSupportFragmentManager().addOnBackStackChangedListener(() -> {
       Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_container);
       if (fragment != null) {
@@ -143,8 +144,7 @@ public class MainActivity extends AppCompatActivity implements
     mUser.Email = getIntent().getStringExtra(BaseActivity.ARG_EMAIL);
     mUser.FullName = getIntent().getStringExtra(BaseActivity.ARG_USER_NAME);
 
-    // get comic series from firestore
-    getRemoteData();
+    readLocalComicSeries();
 
     // get user's permissions
     getUserPermissions();
@@ -377,6 +377,7 @@ public class MainActivity extends AppCompatActivity implements
 
     LogUtils.debug(TAG, "++onComicListSynchronize()");
     mProgressBar.setIndeterminate(true);
+    readServerComicSeries();
     readServerLibrary();
   }
 
@@ -473,9 +474,27 @@ public class MainActivity extends AppCompatActivity implements
   /*
       Public Method(s)
    */
-  public void writeComplete(ArrayList<ComicBook> comicBooks) {
+  public void writeComicSeriesComplete(ArrayList<ComicSeries> comicSeries) {
 
-    LogUtils.debug(TAG, "++writeComplete(%d)", comicBooks.size());
+    LogUtils.debug(TAG, "++writeComicSeriesComplete()");
+    mComicSeries = new HashMap<>();
+    mPublishers = new ArrayList<>();
+    for (ComicSeries series : comicSeries) {
+      if (!mComicSeries.containsKey(series.Code)) {
+        mComicSeries.put(series.Code, series);
+      }
+
+      if (!mPublishers.contains(series.Publisher)) {
+        mPublishers.add(series.Publisher);
+      }
+    }
+
+    mPublishers.sort(new ByStringValue());
+  }
+
+  public void writeLibraryComplete(ArrayList<ComicBook> comicBooks) {
+
+    LogUtils.debug(TAG, "++writeLibraryComplete(%d)", comicBooks.size());
     mProgressBar.setIndeterminate(false);
     mComicBooks = comicBooks;
     replaceFragment(ComicBookListFragment.newInstance(mComicBooks));
@@ -548,30 +567,6 @@ public class MainActivity extends AppCompatActivity implements
 
     LogUtils.debug(TAG, "++getIssueCodeFromUser(%s)", comic);
     replaceFragment(ManualSearchFragment.newInstance(comic.SeriesCode));
-  }
-
-  private void getRemoteData() {
-
-    LogUtils.debug(TAG, "++getRemoteData()");
-    mComicSeries = new HashMap<>();
-    mPublishers = new ArrayList<>();
-    FirebaseFirestore.getInstance().collection(ComicSeries.ROOT).get().addOnCompleteListener(task -> {
-
-      if (task.isSuccessful() && task.getResult() != null) {
-        for (DocumentSnapshot snapshot : task.getResult()) {
-          ComicSeries series = snapshot.toObject(ComicSeries.class);
-          if (series != null) {
-            series.Code = snapshot.getId();
-            mComicSeries.put(series.Code, series);
-            if (!mPublishers.contains(series.Publisher)) {
-              mPublishers.add(series.Publisher);
-            }
-          }
-        }
-      } else {
-        parseComicSeriesAssetFile();
-      }
-    });
   }
 
   private void getUserPermissions() {
@@ -669,9 +664,71 @@ public class MainActivity extends AppCompatActivity implements
     }
   }
 
+  private void readLocalComicSeries() {
+
+    LogUtils.debug(TAG, "++readLocalComicSeries()");
+    mProgressBar.setIndeterminate(true);
+    String parsableString;
+    String resourcePath = BaseActivity.DEFAULT_COMIC_SEREIS_FILE;
+    File file = new File(getFilesDir(), resourcePath);
+    LogUtils.debug(TAG, "Loading %s", file.getAbsolutePath());
+    mComicSeries = new HashMap<>();
+    mPublishers = new ArrayList<>();
+    try {
+      if (file.exists() && file.canRead()) {
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+        while ((parsableString = bufferedReader.readLine()) != null) { //process line
+          if (parsableString.startsWith("--")) { // comment line; ignore
+            continue;
+          }
+
+          List<String> elements = new ArrayList<>(Arrays.asList(parsableString.split("\\|")));
+          if (elements.size() != ComicSeries.SCHEMA_FIELDS) {
+            LogUtils.debug(
+              TAG,
+              "Local comic series schema mismatch. Got: %d Expected: %d",
+              elements.size(),
+              ComicBook.SCHEMA_FIELDS);
+            continue;
+          }
+
+          ComicSeries comicSeries = new ComicSeries();
+          comicSeries.Code = elements.remove(0);
+          comicSeries.Name = elements.remove(0);
+          comicSeries.Publisher = elements.remove(0);
+          comicSeries.Volume = Integer.parseInt(elements.remove(0));
+
+          // attempt to locate this book in existing list
+          if (!mComicSeries.containsKey(comicSeries.Code)) {
+            mComicSeries.put(comicSeries.Code, comicSeries);
+            LogUtils.debug(TAG, "Adding %s to collection.", comicSeries.toString());
+          }
+
+          if (!mPublishers.contains(comicSeries.Publisher)) {
+            mPublishers.add(comicSeries.Publisher);
+          }
+        }
+      } else {
+        LogUtils.debug(TAG, "%s does not exist yet.", resourcePath);
+      }
+    } catch (Exception e) {
+      LogUtils.warn(TAG, "Exception when reading local comic series data.");
+      Crashlytics.logException(e);
+      mProgressBar.setIndeterminate(false);
+    } finally {
+      if (mComicSeries == null || mComicSeries.size() == 0) {
+        readServerComicSeries(); // attempt to get comic series from cloud
+      } else {
+        mPublishers.sort(new SortUtils.ByStringValue());
+        mProgressBar.setIndeterminate(false);
+      }
+    }
+  }
+
   private void readLocalLibrary() {
 
     LogUtils.debug(TAG, "++readLocalLibrary()");
+    mProgressBar.setIndeterminate(true);
     String parsableString;
     String resourcePath = BaseActivity.DEFAULT_LIBRARY_FILE;
     File file = new File(getFilesDir(), resourcePath);
@@ -737,6 +794,33 @@ public class MainActivity extends AppCompatActivity implements
         replaceFragment(ComicBookListFragment.newInstance(mComicBooks));
       }
     }
+  }
+
+  private void readServerComicSeries() {
+
+    LogUtils.debug(TAG, "++readServerComicSeries()");
+    mComicSeries = new HashMap<>();
+    mPublishers = new ArrayList<>();
+    FirebaseFirestore.getInstance().collection(ComicSeries.ROOT).get().addOnCompleteListener(task -> {
+
+      if (task.isSuccessful() && task.getResult() != null) {
+        for (DocumentSnapshot snapshot : task.getResult()) {
+          ComicSeries series = snapshot.toObject(ComicSeries.class);
+          if (series != null) {
+            series.Code = snapshot.getId();
+            mComicSeries.put(series.Code, series);
+            if (!mPublishers.contains(series.Publisher)) {
+              mPublishers.add(series.Publisher);
+            }
+          }
+        }
+
+        new WriteToLocalComicSeriesTask(this, mComicSeries.values()).execute();
+      } else {
+        LogUtils.warn(TAG, "Reverting to asset data for ComicSeries.");
+        parseComicSeriesAssetFile();
+      }
+    });
   }
 
   private void readServerLibrary() {

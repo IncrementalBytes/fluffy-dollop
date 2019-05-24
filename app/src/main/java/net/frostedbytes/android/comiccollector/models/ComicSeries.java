@@ -4,12 +4,16 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.firebase.firestore.Exclude;
+import java.util.Locale;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 
 public class ComicSeries implements Parcelable {
 
     @Exclude
     public static final String ROOT = "ComicSeries";
+
+    @Exclude
+    public static final int SCHEMA_FIELDS = 4;
 
     /**
      * Unique UPC code for series
@@ -60,6 +64,17 @@ public class ComicSeries implements Parcelable {
     @Override
     public int describeContents() { return 0; }
 
+    @Override
+    public String toString() {
+
+        return String.format(
+          Locale.US,
+          "ComicSeries { Name=%s, Publisher=%s, Volume=%d }",
+          Name,
+          Publisher,
+          Volume);
+    }
+
     public static final Creator<ComicSeries> CREATOR = new Creator<ComicSeries>() {
 
         @Override
@@ -68,4 +83,15 @@ public class ComicSeries implements Parcelable {
         @Override
         public ComicSeries[] newArray(int size) { return new ComicSeries[size]; }
     };
+
+    public String writeLine() {
+
+        return String.format(
+          Locale.US,
+          "%s|%s|%s|%s\r\n",
+          Code,
+          Name,
+          Publisher,
+          String.valueOf(Volume));
+    }
 }

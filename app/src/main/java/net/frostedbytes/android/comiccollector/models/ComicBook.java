@@ -199,4 +199,21 @@ public class ComicBook implements Parcelable {
 
     return Volume >= 0;
   }
+
+  public String writeLine() {
+
+    return String.format(
+      Locale.US,
+      "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\r\n",
+      SeriesCode,
+      SeriesName,
+      Volume,
+      IssueCode,
+      Title,
+      String.valueOf(OwnedState),
+      String.valueOf(AddedDate),
+      Publisher,
+      String.valueOf(PublishedDate),
+      String.valueOf(UpdatedDate));
+  }
 }

@@ -11,7 +11,6 @@ import net.frostedbytes.android.comiccollector.models.ComicBook;
 import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
@@ -37,20 +36,7 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
                 BaseActivity.DEFAULT_LIBRARY_FILE,
                 Context.MODE_PRIVATE);
             for (ComicBook comicBook : mComicBooks) {
-                String lineContents = String.format(
-                    Locale.US,
-                    "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s\r\n",
-                    comicBook.SeriesCode,
-                    comicBook.SeriesName,
-                    comicBook.Volume,
-                    comicBook.IssueCode,
-                    comicBook.Title,
-                    String.valueOf(comicBook.OwnedState),
-                    String.valueOf(comicBook.AddedDate),
-                    comicBook.Publisher,
-                    String.valueOf(comicBook.PublishedDate),
-                    String.valueOf(comicBook.UpdatedDate));
-                outputStream.write(lineContents.getBytes());
+                outputStream.write(comicBook.writeLine().getBytes());
                 booksWritten.add(comicBook);
             }
         } catch (Exception e) {
@@ -70,6 +56,6 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
             return;
         }
 
-        activity.writeComplete(comicBooks);
+        activity.writeLibraryComplete(comicBooks);
     }
 }
