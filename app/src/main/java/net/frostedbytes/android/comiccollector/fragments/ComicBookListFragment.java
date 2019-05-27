@@ -52,7 +52,7 @@ public class ComicBookListFragment extends Fragment {
     LogUtils.debug(TAG, "++newInstance(%d)", comicBooks.size());
     ComicBookListFragment fragment = new ComicBookListFragment();
     Bundle args = new Bundle();
-    args.putParcelableArrayList(BaseActivity.ARG_COMIC_LIST, comicBooks);
+    args.putParcelableArrayList(BaseActivity.ARG_COMIC_BOOK_LIST, comicBooks);
     fragment.setArguments(args);
     return fragment;
   }
@@ -74,7 +74,7 @@ public class ComicBookListFragment extends Fragment {
 
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicBooks = arguments.getParcelableArrayList(BaseActivity.ARG_COMIC_LIST);
+      mComicBooks = arguments.getParcelableArrayList(BaseActivity.ARG_COMIC_BOOK_LIST);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
     }

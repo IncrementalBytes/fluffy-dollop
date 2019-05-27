@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -46,15 +47,19 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.common.SortUtils;
+import net.frostedbytes.android.comiccollector.common.SortUtils.ByPublicationDate;
 import net.frostedbytes.android.comiccollector.common.SortUtils.ByStringValue;
 import net.frostedbytes.android.comiccollector.common.WriteToLocalComicSeriesTask;
 import net.frostedbytes.android.comiccollector.common.WriteToLocalLibraryTask;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookListFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicSeriesFragment;
+import net.frostedbytes.android.comiccollector.fragments.ComicSeriesListFragment;
 import net.frostedbytes.android.comiccollector.fragments.ManualSearchFragment;
 import net.frostedbytes.android.comiccollector.fragments.QueryFragment;
 import net.frostedbytes.android.comiccollector.fragments.ScanResultsFragment;
@@ -85,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements
   ComicBookFragment.OnComicBookListener,
   ComicBookListFragment.OnComicBookListListener,
   ComicSeriesFragment.OnComicSeriesListener,
+  ComicSeriesListFragment.OnComicSeriesListListener,
   ManualSearchFragment.OnManualSearchListener,
   QueryFragment.OnQueryListener,
   ScanResultsFragment.OnScanResultsListener {
@@ -131,6 +137,24 @@ public class MainActivity extends AppCompatActivity implements
     Toolbar mainToolbar = findViewById(R.id.main_toolbar);
     setSupportActionBar(mainToolbar);
 
+    BottomNavigationView navToolbar = findViewById(R.id.main_toolbar_navigation);
+    navToolbar.setOnNavigationItemSelectedListener(menuItem -> {
+
+      LogUtils.debug(TAG, "++onNavigationItemSelected(%s)", menuItem.getTitle());
+      switch (menuItem.getItemId()) {
+        case R.id.navigation_comic:
+          replaceFragment(ComicBookListFragment.newInstance(mComicBooks));
+          break;
+        case R.id.navigation_series:
+          replaceFragment(ComicSeriesListFragment.newInstance(new ArrayList<>(mComicSeries.values())));
+          break;
+        case R.id.navigation_settings:
+          break;
+    }
+
+    return false;
+  });
+
     mProgressBar = findViewById(R.id.main_progress);
     getSupportFragmentManager().addOnBackStackChangedListener(() -> {
       Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_container);
@@ -161,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
 
-    LogUtils.debug(TAG, "++onOptionsItemSelected(MenuItem)");
+    LogUtils.debug(TAG, "++onOptionsItemSelected(%s)", item.getTitle());
     switch (item.getItemId()) {
       case R.id.action_home:
         replaceFragment(ComicBookListFragment.newInstance(mComicBooks));
@@ -377,7 +401,6 @@ public class MainActivity extends AppCompatActivity implements
 
     LogUtils.debug(TAG, "++onComicListSynchronize()");
     mProgressBar.setIndeterminate(true);
-    readServerComicSeries();
     readServerLibrary();
   }
 
@@ -392,8 +415,9 @@ public class MainActivity extends AppCompatActivity implements
     comicSeries.Volume = comicBook.Volume;
     if (!comicSeries.Name.isEmpty() && comicSeries.Volume > -1 && !comicSeries.Publisher.isEmpty()) {
       String queryPath = PathUtils.combine(ComicSeries.ROOT, comicSeries.Code);
-      FirebaseFirestore.getInstance().document(queryPath).set(comicSeries, SetOptions.merge())
-          .addOnCompleteListener(task -> {
+      Trace comicSeriesTrace = FirebasePerformance.getInstance().newTrace("set_comic_series");
+      comicSeriesTrace.start();
+      FirebaseFirestore.getInstance().document(queryPath).set(comicSeries, SetOptions.merge()).addOnCompleteListener(task -> {
 
             if (task.isSuccessful()) {
               mComicSeries.put(comicSeries.Code, comicSeries);
@@ -402,12 +426,77 @@ public class MainActivity extends AppCompatActivity implements
               }
 
               replaceFragment(ComicBookFragment.newInstance(mUser.Id, comicBook));
+              comicSeriesTrace.incrementMetric("comic_series_add", 1);
             } else {
+              comicSeriesTrace.incrementMetric("comic_series_err", 1);
               showDismissableSnackbar(getString(R.string.err_add_comic_series));
             }
+
+            comicSeriesTrace.stop();
           });
     } else {
       showDismissableSnackbar(getString(R.string.err_add_comic_series));
+    }
+  }
+
+  @Override
+  public void onComicSeriesListAdd() {
+
+    LogUtils.debug(TAG, "++onComicSeriesListAdd()");
+    replaceFragment(ComicBookListFragment.newInstance(mComicBooks));
+  }
+
+  @Override
+  public void onComicSeriesListItemSelected(ComicSeries comicSeries) {
+
+    LogUtils.debug(TAG, "++onComicSeriesListItemSelected(%s)", comicSeries.toString());
+    ArrayList<ComicBook> filtered = new ArrayList<>();
+    for (ComicBook comicBook : mComicBooks) {
+      if (comicBook.SeriesCode.equalsIgnoreCase(comicSeries.Code)) {
+        filtered.add(comicBook);
+      }
+    }
+
+    filtered.sort(new ByPublicationDate());
+    replaceFragment(ComicBookListFragment.newInstance(filtered));
+  }
+
+  @Override
+  public void onComicSeriesListPopulated(int size) {
+
+    LogUtils.debug(TAG, "++onComicSeriesListPopulated(%d)", size);
+    mProgressBar.setIndeterminate(false);
+    if (size == 0) {
+      mSnackbar = Snackbar.make(
+        findViewById(R.id.main_fragment_container),
+        getString(R.string.err_no_data),
+        Snackbar.LENGTH_INDEFINITE)
+        .setAction(
+          getString(R.string.add),
+          view -> replaceFragment(QueryFragment.newInstance()));
+      mSnackbar.show();
+    }
+  }
+
+  @Override
+  public void onComicSeriesListSynchronize() {
+
+    LogUtils.debug(TAG, "++onComicSeriesListSynchronize()");
+    mProgressBar.setIndeterminate(true);
+    readServerComicSeries();
+  }
+
+  @Override
+  public void onManualSearchActionComplete(String seriesCode) {
+
+    LogUtils.debug(TAG, "++onManualSearchActionComplete(%s)", seriesCode);
+    if (!seriesCode.isEmpty() && seriesCode.length() == BaseActivity.DEFAULT_SERIES_CODE.length()) {
+      mProgressBar.setIndeterminate(true);
+      ComicBook comicBook = new ComicBook();
+      comicBook.SeriesCode = seriesCode;
+      getIssueCodeFromUser(comicBook);
+    } else {
+      showDismissableSnackbar(getString(R.string.err_manual_search));
     }
   }
 
@@ -417,6 +506,7 @@ public class MainActivity extends AppCompatActivity implements
     LogUtils.debug(TAG, "++onManualSearchActionComplete(%s, %s)", seriesCode, issueCode);
     if ((!seriesCode.isEmpty() && seriesCode.length() == BaseActivity.DEFAULT_SERIES_CODE.length()) &&
         (!issueCode.isEmpty() && issueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length())) {
+      mProgressBar.setIndeterminate(true);
       ComicBook comicBook = new ComicBook();
       comicBook.SeriesCode = seriesCode;
       comicBook.setIssueCode(issueCode);
@@ -424,6 +514,19 @@ public class MainActivity extends AppCompatActivity implements
     } else {
       showDismissableSnackbar(getString(R.string.err_manual_search));
     }
+  }
+
+  @Override
+  public void onManualSearchListItemSelected(ComicBook comicBook) {
+
+    LogUtils.debug(TAG, "++onManualSearchListItemSelected(%s)", comicBook.toString());
+    replaceFragment(ComicBookFragment.newInstance(mUser.Id, comicBook));
+  }
+
+  @Override
+  public void onManualSearchListPopulated(int size) {
+
+    LogUtils.debug(TAG, "++onManualSearchListPopulated(%d)", size);
   }
 
   @Override
@@ -440,7 +543,6 @@ public class MainActivity extends AppCompatActivity implements
   public void onQueryShowManualDialog() {
 
     LogUtils.debug(TAG, "++onQueryShowManualDialog()");
-    mProgressBar.setIndeterminate(true);
     replaceFragment(ManualSearchFragment.newInstance());
   }
 
@@ -566,13 +668,24 @@ public class MainActivity extends AppCompatActivity implements
   private void getIssueCodeFromUser(ComicBook comic) {
 
     LogUtils.debug(TAG, "++getIssueCodeFromUser(%s)", comic);
-    replaceFragment(ManualSearchFragment.newInstance(comic.SeriesCode));
+    ArrayList<ComicBook> filtered = new ArrayList<>();
+    for (ComicBook comicBook : mComicBooks) {
+      if (comicBook.SeriesCode.equalsIgnoreCase(comic.SeriesCode)) {
+        filtered.add(comicBook);
+      }
+    }
+
+    filtered.sort(new ByPublicationDate());
+    replaceFragment(ManualSearchFragment.newInstance(comic.SeriesCode, filtered));
   }
 
   private void getUserPermissions() {
 
     LogUtils.debug(TAG, "++getUserPermissions()");
+    mProgressBar.setIndeterminate(true);
     String queryPath = PathUtils.combine(User.ROOT, mUser.Id);
+    Trace userTrace = FirebasePerformance.getInstance().newTrace("get_user");
+    userTrace.start();
     FirebaseFirestore.getInstance().document(queryPath).get().addOnCompleteListener(this, task -> {
 
       if (task.isSuccessful()) {
@@ -587,10 +700,14 @@ public class MainActivity extends AppCompatActivity implements
       }
 
       if (!mUser.Id.isEmpty() && !mUser.Id.equals(BaseActivity.DEFAULT_USER_ID)) {
+        userTrace.incrementMetric("user_read", 1);
         checkDevicePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE_PERMISSIONS_REQUEST);
       } else {
+        userTrace.incrementMetric("user_unread", 1);
         showDismissableSnackbar(getString(R.string.err_unknown_user));
       }
+
+      userTrace.stop();
     });
   }
 
@@ -669,7 +786,7 @@ public class MainActivity extends AppCompatActivity implements
     LogUtils.debug(TAG, "++readLocalComicSeries()");
     mProgressBar.setIndeterminate(true);
     String parsableString;
-    String resourcePath = BaseActivity.DEFAULT_COMIC_SEREIS_FILE;
+    String resourcePath = BaseActivity.DEFAULT_COMIC_SERIES_FILE;
     File file = new File(getFilesDir(), resourcePath);
     LogUtils.debug(TAG, "Loading %s", file.getAbsolutePath());
     mComicSeries = new HashMap<>();
@@ -801,6 +918,8 @@ public class MainActivity extends AppCompatActivity implements
     LogUtils.debug(TAG, "++readServerComicSeries()");
     mComicSeries = new HashMap<>();
     mPublishers = new ArrayList<>();
+    Trace comicSeriesTrace = FirebasePerformance.getInstance().newTrace("get_comic_series");
+    comicSeriesTrace.start();
     FirebaseFirestore.getInstance().collection(ComicSeries.ROOT).get().addOnCompleteListener(task -> {
 
       if (task.isSuccessful() && task.getResult() != null) {
@@ -809,17 +928,23 @@ public class MainActivity extends AppCompatActivity implements
           if (series != null) {
             series.Code = snapshot.getId();
             mComicSeries.put(series.Code, series);
+            comicSeriesTrace.incrementMetric("comic_series_read", 1);
             if (!mPublishers.contains(series.Publisher)) {
               mPublishers.add(series.Publisher);
             }
+          } else {
+            comicSeriesTrace.incrementMetric("comic_series_unread", 1);
           }
         }
 
-        new WriteToLocalComicSeriesTask(this, mComicSeries.values()).execute();
+        new WriteToLocalComicSeriesTask(this, new ArrayList<>(mComicSeries.values())).execute();
       } else {
         LogUtils.warn(TAG, "Reverting to asset data for ComicSeries.");
+        comicSeriesTrace.incrementMetric("comic_series_err", 1);
         parseComicSeriesAssetFile();
       }
+
+      comicSeriesTrace.stop();
     });
   }
 
@@ -829,6 +954,8 @@ public class MainActivity extends AppCompatActivity implements
     String queryPath = PathUtils.combine(User.ROOT, mUser.Id, ComicBook.ROOT);
     LogUtils.debug(TAG, "QueryPath: %s", queryPath);
     mComicBooks = new ArrayList<>();
+    Trace comicBookTrace = FirebasePerformance.getInstance().newTrace("get_user_comics");
+    comicBookTrace.start();
     FirebaseFirestore.getInstance().collection(queryPath).get().addOnCompleteListener(this, task -> {
 
       if (task.isSuccessful() && task.getResult() != null) {
@@ -839,8 +966,10 @@ public class MainActivity extends AppCompatActivity implements
             comicBook.SeriesCode = segments[0];
             comicBook.setIssueCode(segments[1]);
             mComicBooks.add(comicBook);
+            comicBookTrace.incrementMetric("comic_book_read", 1);
           } else {
             LogUtils.warn(TAG, "Unable to convert user book: %s", queryPath);
+            comicBookTrace.incrementMetric("comic_book_unread", 1);
           }
         }
 
@@ -848,8 +977,11 @@ public class MainActivity extends AppCompatActivity implements
         new WriteToLocalLibraryTask(this, mComicBooks).execute();
       } else {
         LogUtils.debug(TAG, "Could not get user book list: %s", queryPath);
+        comicBookTrace.incrementMetric("comic_book_err", 1);
         onComicListPopulated(0);
       }
+
+      comicBookTrace.stop();
     });
   }
 
@@ -981,6 +1113,8 @@ public class MainActivity extends AppCompatActivity implements
       setTitle(getString(R.string.query_for_comic_book));
     } else if (fragmentClassName.equals(ComicBookFragment.class.getName())) {
       setTitle(getString(R.string.comic_book));
+    } else if (fragmentClassName.equals(ComicSeriesListFragment.class.getName())) {
+      setTitle(getString(R.string.series_comics));
     }
   }
 

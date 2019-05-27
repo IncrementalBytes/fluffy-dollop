@@ -3,6 +3,7 @@ package net.frostedbytes.android.comiccollector.common;
 import net.frostedbytes.android.comiccollector.models.ComicBook;
 
 import java.util.Comparator;
+import net.frostedbytes.android.comiccollector.models.ComicSeries;
 
 public class SortUtils {
 
@@ -19,6 +20,14 @@ public class SortUtils {
         public int compare(ComicBook a, ComicBook b) {
 
             return Long.compare(b.PublishedDate, a.PublishedDate);
+        }
+    }
+
+    public static class BySeriesName implements Comparator<ComicSeries> {
+
+        public int compare(ComicSeries a, ComicSeries b) {
+
+            return a.Name.compareTo(b.Name);
         }
     }
 

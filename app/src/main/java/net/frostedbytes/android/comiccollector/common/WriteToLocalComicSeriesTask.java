@@ -8,19 +8,18 @@ import com.crashlytics.android.Crashlytics;
 import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.MainActivity;
 import net.frostedbytes.android.comiccollector.models.ComicSeries;
 
-public class WriteToLocalComicSeriesTask extends AsyncTask<Void, Void, Collection<ComicSeries>> {
+public class WriteToLocalComicSeriesTask extends AsyncTask<Void, Void, ArrayList<ComicSeries>> {
 
   private static final String TAG = BASE_TAG + WriteToLocalComicSeriesTask.class.getSimpleName();
 
   private final WeakReference<MainActivity> mFragmentWeakReference;
-  private final Collection<ComicSeries> mComicSeries;
+  private final ArrayList<ComicSeries> mComicSeries;
 
-  public WriteToLocalComicSeriesTask(MainActivity context, Collection<ComicSeries> comicSeries) {
+  public WriteToLocalComicSeriesTask(MainActivity context, ArrayList<ComicSeries> comicSeries) {
 
     mFragmentWeakReference = new WeakReference<>(context);
     mComicSeries = comicSeries;
@@ -32,7 +31,7 @@ public class WriteToLocalComicSeriesTask extends AsyncTask<Void, Void, Collectio
     FileOutputStream outputStream;
     try {
       outputStream = mFragmentWeakReference.get().getApplicationContext().openFileOutput(
-        BaseActivity.DEFAULT_COMIC_SEREIS_FILE,
+        BaseActivity.DEFAULT_COMIC_SERIES_FILE,
         Context.MODE_PRIVATE);
       for (ComicSeries comicSeries : mComicSeries) {
         outputStream.write(comicSeries.writeLine().getBytes());

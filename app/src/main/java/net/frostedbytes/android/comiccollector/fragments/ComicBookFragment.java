@@ -17,6 +17,8 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.DateUtils;
@@ -139,11 +141,14 @@ public class ComicBookFragment extends Fragment {
           updatedBook.Title = mTitleEdit.getText().toString();
 
           String comicBookQueryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, updatedBook.getUniqueId());
+          Trace comicBookTrace = FirebasePerformance.getInstance().newTrace("set_comic_book");
+          comicBookTrace.start();
           FirebaseFirestore.getInstance().document(comicBookQueryPath).set(updatedBook, SetOptions.merge())
             .addOnCompleteListener(task -> {
 
               if (task.isSuccessful()) {
                 mCallback.onComicBookAddedToLibrary(updatedBook);
+                comicBookTrace.incrementMetric("comic_book_add", 1);
               } else {
                 LogUtils.error(TAG, "Failed to add cloudy book to user's library: %s", comicBookQueryPath);
                 if (task.getException() != null) {
@@ -151,7 +156,10 @@ public class ComicBookFragment extends Fragment {
                 }
 
                 mCallback.onComicBookAddedToLibrary(null);
+                comicBookTrace.incrementMetric("comic_book_err", 1);
               }
+
+              comicBookTrace.stop();
             });
         });
       } else {
@@ -167,11 +175,14 @@ public class ComicBookFragment extends Fragment {
           updatedBook.UpdatedDate = Calendar.getInstance().getTimeInMillis();
 
           String comicBookQueryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, updatedBook.getUniqueId());
+          Trace comicBookTrace = FirebasePerformance.getInstance().newTrace("set_comic_book");
+          comicBookTrace.start();
           FirebaseFirestore.getInstance().document(comicBookQueryPath).set(updatedBook, SetOptions.merge())
             .addOnCompleteListener(task -> {
 
               if (task.isSuccessful()) {
                 mCallback.onComicBookUpdated(updatedBook);
+                comicBookTrace.incrementMetric("comic_book_update", 1);
               } else {
                 LogUtils.error(TAG, "Failed to add cloudy book to user's library: %s", comicBookQueryPath);
                 if (task.getException() != null) {
@@ -179,7 +190,10 @@ public class ComicBookFragment extends Fragment {
                 }
 
                 mCallback.onComicBookUpdated(null);
+                comicBookTrace.incrementMetric("comic_book_err", 1);
               }
+
+              comicBookTrace.stop();
             });
         });
 
@@ -197,10 +211,13 @@ public class ComicBookFragment extends Fragment {
               .setPositiveButton(android.R.string.yes, (dialog, which) -> {
 
                 String queryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, mComicBook.getUniqueId());
+                Trace comicBookTrace = FirebasePerformance.getInstance().newTrace("del_comic_book");
+                comicBookTrace.start();
                 FirebaseFirestore.getInstance().document(queryPath).delete().addOnCompleteListener(task -> {
 
                   if (task.isSuccessful()) {
                     mCallback.onComicBookRemoved(mComicBook);
+                    comicBookTrace.incrementMetric("comic_book_del", 1);
                   } else {
                     LogUtils.error(TAG, "Failed to remove book from user's library: %s", queryPath);
                     if (task.getException() != null) {
@@ -208,8 +225,11 @@ public class ComicBookFragment extends Fragment {
                     }
 
                     mCallback.onComicBookRemoved(null);
+                    comicBookTrace.incrementMetric("comic_book_err", 1);
                   }
                 });
+
+                comicBookTrace.stop();
               })
               .setNegativeButton(android.R.string.no, null)
               .create();
