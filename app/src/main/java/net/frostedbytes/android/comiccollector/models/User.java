@@ -18,7 +18,7 @@ public class User {
     @Exclude
     public String Id;
 
-    public final boolean IsGeek;
+    public boolean IsGeek;
 
     public User() {
 

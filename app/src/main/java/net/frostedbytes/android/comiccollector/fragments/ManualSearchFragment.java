@@ -37,9 +37,9 @@ public class ManualSearchFragment extends Fragment {
 
     void onManualSearchActionComplete(String seriesCode, String issueCode);
 
-    void onManualSearchListItemSelected(ComicBook comicBook);
+    void onManualSearchCancel();
 
-    void onManualSearchListPopulated(int size);
+    void onManualSearchListItemSelected(ComicBook comicBook);
   }
 
   private OnManualSearchListener mCallback;
@@ -55,13 +55,7 @@ public class ManualSearchFragment extends Fragment {
   public static ManualSearchFragment newInstance() {
 
     LogUtils.debug(TAG, "++newInstance()");
-    return ManualSearchFragment.newInstance("");
-  }
-
-  public static ManualSearchFragment newInstance(String seriesCode) {
-
-    LogUtils.debug(TAG, "++newInstance(%s)", seriesCode);
-    return ManualSearchFragment.newInstance(seriesCode, new ArrayList<>());
+    return ManualSearchFragment.newInstance("", new ArrayList<>());
   }
 
   public static ManualSearchFragment newInstance(String seriesCode, ArrayList<ComicBook> comicBooks) {
@@ -110,12 +104,11 @@ public class ManualSearchFragment extends Fragment {
     mRecyclerView.setLayoutManager(manager);
 
     Button cancelButton = view.findViewById(R.id.manual_search_button_cancel);
-    cancelButton.setOnClickListener(v ->
-      mCallback.onManualSearchActionComplete("", ""));
+    cancelButton.setOnClickListener(v -> mCallback.onManualSearchCancel());
     mContinueButton = view.findViewById(R.id.manual_search_button_continue);
     mContinueButton.setEnabled(false);
     mContinueButton.setOnClickListener(v -> {
-      if (mSeriesCode.isEmpty()) {
+      if (mSeriesCode == null || mSeriesCode.isEmpty()) {
         mCallback.onManualSearchActionComplete(mSeriesEdit.getText().toString());
       } else {
         mCallback.onManualSearchActionComplete(mSeriesEdit.getText().toString(), mIssueEdit.getText().toString());
@@ -123,7 +116,7 @@ public class ManualSearchFragment extends Fragment {
     });
 
     mSeriesEdit = view.findViewById(R.id.manual_search_edit_series);
-    if (mSeriesCode == null || mSeriesCode.length() < 1) {
+    if (mSeriesCode == null || mSeriesCode.isEmpty()) {
       mSeriesEdit.addTextChangedListener(new TextWatcher() {
 
         @Override
@@ -154,16 +147,18 @@ public class ManualSearchFragment extends Fragment {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-          validateAll();
         }
 
         @Override
         public void afterTextChanged(Editable s) {
+          validateAll();
         }
       });
     } else {
       TextView issueText = view.findViewById(R.id.manual_search_text_issue);
       issueText.setVisibility(View.INVISIBLE);
+      TextView listText = view.findViewById(R.id.manual_search_text_list);
+      listText.setVisibility(View.INVISIBLE);
       mIssueEdit.setVisibility(View.INVISIBLE);
     }
 
@@ -172,18 +167,15 @@ public class ManualSearchFragment extends Fragment {
   }
 
   /*
-      Private Method(s)
-     */
+    Private Method(s)
+  */
   private void updateUI() {
 
-    if (mComicBooks == null || mComicBooks.size() == 0) {
-      mCallback.onManualSearchListPopulated(0);
-    } else {
+    if (mComicBooks != null && mComicBooks.size() > 0) {
       LogUtils.debug(TAG, "++updateUI()");
       mComicBooks.sort(new SortUtils.ByPublicationDate());
       ComicBookAdapter comicAdapter = new ComicBookAdapter(mComicBooks);
       mRecyclerView.setAdapter(comicAdapter);
-      mCallback.onManualSearchListPopulated(comicAdapter.getItemCount());
     }
   }
 

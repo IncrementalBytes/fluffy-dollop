@@ -2,6 +2,7 @@ package net.frostedbytes.android.comiccollector;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +22,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 
@@ -63,6 +65,7 @@ import net.frostedbytes.android.comiccollector.fragments.ComicSeriesListFragment
 import net.frostedbytes.android.comiccollector.fragments.ManualSearchFragment;
 import net.frostedbytes.android.comiccollector.fragments.QueryFragment;
 import net.frostedbytes.android.comiccollector.fragments.ScanResultsFragment;
+import net.frostedbytes.android.comiccollector.fragments.UserPreferenceFragment;
 import net.frostedbytes.android.comiccollector.models.ComicBook;
 import net.frostedbytes.android.comiccollector.models.ComicSeries;
 import net.frostedbytes.android.comiccollector.models.User;
@@ -93,7 +96,8 @@ public class MainActivity extends AppCompatActivity implements
   ComicSeriesListFragment.OnComicSeriesListListener,
   ManualSearchFragment.OnManualSearchListener,
   QueryFragment.OnQueryListener,
-  ScanResultsFragment.OnScanResultsListener {
+  ScanResultsFragment.OnScanResultsListener,
+  UserPreferenceFragment.OnPreferencesListener {
 
   private static final String TAG = BASE_TAG + MainActivity.class.getSimpleName();
 
@@ -137,10 +141,11 @@ public class MainActivity extends AppCompatActivity implements
     Toolbar mainToolbar = findViewById(R.id.main_toolbar);
     setSupportActionBar(mainToolbar);
 
-    BottomNavigationView navToolbar = findViewById(R.id.main_toolbar_navigation);
-    navToolbar.setOnNavigationItemSelectedListener(menuItem -> {
+    BottomNavigationView mNavToolbar = findViewById(R.id.main_toolbar_navigation);
+    mNavToolbar.setOnNavigationItemSelectedListener(menuItem -> {
 
       LogUtils.debug(TAG, "++onNavigationItemSelected(%s)", menuItem.getTitle());
+      menuItem.setChecked(true);
       switch (menuItem.getItemId()) {
         case R.id.navigation_comic:
           replaceFragment(ComicBookListFragment.newInstance(mComicBooks));
@@ -149,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements
           replaceFragment(ComicSeriesListFragment.newInstance(new ArrayList<>(mComicSeries.values())));
           break;
         case R.id.navigation_settings:
+          replaceFragment(UserPreferenceFragment.newInstance());
           break;
     }
 
@@ -168,10 +174,13 @@ public class MainActivity extends AppCompatActivity implements
     mUser.Email = getIntent().getStringExtra(BaseActivity.ARG_EMAIL);
     mUser.FullName = getIntent().getStringExtra(BaseActivity.ARG_USER_NAME);
 
+    mProgressBar.setIndeterminate(true);
     readLocalComicSeries();
-
-    // get user's permissions
-    getUserPermissions();
+    if (!mUser.Id.isEmpty() && !mUser.Id.equals(BaseActivity.DEFAULT_USER_ID)) {
+      checkDevicePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE_PERMISSIONS_REQUEST);
+    } else {
+      showDismissableSnackbar(getString(R.string.err_unknown_user));
+    }
   }
 
   @Override
@@ -517,6 +526,13 @@ public class MainActivity extends AppCompatActivity implements
   }
 
   @Override
+  public void onManualSearchCancel() {
+
+    LogUtils.debug(TAG, "++onManualSearchCancel()");
+    replaceFragment(ComicBookListFragment.newInstance(mComicBooks));
+  }
+
+  @Override
   public void onManualSearchListItemSelected(ComicBook comicBook) {
 
     LogUtils.debug(TAG, "++onManualSearchListItemSelected(%s)", comicBook.toString());
@@ -524,9 +540,11 @@ public class MainActivity extends AppCompatActivity implements
   }
 
   @Override
-  public void onManualSearchListPopulated(int size) {
+  public void onPreferenceChanged() {
 
-    LogUtils.debug(TAG, "++onManualSearchListPopulated(%d)", size);
+    LogUtils.debug(TAG, "++onPreferenceChanged()");
+    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+    mUser.IsGeek = sharedPreferences.getBoolean(UserPreferenceFragment.IS_GEEK_PREFERENCE, false);
   }
 
   @Override
@@ -540,9 +558,9 @@ public class MainActivity extends AppCompatActivity implements
   }
 
   @Override
-  public void onQueryShowManualDialog() {
+  public void onQueryShowManualInput() {
 
-    LogUtils.debug(TAG, "++onQueryShowManualDialog()");
+    LogUtils.debug(TAG, "++onQueryShowManualInput()");
     replaceFragment(ManualSearchFragment.newInstance());
   }
 
@@ -677,38 +695,6 @@ public class MainActivity extends AppCompatActivity implements
 
     filtered.sort(new ByPublicationDate());
     replaceFragment(ManualSearchFragment.newInstance(comic.SeriesCode, filtered));
-  }
-
-  private void getUserPermissions() {
-
-    LogUtils.debug(TAG, "++getUserPermissions()");
-    mProgressBar.setIndeterminate(true);
-    String queryPath = PathUtils.combine(User.ROOT, mUser.Id);
-    Trace userTrace = FirebasePerformance.getInstance().newTrace("get_user");
-    userTrace.start();
-    FirebaseFirestore.getInstance().document(queryPath).get().addOnCompleteListener(this, task -> {
-
-      if (task.isSuccessful()) {
-        DocumentSnapshot snapshot = task.getResult();
-        if (snapshot != null) {
-          User user = snapshot.toObject(User.class);
-          if (user != null) {
-            mUser = user;
-            mUser.Id = snapshot.getId();
-          }
-        }
-      }
-
-      if (!mUser.Id.isEmpty() && !mUser.Id.equals(BaseActivity.DEFAULT_USER_ID)) {
-        userTrace.incrementMetric("user_read", 1);
-        checkDevicePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE_PERMISSIONS_REQUEST);
-      } else {
-        userTrace.incrementMetric("user_unread", 1);
-        showDismissableSnackbar(getString(R.string.err_unknown_user));
-      }
-
-      userTrace.stop();
-    });
   }
 
   private void parseComicSeriesAssetFile() {
@@ -937,6 +923,7 @@ public class MainActivity extends AppCompatActivity implements
           }
         }
 
+        // update our local cache with data from cloud
         new WriteToLocalComicSeriesTask(this, new ArrayList<>(mComicSeries.values())).execute();
       } else {
         LogUtils.warn(TAG, "Reverting to asset data for ComicSeries.");
@@ -1115,6 +1102,8 @@ public class MainActivity extends AppCompatActivity implements
       setTitle(getString(R.string.comic_book));
     } else if (fragmentClassName.equals(ComicSeriesListFragment.class.getName())) {
       setTitle(getString(R.string.series_comics));
+    } else if (fragmentClassName.equals(UserPreferenceFragment.class.getName())) {
+      setTitle(getString(R.string.preferences));
     }
   }
 
@@ -1176,7 +1165,8 @@ public class MainActivity extends AppCompatActivity implements
                   matrix,
                   true);
               mRotationAttempts = 0;
-              scanImageForText();
+              showDismissableSnackbar("Could not find a bar code, try manually inputting.");
+              replaceFragment(ManualSearchFragment.newInstance());
             }
           } else {
             showDismissableSnackbar(getString(R.string.err_bar_code_task));

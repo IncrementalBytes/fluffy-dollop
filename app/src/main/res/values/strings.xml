@@ -76,4 +76,6 @@
   <string name="menu_series">Series</string>
   <string name="menu_comic">Comics</string>
   <string name="series_comics">Comics within Series</string>
+  <string name="list_of_series_comics">List of Comics from series:</string>
+  <string name="preferences">User Preferences</string>
 </resources>

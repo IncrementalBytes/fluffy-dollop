@@ -25,7 +25,7 @@ public class QueryFragment extends Fragment {
 
         void onQueryActionComplete(String message);
 
-        void onQueryShowManualDialog();
+        void onQueryShowManualInput();
 
         void onQueryTakePicture();
     }
@@ -79,7 +79,7 @@ public class QueryFragment extends Fragment {
         }
 
         CardView manualCard = view.findViewById(R.id.query_card_manual);
-        manualCard.setOnClickListener(v -> mCallback.onQueryShowManualDialog());
+        manualCard.setOnClickListener(v -> mCallback.onQueryShowManualInput());
 
         mCallback.onQueryActionComplete("");
         return view;
