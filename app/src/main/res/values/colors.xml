@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="itemBackground">#373737</color>
-  <color name="bottomNavBarBackground">#5A5A5A</color>
+  <color name="primaryColor">#008577</color>
+  <color name="primaryLightColor">#4CB5A6</color>
+  <color name="primaryDarkColor">#00574B</color>
+
+  <color name="secondaryColor">#d81b60</color>
+  <color name="secondaryLightColor">#FF5C8D</color>
+  <color name="secondaryDarkColor">#a00037</color>
+
+  <color name="primaryTextColor">#ffffff</color>
+  <color name="secondaryTextColor">#000000</color>
+
+  <color name="background">#888888</color>
 </resources>

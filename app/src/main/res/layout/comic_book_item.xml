@@ -3,20 +3,22 @@
   xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
-  android:layout_marginBottom="2dp"
-  android:background="@color/itemBackground">
+  android:layout_marginTop="2dp"
+  android:layout_marginStart="2dp"
+  android:layout_marginEnd="2dp"
+  android:background="?attr/colorPrimary">
 
   <TextView
     android:id="@+id/comic_item_text_series"
+    android:textStyle="bold"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:text="@string/placeholder"
-    android:textStyle="bold"
     android:ellipsize="end"
-    app:layout_constraintStart_toStartOf="parent"
+    android:text="@string/placeholder"
     app:layout_constraintEnd_toStartOf="@id/comic_item_text_publisher"
-    app:layout_constraintTop_toTopOf="parent" />
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"/>
 
   <TextView
     android:id="@+id/comic_item_text_publisher"
@@ -24,8 +26,9 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
+    android:textColor="@color/primaryColor"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    app:layout_constraintTop_toTopOf="parent"/>
 
   <TextView
     android:id="@+id/comic_item_text_title"
@@ -33,26 +36,26 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/secondaryLightColor"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/comic_item_text_series"/>
 
   <TextView
     android:id="@+id/comic_item_text_volume"
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/volume"
-    android:textStyle="bold"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_title"
-    app:layout_constraintEnd_toStartOf="@id/comic_item_text_volume_value" />
+    app:layout_constraintEnd_toStartOf="@id/comic_item_text_volume_value"
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_title"/>
   <TextView
     android:id="@+id/comic_item_text_volume_value"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/primaryColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@id/comic_item_text_title"/>
 
@@ -65,24 +68,24 @@
     android:src="@drawable/ic_owned_dark"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_volume" />
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_volume"/>
 
   <TextView
     android:id="@+id/comic_item_text_issue"
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/issue"
-    android:textStyle="bold"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toStartOf="@id/comic_item_text_issue_value" />
+    app:layout_constraintEnd_toStartOf="@id/comic_item_text_issue_value"/>
   <TextView
     android:id="@+id/comic_item_text_issue_value"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/primaryColor"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"/>
 

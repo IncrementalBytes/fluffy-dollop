@@ -28,7 +28,7 @@
     android:gravity="end"
     android:hint="@string/search_series_hint"
     android:inputType="number"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/secondaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toTopOf="parent"/>
 
@@ -53,7 +53,7 @@
     android:gravity="end"
     android:hint="@string/search_issue_hint"
     android:inputType="number"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/secondaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/manual_search_edit_series"/>
 

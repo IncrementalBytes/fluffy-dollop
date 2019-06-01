@@ -3,7 +3,8 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_height="match_parent"
+  android:background="?attr/colorPrimary">
 
   <TextView
     android:id="@+id/comic_book_text_title"
@@ -27,7 +28,7 @@
     android:inputType="text"
     android:maxLines="1"
     android:textAlignment="gravity"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/secondaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toTopOf="parent"/>
 
@@ -52,22 +53,22 @@
     android:gravity="center_vertical|end"
     android:inputType="date"
     android:textAlignment="gravity"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/secondaryLightColor"
     app:layout_constraintBottom_toTopOf="@id/comic_book_text_series"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@id/comic_book_edit_title"/>
 
   <TextView
     android:id="@+id/comic_book_text_series"
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:text="@string/series"
     android:textSize="24sp"
-    android:textStyle="bold"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_text_series_value"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@id/comic_book_text_series_value" />
+    app:layout_constraintTop_toTopOf="@id/comic_book_text_series_value"/>
   <TextView
     android:id="@+id/comic_book_text_series_value"
     android:layout_width="0dp"
@@ -79,7 +80,7 @@
     android:maxLines="1"
     android:text="@string/placeholder"
     android:textAlignment="gravity"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/primaryLightColor"
     android:textSize="24sp"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@+id/comic_book_text_series"
@@ -87,15 +88,15 @@
 
   <TextView
     android:id="@+id/comic_book_text_publisher"
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:text="@string/publisher"
     android:textSize="24sp"
-    android:textStyle="bold"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_text_publisher_value"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@id/comic_book_text_publisher_value" />
+    app:layout_constraintTop_toTopOf="@id/comic_book_text_publisher_value"/>
   <TextView
     android:id="@+id/comic_book_text_publisher_value"
     android:layout_width="0dp"
@@ -107,7 +108,7 @@
     android:maxLines="1"
     android:text="@string/placeholder"
     android:textAlignment="gravity"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/primaryLightColor"
     android:textSize="24sp"
     app:layout_constraintBottom_toTopOf="@id/comic_book_text_issue_value"
     app:layout_constraintEnd_toEndOf="parent"
@@ -116,14 +117,14 @@
 
   <TextView
     android:id="@+id/comic_book_text_volume"
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:text="@string/volume"
     android:textSize="24sp"
-    android:textStyle="bold"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_book_text_publisher" />
+    app:layout_constraintTop_toBottomOf="@id/comic_book_text_publisher"/>
   <TextView
     android:id="@+id/comic_book_text_volume_value"
     android:layout_width="wrap_content"
@@ -132,7 +133,7 @@
     android:gravity="center_vertical|end"
     android:text="@string/placeholder"
     android:textAlignment="gravity"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/primaryLightColor"
     android:textSize="24sp"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_text_volume"
     app:layout_constraintStart_toEndOf="@id/comic_book_text_volume"
@@ -158,7 +159,7 @@
     android:gravity="center_vertical|end"
     android:text="@string/placeholder"
     android:textAlignment="gravity"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/primaryLightColor"
     android:textSize="24sp"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_text_volume"
     app:layout_constraintEnd_toEndOf="parent"
@@ -166,15 +167,15 @@
 
   <TextView
     android:id="@+id/comic_book_text_product_code"
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:text="@string/product_code"
     android:textSize="24sp"
-    android:textStyle="bold"
     app:layout_constraintBottom_toTopOf="@id/comic_book_toggle_owned"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_book_text_issue" />
+    app:layout_constraintTop_toBottomOf="@id/comic_book_text_issue"/>
   <TextView
     android:id="@+id/comic_book_text_product_code_value"
     android:layout_width="0dp"
@@ -183,7 +184,7 @@
     android:gravity="center_vertical|end"
     android:text="@string/placeholder"
     android:textAlignment="gravity"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/primaryLightColor"
     android:textSize="24sp"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_text_product_code"
     app:layout_constraintEnd_toEndOf="parent"
@@ -209,8 +210,8 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:text="@string/add_to_library"
-    app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toStartOf="@id/comic_book_button_update"
+    app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/comic_book_toggle_owned"/>
 
   <Button
@@ -232,6 +233,6 @@
     android:layout_margin="8dp"
     android:text="@string/remove_from_library"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent" />
+    app:layout_constraintEnd_toEndOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

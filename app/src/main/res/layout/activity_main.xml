@@ -11,10 +11,7 @@
     android:id="@+id/main_toolbar"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="?attr/colorPrimary"
-    android:elevation="4dp"
-    android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+    android:elevation="8dp"
     app:layout_constraintTop_toTopOf="parent"/>
 
   <ProgressBar
@@ -22,30 +19,23 @@
     style="?android:attr/progressBarStyleHorizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:elevation="4dp"
+    android:elevation="8dp"
     app:layout_constraintTop_toBottomOf="@id/main_toolbar"/>
 
   <FrameLayout
     android:layout_width="0dp"
     android:layout_height="0dp"
-    app:layout_constraintBottom_toTopOf="@id/main_toolbar_navigation"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/main_progress">
+    app:layout_constraintTop_toBottomOf="@id/main_progress"
+    app:layout_constraintBottom_toBottomOf="parent">
 
     <FrameLayout
       android:id="@+id/main_fragment_container"
       android:layout_width="match_parent"
-      android:layout_height="match_parent" />
+      android:layout_height="match_parent"
+      />
 
   </FrameLayout>
-
-  <android.support.design.widget.BottomNavigationView
-    android:id="@+id/main_toolbar_navigation"
-    android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
-    app:itemBackground="@color/bottomNavBarBackground"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:menu="@menu/menu_navigation"/>
 
 </android.support.constraint.ConstraintLayout>

@@ -1,2 +1,2 @@
-# fantastic-octo-spark
-Repo for the Cloudy Curator app
+# fluffy-dollop
+Repo for the Comic Collector app

@@ -21,34 +21,35 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:text="@string/placeholder"
-    android:inputType="number"
+    android:autofillHints="@string/series_upc"
     android:enabled="false"
-    app:layout_constraintTop_toTopOf="parent"
+    android:inputType="number"
+    android:text="@string/placeholder"
+    android:textColor="@color/primaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
-    android:autofillHints="@string/series_upc"/>
+    app:layout_constraintTop_toTopOf="parent"/>
 
   <TextView
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:labelFor="@id/comic_series_edit_name"
     android:text="@string/series_name"
     android:textSize="24sp"
-    android:textStyle="bold"
-    android:labelFor="@id/comic_series_edit_name"
-    app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintBottom_toBottomOf="@id/comic_series_edit_name"
+    app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="@id/comic_series_edit_name"/>
   <EditText
     android:id="@+id/comic_series_edit_name"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
+    android:autofillHints="@string/hint_series_name"
     android:ems="10"
     android:inputType="textPersonName"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/secondaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_code"
-    android:autofillHints="@string/hint_series_name"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_code"/>
 
   <TextView
     android:layout_width="wrap_content"
@@ -65,12 +66,12 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
+    android:autofillHints=""
     android:ems="3"
     android:inputType="number"
-    android:textColor="?attr/colorAccent"
+    android:textColor="@color/secondaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_name"
-    android:autofillHints=""/>
+    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_name"/>
 
   <RadioGroup
     android:id="@+id/comic_series_group_publisher"
@@ -111,13 +112,13 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="@dimen/default_view_margin"
       android:layout_marginBottom="@dimen/default_view_margin"
-      android:layout_marginEnd="@dimen/default_view_margin"
       android:layout_marginStart="50dp"
+      android:layout_marginEnd="@dimen/default_view_margin"
       android:autofillHints="@string/hint_publisher"
       android:ems="16"
       android:enabled="false"
       android:inputType="textPersonName"
-      android:textColor="?attr/colorAccent"/>
+      android:textColor="@color/secondaryLightColor"/>
   </RadioGroup>
 
   <Button

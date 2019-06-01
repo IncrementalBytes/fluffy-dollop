@@ -141,26 +141,6 @@ public class MainActivity extends AppCompatActivity implements
     Toolbar mainToolbar = findViewById(R.id.main_toolbar);
     setSupportActionBar(mainToolbar);
 
-    BottomNavigationView mNavToolbar = findViewById(R.id.main_toolbar_navigation);
-    mNavToolbar.setOnNavigationItemSelectedListener(menuItem -> {
-
-      LogUtils.debug(TAG, "++onNavigationItemSelected(%s)", menuItem.getTitle());
-      menuItem.setChecked(true);
-      switch (menuItem.getItemId()) {
-        case R.id.navigation_comic:
-          replaceFragment(ComicBookListFragment.newInstance(mComicBooks));
-          break;
-        case R.id.navigation_series:
-          replaceFragment(ComicSeriesListFragment.newInstance(new ArrayList<>(mComicSeries.values())));
-          break;
-        case R.id.navigation_settings:
-          replaceFragment(UserPreferenceFragment.newInstance());
-          break;
-    }
-
-    return false;
-  });
-
     mProgressBar = findViewById(R.id.main_progress);
     getSupportFragmentManager().addOnBackStackChangedListener(() -> {
       Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.main_fragment_container);
@@ -198,6 +178,9 @@ public class MainActivity extends AppCompatActivity implements
     switch (item.getItemId()) {
       case R.id.action_home:
         replaceFragment(ComicBookListFragment.newInstance(mComicBooks));
+        break;
+      case R.id.action_series:
+        replaceFragment(ComicSeriesListFragment.newInstance(new ArrayList<>(mComicSeries.values())));
         break;
       case R.id.action_add:
         replaceFragment(QueryFragment.newInstance());
@@ -561,6 +544,10 @@ public class MainActivity extends AppCompatActivity implements
   public void onQueryShowManualInput() {
 
     LogUtils.debug(TAG, "++onQueryShowManualInput()");
+    if (mSnackbar != null && mSnackbar.isShown()) {
+      mSnackbar.dismiss();
+    }
+
     replaceFragment(ManualSearchFragment.newInstance());
   }
 
@@ -694,6 +681,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     filtered.sort(new ByPublicationDate());
+    if (mSnackbar != null && mSnackbar.isShown()) {
+      mSnackbar.dismiss();
+    }
+
     replaceFragment(ManualSearchFragment.newInstance(comic.SeriesCode, filtered));
   }
 
@@ -1165,8 +1156,8 @@ public class MainActivity extends AppCompatActivity implements
                   matrix,
                   true);
               mRotationAttempts = 0;
-              showDismissableSnackbar("Could not find a bar code, try manually inputting.");
-              replaceFragment(ManualSearchFragment.newInstance());
+              showDismissableSnackbar(getString(R.string.err_bar_code_not_found));
+              onQueryShowManualInput();
             }
           } else {
             showDismissableSnackbar(getString(R.string.err_bar_code_task));

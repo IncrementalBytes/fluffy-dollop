@@ -9,7 +9,7 @@
   <string name="logout_message">Sign out of Comic Collector?</string>
   <string name="desc_comic_list">List of comics.</string>
   <string name="user_owns_this_comic">Owned by user.</string>
-  <string name="comic_list">Comic List</string>
+  <string name="comic_list">Your Comic List</string>
   <string name="permission_denied_explanation">Permissions needed for full app functionality.</string>
   <string name="ok">OK</string>
   <string name="remove_book_message">Remove \'%s\' from your library?</string>
@@ -78,4 +78,6 @@
   <string name="series_comics">Comics within Series</string>
   <string name="list_of_series_comics">List of Comics from series:</string>
   <string name="preferences">User Preferences</string>
+  <string name="err_bar_code_not_found">Could not find a bar code, try manually inputting.</string>
+  <string name="menu_recent">Recent</string>
 </resources>

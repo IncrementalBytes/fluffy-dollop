@@ -11,6 +11,11 @@
       android:title="@string/menu_home"
       app:showAsAction="collapseActionView|withText"/>
     <item
+      android:id="@+id/action_series"
+      android:icon="@drawable/ic_series_dark"
+      android:title="@string/menu_series"
+      app:showAsAction="collapseActionView|withText"/>
+    <item
       android:id="@+id/action_add"
       android:icon="@drawable/ic_add_dark"
       android:title="@string/menu_add"
