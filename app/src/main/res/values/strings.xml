@@ -60,9 +60,7 @@
   <string name="cancel_button">Cancel</string>
   <string name="err_manual_search">Could not continue, expected comic book details missing.</string>
   <string name="hint_image_description">Thumbnail of image from camera.</string>
-  <string name="desc_series_list">List of comic series.</string>
   <string name="menu_settings">Settings</string>
-  <string name="menu_series">Series</string>
   <string name="title_preferences">User Preferences</string>
   <string name="img_issue_code_hint">Photo hint for issue code location.</string>
   <string name="img_product_code_hint">Photo hint for product code location.</string>
@@ -84,4 +82,6 @@
   <string name="err_unknown_publisher">Barcode did not contain recognizable publisher.</string>
   <string name="title_please_wait">Please Wait</string>
   <string name="title_gathering_data">Gathering Data</string>
+  <string name="permission_storage">Permission needed for storing data locally to reduce network usage.</string>
+  <string name="permission_camera">Permission needed for capturing barcode images for processing.</string>
 </resources>

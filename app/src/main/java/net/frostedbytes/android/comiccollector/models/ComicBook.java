@@ -71,6 +71,7 @@ public class ComicBook implements Parcelable {
   /**
    * Unique identifier for publisher of comic.
    */
+  @Exclude
   public String PublisherId;
 
   /**
@@ -81,6 +82,7 @@ public class ComicBook implements Parcelable {
   /**
    * Unique identifier for the series this comic is published under.
    */
+  @Exclude
   public String SeriesId;
 
   /**

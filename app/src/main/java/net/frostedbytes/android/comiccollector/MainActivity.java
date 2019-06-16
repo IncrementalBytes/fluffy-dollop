@@ -52,13 +52,11 @@ import java.util.Calendar;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.common.SortUtils;
-import net.frostedbytes.android.comiccollector.common.SortUtils.ByPublicationDate;
 import net.frostedbytes.android.comiccollector.common.WriteToLocalComicSeriesTask;
 import net.frostedbytes.android.comiccollector.common.WriteToLocalLibraryTask;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookListFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicSeriesFragment;
-import net.frostedbytes.android.comiccollector.fragments.ComicSeriesListFragment;
 import net.frostedbytes.android.comiccollector.fragments.InterludeFragment;
 import net.frostedbytes.android.comiccollector.fragments.ManualSearchFragment;
 import net.frostedbytes.android.comiccollector.fragments.TutorialFragment;
@@ -84,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements
   ComicBookFragment.OnComicBookListener,
   ComicBookListFragment.OnComicBookListListener,
   ComicSeriesFragment.OnComicSeriesListener,
-  ComicSeriesListFragment.OnComicSeriesListListener,
   ManualSearchFragment.OnManualSearchListener,
   TutorialFragment.OnTutorialListener,
   UserPreferenceFragment.OnPreferencesListener {
@@ -140,6 +137,9 @@ public class MainActivity extends AppCompatActivity implements
       }
     });
 
+    mComicBooks = new ArrayList<>();
+    mComicSeries = new HashMap<>();
+    mPublishers = new HashMap<>();
     mUser = new User();
     mUser.Id = getIntent().getStringExtra(BaseActivity.ARG_FIREBASE_USER_ID);
     mUser.Email = getIntent().getStringExtra(BaseActivity.ARG_EMAIL);
@@ -166,13 +166,20 @@ public class MainActivity extends AppCompatActivity implements
     LogUtils.debug(TAG, "++onOptionsItemSelected(%s)", item.getTitle());
     switch (item.getItemId()) {
       case R.id.action_home:
-        replaceFragment(ComicBookListFragment.newInstance(mComicBooks, mPublishers, mComicSeries));
-        break;
-      case R.id.action_series:
-        replaceFragment(ComicSeriesListFragment.newInstance(new ArrayList<>(mComicSeries.values()), mPublishers));
+        if (!mUser.Id.isEmpty() && !mUser.Id.equals(BaseActivity.DEFAULT_USER_ID)) {
+          checkDevicePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE_PERMISSIONS_REQUEST);
+        } else {
+          showDismissableSnackbar(getString(R.string.err_unknown_user));
+        }
+
         break;
       case R.id.action_add:
-        takePictureIntent();
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+          checkDevicePermission(Manifest.permission.CAMERA, CAMERA_PERMISSIONS_REQUEST);
+        } else {
+          showDismissableSnackbar(getString(R.string.err_no_camera_detected));
+        }
+
         break;
       case R.id.action_settings:
         replaceFragment(UserPreferenceFragment.newInstance(mUser));
@@ -264,6 +271,8 @@ public class MainActivity extends AppCompatActivity implements
           }
         } else {
           LogUtils.debug(TAG, "WRITE_EXTERNAL_STORAGE permission denied.");
+          mProgressBar.setIndeterminate(false);
+          showDismissableSnackbar(getString(R.string.permission_storage));
         }
 
         break;
@@ -273,6 +282,8 @@ public class MainActivity extends AppCompatActivity implements
           takePictureIntent();
         } else {
           LogUtils.debug(TAG, "CAMERA_PERMISSIONS_REQUEST permission denied.");
+          mProgressBar.setIndeterminate(false);
+          showDismissableSnackbar(getString(R.string.permission_camera));
         }
 
         break;
@@ -447,53 +458,6 @@ public class MainActivity extends AppCompatActivity implements
       replaceFragment(ComicBookListFragment.newInstance(mComicBooks, mPublishers, mComicSeries));
       showDismissableSnackbar(getString(R.string.err_add_comic_series));
     }
-  }
-
-  @Override
-  public void onComicSeriesListAdd() {
-
-    LogUtils.debug(TAG, "++onComicSeriesListAdd()");
-    replaceFragment(ComicBookListFragment.newInstance(mComicBooks, mPublishers, mComicSeries));
-  }
-
-  @Override
-  public void onComicSeriesListItemSelected(ComicSeries comicSeries) {
-
-    LogUtils.debug(TAG, "++onComicSeriesListItemSelected(%s)", comicSeries.toString());
-    ArrayList<ComicBook> filtered = new ArrayList<>();
-    for (ComicBook comicBook : mComicBooks) {
-      if (comicBook.getProductId().equals(comicSeries.getId())) {
-        filtered.add(comicBook);
-      }
-    }
-
-    filtered.sort(new ByPublicationDate());
-    replaceFragment(ComicBookListFragment.newInstance(filtered, mPublishers, mComicSeries));
-  }
-
-  @Override
-  public void onComicSeriesListPopulated(int size) {
-
-    LogUtils.debug(TAG, "++onComicSeriesListPopulated(%d)", size);
-    mProgressBar.setIndeterminate(false);
-    if (size == 0) {
-      mSnackbar = Snackbar.make(
-        findViewById(R.id.main_fragment_container),
-        getString(R.string.err_no_data),
-        Snackbar.LENGTH_INDEFINITE)
-        .setAction(
-          getString(R.string.add),
-          view -> takePictureIntent());
-      mSnackbar.show();
-    }
-  }
-
-  @Override
-  public void onComicSeriesListSynchronize() {
-
-    LogUtils.debug(TAG, "++onComicSeriesListSynchronize()");
-    mProgressBar.setIndeterminate(true);
-    readServerComicSeries();
   }
 
   @Override
@@ -941,8 +905,6 @@ public class MainActivity extends AppCompatActivity implements
       setTitle(getString(R.string.title_comic_library));
     } else if (fragmentClassName.equals(ComicBookFragment.class.getName())) {
       setTitle(getString(R.string.title_comic_book));
-    } else if (fragmentClassName.equals(ComicSeriesListFragment.class.getName())) {
-      setTitle(getString(R.string.title_comic_series));
     } else if (fragmentClassName.equals(UserPreferenceFragment.class.getName())) {
       setTitle(getString(R.string.title_preferences));
     } else if (fragmentClassName.equals(TutorialFragment.class.getName())) {
