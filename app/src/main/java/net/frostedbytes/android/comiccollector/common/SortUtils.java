@@ -7,35 +7,35 @@ import net.frostedbytes.android.comiccollector.models.ComicSeries;
 
 public class SortUtils {
 
-    public static class ByBookName implements Comparator<ComicBook> {
+  public static class ByBookName implements Comparator<ComicBook> {
 
-        public int compare(ComicBook a, ComicBook b) {
+    public int compare(ComicBook a, ComicBook b) {
 
-            return a.Title.compareTo(b.Title);
-        }
+      return a.Title.compareTo(b.Title);
     }
+  }
 
-    public static class ByPublicationDate implements Comparator<ComicBook> {
+  public static class ByPublicationDate implements Comparator<ComicBook> {
 
-        public int compare(ComicBook a, ComicBook b) {
+    public int compare(ComicBook a, ComicBook b) {
 
-            return Long.compare(b.PublishedDate, a.PublishedDate);
-        }
+      return Long.compare(b.PublishedDate, a.PublishedDate);
     }
+  }
 
-    public static class BySeriesName implements Comparator<ComicSeries> {
+  public static class BySeriesName implements Comparator<ComicSeries> {
 
-        public int compare(ComicSeries a, ComicSeries b) {
+    public int compare(ComicSeries a, ComicSeries b) {
 
-            return a.Name.compareTo(b.Name);
-        }
+      return a.SeriesName.compareTo(b.SeriesName);
     }
+  }
 
-    public static class ByStringValue implements Comparator<String> {
+  public static class ByStringValue implements Comparator<String> {
 
-        public int compare(String a, String b) {
+    public int compare(String a, String b) {
 
-            return a.compareTo(b);
-        }
+      return a.compareTo(b);
     }
+  }
 }

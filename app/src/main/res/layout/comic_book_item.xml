@@ -59,15 +59,43 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@id/comic_item_text_title"/>
 
+  <TextView
+    android:id="@+id/comic_item_text_own"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:text="@string/owned"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_volume"/>
   <ImageView
     android:id="@+id/comic_item_image_own"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_image_margin"
     android:contentDescription="@string/user_owns_this_comic"
-    android:src="@drawable/ic_owned_dark"
+    android:src="@drawable/ic_unchecked_dark"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintStart_toEndOf="@id/comic_item_text_own"
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_volume"/>
+  <TextView
+    android:id="@+id/comic_item_text_read"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:text="@string/read"
+    app:layout_constraintStart_toEndOf="@id/comic_item_image_own"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_volume"/>
+  <ImageView
+    android:id="@+id/comic_item_image_read"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_image_margin"
+    android:contentDescription="@string/user_read_this_comic"
+    android:src="@drawable/ic_unchecked_dark"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toEndOf="@id/comic_item_text_read"
     app:layout_constraintTop_toBottomOf="@id/comic_item_text_volume"/>
 
   <TextView

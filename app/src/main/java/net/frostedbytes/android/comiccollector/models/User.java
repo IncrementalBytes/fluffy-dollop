@@ -1,24 +1,21 @@
 package net.frostedbytes.android.comiccollector.models;
 
-import com.google.firebase.firestore.Exclude;
-
+import java.io.Serializable;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 
-public class User {
+public class User implements Serializable {
 
-    @Exclude
     public static final String ROOT = "Users";
 
-    @Exclude
     public String Email;
 
-    @Exclude
     public String FullName;
 
-    @Exclude
     public String Id;
 
     public boolean IsGeek;
+
+    public boolean ShowBarcodeHint;
 
     public User() {
 
@@ -26,5 +23,6 @@ public class User {
         this.FullName = "";
         this.Id = BaseActivity.DEFAULT_USER_ID;
         this.IsGeek = false;
+        this.ShowBarcodeHint = true;
     }
 }

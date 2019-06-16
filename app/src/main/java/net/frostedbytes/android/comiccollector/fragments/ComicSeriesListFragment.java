@@ -14,12 +14,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.SortUtils;
+import net.frostedbytes.android.comiccollector.models.ComicPublisher;
 import net.frostedbytes.android.comiccollector.models.ComicSeries;
 
 public class ComicSeriesListFragment extends Fragment {
@@ -41,14 +43,16 @@ public class ComicSeriesListFragment extends Fragment {
 
   private RecyclerView mRecyclerView;
 
+  private HashMap<String, ComicPublisher> mComicPublishers;
   private ArrayList<ComicSeries> mComicSeries;
 
-  public static ComicSeriesListFragment newInstance(ArrayList<ComicSeries> comicSeries) {
+  public static ComicSeriesListFragment newInstance(ArrayList<ComicSeries> comicSeries, HashMap<String, ComicPublisher> publishers) {
 
     LogUtils.debug(TAG, "++newInstance(%d)", comicSeries.size());
     ComicSeriesListFragment fragment = new ComicSeriesListFragment();
     Bundle args = new Bundle();
     args.putParcelableArrayList(BaseActivity.ARG_COMIC_SERIES_LIST, comicSeries);
+    args.putSerializable(BaseActivity.ARG_COMIC_PUBLISHERS, publishers);
     fragment.setArguments(args);
     return fragment;
   }
@@ -56,6 +60,7 @@ public class ComicSeriesListFragment extends Fragment {
   /*
     Fragment Override(s)
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
@@ -70,6 +75,7 @@ public class ComicSeriesListFragment extends Fragment {
 
     Bundle arguments = getArguments();
     if (arguments != null) {
+      mComicPublishers = (HashMap<String, ComicPublisher>) arguments.getSerializable(BaseActivity.ARG_COMIC_PUBLISHERS);
       mComicSeries = arguments.getParcelableArrayList(BaseActivity.ARG_COMIC_SERIES_LIST);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
@@ -178,8 +184,18 @@ public class ComicSeriesListFragment extends Fragment {
 
       mComicSeries = comicSeries;
 
-      mPublisherTextView.setText(mComicSeries.Publisher);
-      mSeriesNameTextView.setText(mComicSeries.Name);
+      if (mComicPublishers != null) {
+        ComicPublisher publisher = mComicPublishers.get(mComicSeries.PublisherId);
+        if (publisher != null) {
+          mPublisherTextView.setText(publisher.Name);
+        } else {
+          mPublisherTextView.setText("N/A");
+        }
+      } else {
+        mPublisherTextView.setText("N/A");
+      }
+
+      mSeriesNameTextView.setText(mComicSeries.SeriesName);
       mVolumeTextView.setText(String.valueOf(mComicSeries.Volume));
     }
 

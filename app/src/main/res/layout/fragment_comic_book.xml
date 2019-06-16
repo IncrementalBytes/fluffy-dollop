@@ -3,8 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:background="?attr/colorPrimary">
+  android:layout_height="match_parent">
 
   <TextView
     android:id="@+id/comic_book_text_title"
@@ -92,7 +91,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    android:text="@string/publisher"
+    android:text="@string/publisher_name"
     android:textSize="24sp"
     app:layout_constraintBottom_toBottomOf="@id/comic_book_text_publisher_value"
     app:layout_constraintStart_toStartOf="parent"
@@ -198,10 +197,22 @@
     android:layout_margin="8dp"
     android:layout_marginEnd="8dp"
     android:text=""
-    android:textOff="@string/not_owned"
-    android:textOn="@string/owned"
-    app:layout_constraintEnd_toEndOf="parent"
+    android:textOff="@string/toggle_not_owned"
+    android:textOn="@string/toggle_owned"
+    app:layout_constraintEnd_toStartOf="@id/comic_book_toggle_read"
     app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/comic_book_text_product_code"/>
+  <ToggleButton
+    android:id="@+id/comic_book_toggle_read"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:layout_marginEnd="8dp"
+    android:text=""
+    android:textOff="@string/toggle_not_read"
+    android:textOn="@string/toggle_read"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@id/comic_book_toggle_owned"
     app:layout_constraintTop_toBottomOf="@id/comic_book_text_product_code"/>
 
   <Button
@@ -224,7 +235,7 @@
     android:text="@string/update"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@+id/comic_book_button_add"
-    app:layout_constraintTop_toBottomOf="@+id/comic_book_toggle_owned"/>
+    app:layout_constraintTop_toBottomOf="@+id/comic_book_toggle_read"/>
 
   <Button
     android:id="@+id/comic_book_button_remove"

@@ -25,6 +25,8 @@ import net.frostedbytes.android.comiccollector.common.DateUtils;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.models.ComicBook;
+import net.frostedbytes.android.comiccollector.models.ComicPublisher;
+import net.frostedbytes.android.comiccollector.models.ComicSeries;
 import net.frostedbytes.android.comiccollector.models.User;
 
 import java.util.Calendar;
@@ -55,18 +57,23 @@ public class ComicBookFragment extends Fragment {
 
   private ToggleButton mOwnedToggle;
   private EditText mPublishedDateEdit;
+  private ToggleButton mReadToggle;
   private EditText mTitleEdit;
 
   private ComicBook mComicBook;
+  private ComicPublisher mComicPublisher;
+  private ComicSeries mComicSeries;
   private String mUserId;
 
-  public static ComicBookFragment newInstance(String userId, ComicBook comicBook) {
+  public static ComicBookFragment newInstance(String userId, ComicBook comicBook, ComicPublisher comicPublisher, ComicSeries comicSeries) {
 
     LogUtils.debug(TAG, "++newInstance(%s, %s)", userId, comicBook.toString());
     ComicBookFragment fragment = new ComicBookFragment();
     Bundle args = new Bundle();
     args.putString(BaseActivity.ARG_USER_ID, userId);
     args.putParcelable(BaseActivity.ARG_COMIC_BOOK, comicBook);
+    args.putParcelable(BaseActivity.ARG_COMIC_PUBLISHER, comicPublisher);
+    args.putParcelable(BaseActivity.ARG_COMIC_SERIES, comicSeries);
     fragment.setArguments(args);
     return fragment;
   }
@@ -89,6 +96,8 @@ public class ComicBookFragment extends Fragment {
     Bundle arguments = getArguments();
     if (arguments != null) {
       mComicBook = arguments.getParcelable(BaseActivity.ARG_COMIC_BOOK);
+      mComicPublisher = arguments.getParcelable(BaseActivity.ARG_COMIC_PUBLISHER);
+      mComicSeries = arguments.getParcelable(BaseActivity.ARG_COMIC_SERIES);
       mUserId = arguments.getString(BaseActivity.ARG_USER_ID);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
@@ -101,26 +110,35 @@ public class ComicBookFragment extends Fragment {
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     final View view = inflater.inflate(R.layout.fragment_comic_book, container, false);
 
-    if (!mComicBook.IsValid()) {
+    if (!mComicBook.isValid()) {
       mCallback.onComicBookInit(false);
     } else {
       mTitleEdit = view.findViewById(R.id.comic_book_edit_title);
       mTitleEdit.setText(mComicBook.Title);
       mPublishedDateEdit = view.findViewById(R.id.comic_book_edit_published_date);
-      mPublishedDateEdit.setText(DateUtils.formatDateForDisplay(mComicBook.PublishedDate));
+      if (mComicBook.PublishedDate != 0) {
+        mPublishedDateEdit.setText(DateUtils.formatDateForDisplay(mComicBook.PublishedDate));
+      } else {
+        mPublishedDateEdit.setText(DateUtils.formatDateForDisplay(Calendar.getInstance().getTimeInMillis()));
+      }
+
       TextView mSeriesText = view.findViewById(R.id.comic_book_text_series_value);
-      mSeriesText.setText(mComicBook.SeriesName);
+      mSeriesText.setText(mComicSeries.SeriesName);
       TextView mPublisherText = view.findViewById(R.id.comic_book_text_publisher_value);
-      mPublisherText.setText(mComicBook.Publisher);
+      mPublisherText.setText(mComicPublisher.Name);
+
       TextView mVolumeText = view.findViewById(R.id.comic_book_text_volume_value);
-      mVolumeText.setText(String.valueOf(mComicBook.Volume));
+      mVolumeText.setText(String.valueOf(mComicSeries.Volume));
+
       TextView mIssueText = view.findViewById(R.id.comic_book_text_issue_value);
       mIssueText.setText(String.valueOf(mComicBook.IssueNumber));
       TextView mProductCodeText = view.findViewById(R.id.comic_book_text_product_code_value);
-      mProductCodeText.setText(mComicBook.SeriesCode);
+      mProductCodeText.setText(mComicBook.SeriesId);
 
       mOwnedToggle = view.findViewById(R.id.comic_book_toggle_owned);
       mOwnedToggle.setChecked(mComicBook.OwnedState);
+      mReadToggle = view.findViewById(R.id.comic_book_toggle_read);
+      mReadToggle.setChecked(mComicBook.ReadState);
 
       Button addToLibraryButton = view.findViewById(R.id.comic_book_button_add);
       Button updateButton = view.findViewById(R.id.comic_book_button_update);
@@ -138,9 +156,10 @@ public class ComicBookFragment extends Fragment {
           updatedBook.AddedDate = Calendar.getInstance().getTimeInMillis();
           updatedBook.OwnedState = mOwnedToggle.isChecked();
           updatedBook.PublishedDate = DateUtils.fromString(mPublishedDateEdit.getText().toString());
+          updatedBook.ReadState = mReadToggle.isChecked();
           updatedBook.Title = mTitleEdit.getText().toString();
 
-          String comicBookQueryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, updatedBook.getUniqueId());
+          String comicBookQueryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, updatedBook.getFullId());
           Trace comicBookTrace = FirebasePerformance.getInstance().newTrace("set_comic_book");
           comicBookTrace.start();
           FirebaseFirestore.getInstance().document(comicBookQueryPath).set(updatedBook, SetOptions.merge())
@@ -171,10 +190,11 @@ public class ComicBookFragment extends Fragment {
           ComicBook updatedBook = new ComicBook(mComicBook);
           updatedBook.OwnedState = mOwnedToggle.isChecked();
           updatedBook.PublishedDate = mComicBook.PublishedDate;
+          updatedBook.ReadState = mReadToggle.isChecked();
           updatedBook.Title = mTitleEdit.getText().toString();
-          updatedBook.UpdatedDate = Calendar.getInstance().getTimeInMillis();
+          updatedBook.ModifiedDate = Calendar.getInstance().getTimeInMillis();
 
-          String comicBookQueryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, updatedBook.getUniqueId());
+          String comicBookQueryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, updatedBook.getFullId());
           Trace comicBookTrace = FirebasePerformance.getInstance().newTrace("set_comic_book");
           comicBookTrace.start();
           FirebaseFirestore.getInstance().document(comicBookQueryPath).set(updatedBook, SetOptions.merge())
@@ -210,7 +230,7 @@ public class ComicBookFragment extends Fragment {
               .setMessage(message)
               .setPositiveButton(android.R.string.yes, (dialog, which) -> {
 
-                String queryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, mComicBook.getUniqueId());
+                String queryPath = PathUtils.combine(User.ROOT, mUserId, ComicBook.ROOT, mComicBook.getFullId());
                 Trace comicBookTrace = FirebasePerformance.getInstance().newTrace("del_comic_book");
                 comicBookTrace.start();
                 FirebaseFirestore.getInstance().document(queryPath).delete().addOnCompleteListener(task -> {

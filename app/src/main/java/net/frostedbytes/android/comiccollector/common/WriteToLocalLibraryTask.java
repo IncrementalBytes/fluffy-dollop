@@ -16,46 +16,46 @@ import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
 public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<ComicBook>> {
 
-    private static final String TAG = BASE_TAG + WriteToLocalLibraryTask.class.getSimpleName();
+  private static final String TAG = BASE_TAG + WriteToLocalLibraryTask.class.getSimpleName();
 
-    private final WeakReference<MainActivity> mFragmentWeakReference;
-    private final ArrayList<ComicBook> mComicBooks;
+  private final WeakReference<MainActivity> mFragmentWeakReference;
+  private final ArrayList<ComicBook> mComicBooks;
 
-    public WriteToLocalLibraryTask(MainActivity context, ArrayList<ComicBook> comicBooks) {
+  public WriteToLocalLibraryTask(MainActivity context, ArrayList<ComicBook> comicBooks) {
 
-        mFragmentWeakReference = new WeakReference<>(context);
-        mComicBooks = comicBooks;
+    mFragmentWeakReference = new WeakReference<>(context);
+    mComicBooks = comicBooks;
+  }
+
+  protected ArrayList<ComicBook> doInBackground(Void... params) {
+
+    ArrayList<ComicBook> booksWritten = new ArrayList<>();
+    FileOutputStream outputStream;
+    try {
+      outputStream = mFragmentWeakReference.get().getApplicationContext().openFileOutput(
+        BaseActivity.DEFAULT_LIBRARY_FILE,
+        Context.MODE_PRIVATE);
+      for (ComicBook comicBook : mComicBooks) {
+        outputStream.write(comicBook.writeLine().getBytes());
+        booksWritten.add(comicBook);
+      }
+    } catch (Exception e) {
+      LogUtils.warn(TAG, "Exception when writing local library.");
+      Crashlytics.logException(e);
     }
 
-    protected ArrayList<ComicBook> doInBackground(Void... params) {
+    return booksWritten;
+  }
 
-        ArrayList<ComicBook> booksWritten = new ArrayList<>();
-        FileOutputStream outputStream;
-        try {
-            outputStream = mFragmentWeakReference.get().getApplicationContext().openFileOutput(
-                BaseActivity.DEFAULT_LIBRARY_FILE,
-                Context.MODE_PRIVATE);
-            for (ComicBook comicBook : mComicBooks) {
-                outputStream.write(comicBook.writeLine().getBytes());
-                booksWritten.add(comicBook);
-            }
-        } catch (Exception e) {
-            LogUtils.warn(TAG, "Exception when writing local library.");
-            Crashlytics.logException(e);
-        }
+  protected void onPostExecute(ArrayList<ComicBook> comicBooks) {
 
-        return booksWritten;
+    LogUtils.debug(TAG, "++onPostExecute(%d)", comicBooks.size());
+    MainActivity activity = mFragmentWeakReference.get();
+    if (activity == null) {
+      LogUtils.error(TAG, "Activity is null.");
+      return;
     }
 
-    protected void onPostExecute(ArrayList<ComicBook> comicBooks) {
-
-        LogUtils.debug(TAG, "++onPostExecute(%d)", comicBooks.size());
-        MainActivity activity = mFragmentWeakReference.get();
-        if (activity == null) {
-            LogUtils.error(TAG, "Activity is null.");
-            return;
-        }
-
-        activity.writeLibraryComplete(comicBooks);
-    }
+    activity.writeLibraryComplete(comicBooks);
+  }
 }

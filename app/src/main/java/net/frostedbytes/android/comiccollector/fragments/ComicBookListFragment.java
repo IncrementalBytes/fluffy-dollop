@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.HashMap;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
@@ -23,6 +24,8 @@ import net.frostedbytes.android.comiccollector.models.ComicBook;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import net.frostedbytes.android.comiccollector.models.ComicPublisher;
+import net.frostedbytes.android.comiccollector.models.ComicSeries;
 
 import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
@@ -46,13 +49,20 @@ public class ComicBookListFragment extends Fragment {
   private RecyclerView mRecyclerView;
 
   private ArrayList<ComicBook> mComicBooks;
+  private HashMap<String, ComicPublisher> mComicPublishers;
+  private HashMap<String, ComicSeries> mComicSeries;
 
-  public static ComicBookListFragment newInstance(ArrayList<ComicBook> comicBooks) {
+  public static ComicBookListFragment newInstance(
+    ArrayList<ComicBook> comicBooks,
+    HashMap<String, ComicPublisher> publishers,
+    HashMap<String, ComicSeries> series) {
 
     LogUtils.debug(TAG, "++newInstance(%d)", comicBooks.size());
     ComicBookListFragment fragment = new ComicBookListFragment();
     Bundle args = new Bundle();
     args.putParcelableArrayList(BaseActivity.ARG_COMIC_BOOK_LIST, comicBooks);
+    args.putSerializable(BaseActivity.ARG_COMIC_PUBLISHERS, publishers);
+    args.putSerializable(BaseActivity.ARG_COMIC_SERIES, series);
     fragment.setArguments(args);
     return fragment;
   }
@@ -60,6 +70,7 @@ public class ComicBookListFragment extends Fragment {
   /*
     Fragment Override(s)
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
@@ -75,6 +86,8 @@ public class ComicBookListFragment extends Fragment {
     Bundle arguments = getArguments();
     if (arguments != null) {
       mComicBooks = arguments.getParcelableArrayList(BaseActivity.ARG_COMIC_BOOK_LIST);
+      mComicPublishers = (HashMap<String, ComicPublisher>) arguments.getSerializable(BaseActivity.ARG_COMIC_PUBLISHERS);
+      mComicSeries = (HashMap<String, ComicSeries>) arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
     }
@@ -165,6 +178,7 @@ public class ComicBookListFragment extends Fragment {
     private final TextView mIssueTextView;
     private final ImageView mOwnImage;
     private final TextView mPublisherTextView;
+    private final ImageView mReadImage;
     private final TextView mSeriesNameTextView;
     private final TextView mTitleTextView;
     private final TextView mVolumeTextView;
@@ -175,8 +189,9 @@ public class ComicBookListFragment extends Fragment {
       super(inflater.inflate(R.layout.comic_book_item, parent, false));
 
       mIssueTextView = itemView.findViewById(R.id.comic_item_text_issue_value);
-      mPublisherTextView = itemView.findViewById(R.id.comic_item_text_publisher);
       mOwnImage = itemView.findViewById(R.id.comic_item_image_own);
+      mPublisherTextView = itemView.findViewById(R.id.comic_item_text_publisher);
+      mReadImage = itemView.findViewById(R.id.comic_item_image_read);
       mSeriesNameTextView = itemView.findViewById(R.id.comic_item_text_series);
       mTitleTextView = itemView.findViewById(R.id.comic_item_text_title);
       mVolumeTextView = itemView.findViewById(R.id.comic_item_text_volume_value);
@@ -187,17 +202,44 @@ public class ComicBookListFragment extends Fragment {
     void bind(ComicBook comicBook) {
 
       mComicBook = comicBook;
-
-      mPublisherTextView.setText(mComicBook.Publisher);
-      if (mComicBook.OwnedState) {
-        mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_owned_dark, null));
+      if (mComicPublishers != null) {
+        ComicPublisher publisher = mComicPublishers.get(mComicBook.PublisherId);
+        if (publisher != null) {
+          mPublisherTextView.setText(publisher.Name);
+        } else {
+          mPublisherTextView.setText("N/A");
+        }
       } else {
-        mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_wishlist_dark, null));
+        mPublisherTextView.setText("N/A");
       }
 
-      mSeriesNameTextView.setText(mComicBook.SeriesName);
+      if (mComicBook.OwnedState) {
+        mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_checked_dark, null));
+      } else {
+        mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_unchecked_dark, null));
+      }
+
+      if (mComicBook.ReadState) {
+        mReadImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_checked_dark, null));
+      } else {
+        mReadImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_unchecked_dark, null));
+      }
+
+      if (mComicSeries != null) {
+        ComicSeries series = mComicSeries.get(mComicBook.getProductId());
+        if (series != null) {
+          mSeriesNameTextView.setText(series.SeriesName);
+          mVolumeTextView.setText(String.valueOf(series.Volume));
+        } else {
+          mSeriesNameTextView.setText("N/A");
+          mVolumeTextView.setText("N/A");
+        }
+      } else {
+        mSeriesNameTextView.setText("N/A");
+        mVolumeTextView.setText("N/A");
+      }
+
       mTitleTextView.setText(mComicBook.Title);
-      mVolumeTextView.setText(String.valueOf(mComicBook.Volume));
       mIssueTextView.setText(String.valueOf(mComicBook.IssueNumber));
     }
 

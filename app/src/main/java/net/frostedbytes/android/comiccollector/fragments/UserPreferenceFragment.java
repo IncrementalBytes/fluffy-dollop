@@ -5,16 +5,20 @@ import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v14.preference.SwitchPreference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import java.util.Locale;
+import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
+import net.frostedbytes.android.comiccollector.models.User;
 
 public class UserPreferenceFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
   private static final String TAG = BASE_TAG + UserPreferenceFragment.class.getSimpleName();
 
   public static final String IS_GEEK_PREFERENCE = "preference_is_geek";
+  public static final String SHOW_TUTORIAL_PREFERENCE = "preference_show_tutorial";
 
   public interface OnPreferencesListener {
 
@@ -23,10 +27,16 @@ public class UserPreferenceFragment extends PreferenceFragmentCompat implements 
 
   private OnPreferencesListener mCallback;
 
-  public static UserPreferenceFragment newInstance() {
+  private User mUser;
+
+  public static UserPreferenceFragment newInstance(User user) {
 
     LogUtils.debug(TAG, "++newInstance()");
-    return new UserPreferenceFragment();
+    UserPreferenceFragment fragment = new UserPreferenceFragment();
+    Bundle args = new Bundle();
+    args.putSerializable(BaseActivity.ARG_USER, user);
+    fragment.setArguments(args);
+    return fragment;
   }
 
   /*
@@ -43,6 +53,13 @@ public class UserPreferenceFragment extends PreferenceFragmentCompat implements 
       throw new ClassCastException(
         String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
     }
+
+    Bundle arguments = getArguments();
+    if (arguments != null) {
+      mUser = (User)arguments.getSerializable(BaseActivity.ARG_USER);
+    } else {
+      LogUtils.error(TAG, "Arguments were null.");
+    }
   }
 
   @Override
@@ -50,6 +67,10 @@ public class UserPreferenceFragment extends PreferenceFragmentCompat implements 
 
     LogUtils.debug(TAG, "++onCreatePreferences(Bundle, String)");
     addPreferencesFromResource(R.xml.app_preferences);
+    SwitchPreference switchPreference = (SwitchPreference) findPreference(IS_GEEK_PREFERENCE);
+    switchPreference.setChecked(mUser.IsGeek);
+    switchPreference = (SwitchPreference) findPreference(SHOW_TUTORIAL_PREFERENCE);
+    switchPreference.setChecked(mUser.ShowBarcodeHint);
   }
 
   @Override
