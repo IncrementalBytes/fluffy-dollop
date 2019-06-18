@@ -3,14 +3,10 @@ package net.frostedbytes.android.comiccollector.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.firebase.firestore.Exclude;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 
 public class ComicPublisher implements Parcelable {
-
-  HashMap<String, ComicPublisher> data_map = new HashMap<>();
 
   @Exclude
   public static final String ROOT = "ComicPublishers";
@@ -52,17 +48,11 @@ public class ComicPublisher implements Parcelable {
 
   protected ComicPublisher(Parcel in) {
 
-    final int N = in.readInt();
-    for (int i = 0; i < N; i++) {
-      String key = in.readString();
-      ComicPublisher dat = new ComicPublisher();
-      dat.AddedDate = in.readLong();
-      dat.Id = in.readString();
-      dat.IsFlagged = in.readInt() != 0;
-      dat.ModifiedDate = in.readLong();
-      dat.Name = in.readString();
-      data_map.put(key, dat);
-    }
+    AddedDate = in.readLong();
+    Id = in.readString();
+    IsFlagged = in.readInt() != 0;
+    ModifiedDate = in.readLong();
+    Name = in.readString();
   }
 
   /*
@@ -87,17 +77,11 @@ public class ComicPublisher implements Parcelable {
   @Override
   public void writeToParcel(Parcel dest, int flags) {
 
-    final int N = data_map.size();
-    dest.writeInt(N);
-    if (N > 0) {
-      for (Map.Entry<String, ComicPublisher> entry : data_map.entrySet()) {
-        dest.writeLong(AddedDate);
-        dest.writeString(Id);
-        dest.writeInt(IsFlagged ? 1 : 0);
-        dest.writeLong(ModifiedDate);
-        dest.writeString(Name);
-      }
-    }
+    dest.writeLong(AddedDate);
+    dest.writeString(Id);
+    dest.writeInt(IsFlagged ? 1 : 0);
+    dest.writeLong(ModifiedDate);
+    dest.writeString(Name);
   }
 
   /*

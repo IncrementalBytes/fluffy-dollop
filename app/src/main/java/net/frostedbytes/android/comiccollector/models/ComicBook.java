@@ -19,7 +19,7 @@ import net.frostedbytes.android.comiccollector.common.LogUtils;
 
 public class ComicBook implements Parcelable {
 
-  private static final String TAG = BaseActivity.BASE_TAG + ComicBook.class.getSimpleName();
+  private static final String TAG = BaseActivity.BASE_TAG + "ComicBook";
   private static final int SCHEMA_FIELDS = 7;
 
   @Exclude
@@ -39,6 +39,7 @@ public class ComicBook implements Parcelable {
   /**
    * Unique code for issue (paired with SeriesId); populates IssueNumber, CoverVersion, and PrintRun.
    */
+  @Exclude
   public String IssueCode;
 
   /**
@@ -263,6 +264,7 @@ public class ComicBook implements Parcelable {
   @Exclude
   public boolean isValid() {
 
+    LogUtils.debug(TAG, "++isValid()");
     if (PublisherId == null ||
       PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) ||
       PublisherId.length() != BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length()) {
@@ -293,6 +295,7 @@ public class ComicBook implements Parcelable {
    */
   public void parseIssueCode(String issueCode) {
 
+    LogUtils.debug(TAG, "++parseIssueCode(%s)", issueCode);
     IssueCode = issueCode;
     if (IssueCode != null && IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length()) {
       try {
@@ -323,6 +326,7 @@ public class ComicBook implements Parcelable {
    */
   public void parseProductCode(String productCode) {
 
+    LogUtils.debug(TAG, "++parseProductCode(%s)", productCode);
     if (productCode != null && productCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) {
       try {
         PublisherId = productCode.substring(0, BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length());

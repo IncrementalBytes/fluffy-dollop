@@ -16,7 +16,7 @@ import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
 public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<ComicBook>> {
 
-  private static final String TAG = BASE_TAG + WriteToLocalLibraryTask.class.getSimpleName();
+  private static final String TAG = BASE_TAG + "WriteToLocalLibraryTask";
 
   private final WeakReference<MainActivity> mFragmentWeakReference;
   private final ArrayList<ComicBook> mComicBooks;

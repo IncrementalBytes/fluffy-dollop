@@ -24,8 +24,8 @@
   <string name="err_no_camera_detected">Camera was not detected.</string>
 
   <string name="debug_path">/storage/self/primary/DCIM/Camera</string>
-  <!--<string name="debug_file_name">20190511_060443.jpg</string>-->
-  <string name="debug_file_name">20190419_131840.jpg</string>
+  <string name="debug_file_name">20190511_060443.jpg</string>
+  <!--<string name="debug_file_name">20190419_131840.jpg</string>-->
   <string name="cancel">Cancel</string>
   <string name="title">Title:</string>
   <string name="product_code">Product Code:</string>

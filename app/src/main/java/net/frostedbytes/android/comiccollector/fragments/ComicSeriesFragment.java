@@ -22,7 +22,7 @@ import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
 public class ComicSeriesFragment extends Fragment {
 
-  private static final String TAG = BASE_TAG + ComicSeriesFragment.class.getSimpleName();
+  private static final String TAG = BASE_TAG + "ComicSeriesFragment";
 
   public interface OnComicSeriesListener {
 
@@ -94,6 +94,7 @@ public class ComicSeriesFragment extends Fragment {
     mPublisherNameEdit.setEnabled(false);
 
     mSeriesNameEdit = view.findViewById(R.id.comic_series_edit_name);
+    mSeriesNameEdit.setText(mComicSeries.SeriesName);
     mSeriesNameEdit.addTextChangedListener(new TextWatcher() {
       @Override
       public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -133,7 +134,10 @@ public class ComicSeriesFragment extends Fragment {
     mContinueButton.setOnClickListener(v -> {
 
       mComicSeries.SeriesName = mSeriesNameEdit.getText().toString().trim();
-      mComicSeries.Volume = Integer.parseInt(mSeriesVolumeEdit.getText().toString());
+      if (!mSeriesVolumeEdit.getText().toString().isEmpty()) {
+        mComicSeries.Volume = Integer.parseInt(mSeriesVolumeEdit.getText().toString());
+      }
+
       mCallback.onComicSeriesActionComplete(mComicSeries);
     });
 

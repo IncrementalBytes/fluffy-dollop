@@ -51,6 +51,7 @@ import com.google.firebase.perf.metrics.Trace;
 import java.util.Calendar;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.PathUtils;
+import net.frostedbytes.android.comiccollector.common.RetrieveComicSeriesDataTask;
 import net.frostedbytes.android.comiccollector.common.SortUtils;
 import net.frostedbytes.android.comiccollector.common.WriteToLocalComicSeriesTask;
 import net.frostedbytes.android.comiccollector.common.WriteToLocalLibraryTask;
@@ -86,13 +87,14 @@ public class MainActivity extends AppCompatActivity implements
   TutorialFragment.OnTutorialListener,
   UserPreferenceFragment.OnPreferencesListener {
 
-  private static final String TAG = BASE_TAG + MainActivity.class.getSimpleName();
+  private static final String TAG = BASE_TAG + "MainActivity";
 
   private static final int REQUEST_IMAGE_CAPTURE = 1;
 
   private static final int CAMERA_PERMISSIONS_REQUEST = 11;
   private static final int WRITE_EXTERNAL_STORAGE_PERMISSIONS_REQUEST = 12;
 
+  private Toolbar mMainToolbar;
   private ProgressBar mProgressBar;
   private Snackbar mSnackbar;
 
@@ -126,8 +128,8 @@ public class MainActivity extends AppCompatActivity implements
     LogUtils.debug(TAG, "++onCreate(Bundle)");
     setContentView(R.layout.activity_main);
 
-    Toolbar mainToolbar = findViewById(R.id.main_toolbar);
-    setSupportActionBar(mainToolbar);
+    mMainToolbar = findViewById(R.id.main_toolbar);
+    setSupportActionBar(mMainToolbar);
 
     mProgressBar = findViewById(R.id.main_progress);
     getSupportFragmentManager().addOnBackStackChangedListener(() -> {
@@ -215,6 +217,13 @@ public class MainActivity extends AppCompatActivity implements
   }
 
   @Override
+  public void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+
+    LogUtils.debug(TAG, "++onSaveInstanceState(Bundle)");
+  }
+
+  @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
@@ -228,6 +237,14 @@ public class MainActivity extends AppCompatActivity implements
           Crashlytics.logException(e);
         }
       } else {
+        if (mCurrentImageFile == null) {
+          try {
+            mCurrentImageFile = createImageFile();
+          } catch (IOException e) {
+            Crashlytics.logException(e);
+          }
+        }
+
         try {
           mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(mCurrentImageFile));
         } catch (FileNotFoundException e) {
@@ -256,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-    LogUtils.debug(TAG, "++onRequestPermissionResult(int, String[], int[])");
+    LogUtils.debug(TAG, "++onRequestPermissionsResult(int, String[], int[])");
     switch (requestCode) {
       case WRITE_EXTERNAL_STORAGE_PERMISSIONS_REQUEST:
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -307,10 +324,10 @@ public class MainActivity extends AppCompatActivity implements
   public void onComicBookAddedToLibrary(ComicBook comicBook) {
 
     if (comicBook == null) {
-      LogUtils.debug(TAG, "++onUserBookAddedToLibrary(null)");
+      LogUtils.debug(TAG, "++onComicBookAddedToLibrary(null)");
       showDismissableSnackbar(getString(R.string.err_add_comic_book));
     } else {
-      LogUtils.debug(TAG, "++onUserBookAddedToLibrary(%s)", comicBook.toString());
+      LogUtils.debug(TAG, "++onComicBookAddedToLibrary(%s)", comicBook.toString());
       mComicBooks.add(comicBook);
       new WriteToLocalLibraryTask(this, mComicBooks).execute();
     }
@@ -328,10 +345,10 @@ public class MainActivity extends AppCompatActivity implements
 
     mProgressBar.setIndeterminate(false);
     if (comicBook == null) {
-      LogUtils.debug(TAG, "++onCloudyBookRemoved(null)");
+      LogUtils.debug(TAG, "++onComicBookRemoved(null)");
       showDismissableSnackbar(getString(R.string.err_remove_comic_book));
     } else {
-      LogUtils.debug(TAG, "++onCloudyBookRemoved(%s)", comicBook.toString());
+      LogUtils.debug(TAG, "++onComicBookRemoved(%s)", comicBook.toString());
       mComicBooks.remove(comicBook);
       new WriteToLocalLibraryTask(this, mComicBooks).execute();
       replaceFragment(ComicBookListFragment.newInstance(mComicBooks, mPublishers, mComicSeries));
@@ -349,10 +366,10 @@ public class MainActivity extends AppCompatActivity implements
   public void onComicBookUpdated(ComicBook updatedComicBook) {
 
     if (updatedComicBook == null) {
-      LogUtils.debug(TAG, "++onCloudyBookUpdated(null)");
+      LogUtils.debug(TAG, "++onComicBookUpdated(null)");
       showDismissableSnackbar(getString(R.string.err_update_comic_book));
     } else {
-      LogUtils.debug(TAG, "++onCloudyBookUpdated(%s)", updatedComicBook.toString());
+      LogUtils.debug(TAG, "++onComicBookUpdated(%s)", updatedComicBook.toString());
       ArrayList<ComicBook> updatedComicBookList = new ArrayList<>();
       for (ComicBook comicBook : mComicBooks) {
         if (comicBook.getFullId().equals(updatedComicBook.getFullId())) {
@@ -395,6 +412,8 @@ public class MainActivity extends AppCompatActivity implements
 
     LogUtils.debug(TAG, "++onComicListPopulated(%d)", size);
     mProgressBar.setIndeterminate(false);
+    mMainToolbar.getMenu().findItem(R.id.action_add).setEnabled(true);
+    mMainToolbar.getMenu().findItem(R.id.action_home).setEnabled(true);
     if (size == 0) {
       if (mSnackbar == null || !mSnackbar.isShown()) {
         mSnackbar = Snackbar.make(
@@ -420,7 +439,9 @@ public class MainActivity extends AppCompatActivity implements
 
     LogUtils.debug(TAG, "++onComicListSynchronize()");
     mProgressBar.setIndeterminate(true);
-    readServerLibrary();
+    mMainToolbar.getMenu().findItem(R.id.action_add).setEnabled(false);
+    mMainToolbar.getMenu().findItem(R.id.action_home).setEnabled(false);
+    readServerComicPublishers();
   }
 
   @Override
@@ -513,6 +534,12 @@ public class MainActivity extends AppCompatActivity implements
   /*
       Public Method(s)
    */
+  public void retrieveComicSeriesComplete(ComicSeries comicSeries) {
+
+    LogUtils.debug(TAG, "++retrieveComicSeriesComplete(%s)", comicSeries.toString());
+    replaceFragment(ComicSeriesFragment.newInstance(comicSeries, mPublishers.get(comicSeries.PublisherId)));
+  }
+
   public void writeComicSeriesComplete(ArrayList<ComicSeries> comicSeries) {
 
     LogUtils.debug(TAG, "++writeComicSeriesComplete(%d)", comicSeries.size());
@@ -535,12 +562,6 @@ public class MainActivity extends AppCompatActivity implements
   /*
       Private Method(s)
    */
-  private void addNewComicSeries(ComicSeries comicSeries) {
-
-    LogUtils.debug(TAG, "++addNewComicSeries(%s)", comicSeries.toString());
-    replaceFragment(ComicSeriesFragment.newInstance(comicSeries, mPublishers.get(comicSeries.PublisherId)));
-  }
-
   private void checkDevicePermission(String permission, int permissionCode) {
 
     LogUtils.debug(TAG, "++checkDevicePermission(%s, %d)", permission, permissionCode);
@@ -642,13 +663,12 @@ public class MainActivity extends AppCompatActivity implements
       ComicPublisher publisher = mPublishers.get(comicBook.PublisherId);
       if (publisher != null) {
         ComicSeries series = mComicSeries.get(comicBook.getProductId());
-        if (series == null) {
-          // save comic book for later
-          mCurrentComicBook = new ComicBook(comicBook);
+        if (series == null) { // search for more info via REST API before asking user for information
+          mCurrentComicBook = comicBook;
           series = new ComicSeries();
           series.PublisherId = comicBook.PublisherId;
           series.Id = comicBook.SeriesId;
-          addNewComicSeries(series);
+          new RetrieveComicSeriesDataTask(this, series).execute();
         } else { // new book and known series, proceed to add
           replaceFragment(
             ComicBookFragment.newInstance(
@@ -666,7 +686,7 @@ public class MainActivity extends AppCompatActivity implements
 
   private void readServerComicPublishers() {
 
-    LogUtils.debug(TAG, "++readServerComicSeries()");
+    LogUtils.debug(TAG, "++readServerComicPublishers()");
     mPublishers = new HashMap<>();
     Trace comicPublisherTrace = FirebasePerformance.getInstance().newTrace("get_comic_publishers");
     comicPublisherTrace.start();
@@ -810,7 +830,7 @@ public class MainActivity extends AppCompatActivity implements
 
     fragmentTransaction.addToBackStack(fragment.getClass().getName());
     LogUtils.debug(TAG, "Back stack count: %d", fragmentManager.getBackStackEntryCount());
-    fragmentTransaction.commit();
+    fragmentTransaction.commitAllowingStateLoss();
   }
 
   private void scanImageForProductCode() {
@@ -977,7 +997,7 @@ public class MainActivity extends AppCompatActivity implements
               matrix,
               true);
             mRotationAttempts = 0;
-            replaceFragment(ManualSearchFragment.newInstance(comic));
+            replaceFragment(ManualSearchFragment.newInstance(new ComicBook()));
           }
         } else {
           showDismissableSnackbar(getString(R.string.err_bar_code_task));

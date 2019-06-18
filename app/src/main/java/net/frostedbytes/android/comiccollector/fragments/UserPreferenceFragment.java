@@ -15,7 +15,7 @@ import net.frostedbytes.android.comiccollector.models.User;
 
 public class UserPreferenceFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-  private static final String TAG = BASE_TAG + UserPreferenceFragment.class.getSimpleName();
+  private static final String TAG = BASE_TAG + "UserPreferenceFragment";
 
   public static final String IS_GEEK_PREFERENCE = "preference_is_geek";
   public static final String SHOW_TUTORIAL_PREFERENCE = "preference_show_tutorial";

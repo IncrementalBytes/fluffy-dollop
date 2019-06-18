@@ -22,7 +22,7 @@ import net.frostedbytes.android.comiccollector.models.ComicBook;
 
 public class ManualSearchFragment extends Fragment {
 
-  private static final String TAG = BASE_TAG + ManualSearchFragment.class.getSimpleName();
+  private static final String TAG = BASE_TAG + "ManualSearchFragment";
 
   public interface OnManualSearchListener {
 
@@ -100,7 +100,7 @@ public class ManualSearchFragment extends Fragment {
     mProductCodeEdit = view.findViewById(R.id.manual_search_edit_product);
     mIssueCodeEdit = view.findViewById(R.id.manual_search_edit_issue);
     TextView messageText = view.findViewById(R.id.manual_search_text_no_barcode);
-    if (mComicBook == null || !mComicBook.isValid()) {
+    if (mComicBook == null || !isValid()) {
       mProductCodeEdit.addTextChangedListener(new TextWatcher() {
 
         @Override
@@ -144,6 +144,25 @@ public class ManualSearchFragment extends Fragment {
   /*
     Private Method(s)
   */
+  private boolean isValid() {
+
+    LogUtils.debug(TAG, "++isValid()");
+    if (mComicBook.PublisherId == null ||
+      mComicBook.PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) ||
+      mComicBook.PublisherId.length() != BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length()) {
+      LogUtils.debug(TAG, "Publisher data is unexpected: %s", mComicBook.PublisherId);
+      return false;
+    }
+
+    if (mComicBook.SeriesId == null ||
+      mComicBook.SeriesId.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID) ||
+      mComicBook.SeriesId.length() != BaseActivity.DEFAULT_COMIC_SERIES_ID.length()) {
+      LogUtils.debug(TAG, "Series data is unexpected: %s", mComicBook.SeriesId);
+      return false;
+    }
+    return true;
+  }
+
   private void validateAll() {
 
     if (mProductCodeEdit.getText().toString().length() == BaseActivity.DEFAULT_PRODUCT_CODE.length() &&

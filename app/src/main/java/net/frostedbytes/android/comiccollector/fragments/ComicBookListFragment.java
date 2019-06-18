@@ -31,7 +31,7 @@ import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
 public class ComicBookListFragment extends Fragment {
 
-  private static final String TAG = BASE_TAG + ComicBookListFragment.class.getSimpleName();
+  private static final String TAG = BASE_TAG + "ComicBookListFragment";
 
   public interface OnComicBookListListener {
 

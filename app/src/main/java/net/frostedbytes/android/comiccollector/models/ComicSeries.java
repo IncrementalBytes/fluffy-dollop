@@ -22,7 +22,7 @@ import net.frostedbytes.android.comiccollector.common.LogUtils;
 
 public class ComicSeries implements Parcelable {
 
-  private static final String TAG = BaseActivity.BASE_TAG + ComicSeries.class.getSimpleName();
+  private static final String TAG = BaseActivity.BASE_TAG + "ComicSeries";
   private static final int SCHEMA_FIELDS = 7;
 
   @Exclude
@@ -147,7 +147,7 @@ public class ComicSeries implements Parcelable {
    */
   public static HashMap<String, ComicSeries> parseComicSeriesAssetFile(AssetManager assetManager) {
 
-    LogUtils.debug(TAG, "++parseComicSeriesAssetFile()");
+    LogUtils.debug(TAG, "++parseComicSeriesAssetFile(AssetManager)");
     HashMap<String, ComicSeries> comicSeries = new HashMap<>();
     String parsableString;
     BufferedReader reader = null;
@@ -241,6 +241,7 @@ public class ComicSeries implements Parcelable {
   @Exclude
   public boolean isValid() {
 
+    LogUtils.debug(TAG, "++isValid()");
     if (PublisherId == null ||
       PublisherId.length() != BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length() ||
       PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID)) {

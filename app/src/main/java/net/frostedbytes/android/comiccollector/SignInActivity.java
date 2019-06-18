@@ -27,7 +27,7 @@ import java.util.Locale;
 
 public class SignInActivity extends BaseActivity implements OnClickListener {
 
-  private static final String TAG = BASE_TAG + SignInActivity.class.getSimpleName();
+  private static final String TAG = BASE_TAG + "SignInActivity";
 
   private static final int RC_SIGN_IN = 4701;
 
