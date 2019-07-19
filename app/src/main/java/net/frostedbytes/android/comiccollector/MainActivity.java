@@ -1,6 +1,6 @@
 package net.frostedbytes.android.comiccollector;
 
-import android.Manifest;
+import android.Manifest.permission;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -24,23 +24,21 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.perf.FirebasePerformance;
 import com.google.firebase.perf.metrics.Trace;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
-import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.common.SortUtils;
+import net.frostedbytes.android.comiccollector.common.SortUtils.ByPublicationDate;
 import net.frostedbytes.android.comiccollector.common.WriteToLocalComicSeriesTask;
 import net.frostedbytes.android.comiccollector.common.WriteToLocalLibraryTask;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookListFragment;
-import net.frostedbytes.android.comiccollector.fragments.ComicSeriesFragment;
-import net.frostedbytes.android.comiccollector.fragments.InterludeFragment;
-import net.frostedbytes.android.comiccollector.fragments.ManualSearchFragment;
-import net.frostedbytes.android.comiccollector.fragments.TutorialFragment;
+import net.frostedbytes.android.comiccollector.fragments.SystemMessageFragment;
 import net.frostedbytes.android.comiccollector.fragments.UserPreferenceFragment;
 import net.frostedbytes.android.comiccollector.models.ComicBook;
 import net.frostedbytes.android.comiccollector.models.ComicPublisher;
@@ -60,6 +58,10 @@ public class MainActivity extends BaseActivity implements
   private Toolbar mMainToolbar;
   private ProgressBar mProgressBar;
   private Snackbar mSnackbar;
+
+  private ListenerRegistration mComicPublishersRegistration;
+  private ListenerRegistration mComicSeriesRegistration;
+  private FirebaseFirestore mFirestore;
 
   private ArrayList<ComicBook> mComicBooks;
   private HashMap<String, ComicSeries> mComicSeries;
@@ -98,6 +100,8 @@ public class MainActivity extends BaseActivity implements
       }
     });
 
+    mFirestore = FirebaseFirestore.getInstance();
+
     mComicBooks = new ArrayList<>();
     mComicSeries = new HashMap<>();
     mPublishers = new HashMap<>();
@@ -113,7 +117,7 @@ public class MainActivity extends BaseActivity implements
       mProgressBar.setIndeterminate(true);
       readServerComicPublishers();
     } else {
-      // TODO: add process for unknown user
+      replaceFragment(SystemMessageFragment.newInstance(getString(R.string.err_unknown_user)));
     }
   }
 
@@ -130,6 +134,15 @@ public class MainActivity extends BaseActivity implements
     super.onDestroy();
 
     LogUtils.debug(TAG, "++onDestroy()");
+    if (mComicPublishersRegistration != null) {
+      mComicPublishersRegistration.remove();
+    }
+
+    if (mComicSeriesRegistration != null) {
+      mComicSeriesRegistration.remove();
+    }
+
+    mFirestore = null;
     mComicBooks = null;
     mComicSeries = null;
     mPublishers = null;
@@ -143,7 +156,7 @@ public class MainActivity extends BaseActivity implements
     switch (item.getItemId()) {
       case R.id.action_home:
         if (!mUser.Id.isEmpty() && !mUser.Id.equals(BaseActivity.DEFAULT_USER_ID)) {
-          checkDevicePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, BaseActivity.REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS);
+          checkDevicePermission();
         } else {
           showDismissableSnackbar(getString(R.string.err_unknown_user));
         }
@@ -197,19 +210,16 @@ public class MainActivity extends BaseActivity implements
     super.onActivityResult(requestCode, resultCode, data);
 
     LogUtils.debug(TAG, "++onActivityResult(%d, %d, Intent)", requestCode, resultCode);
-    if (resultCode != RESULT_OK) {
-      // TODO: not good
-      return;
-    }
-
     String message;
-    switch (requestCode) {
-      case BaseActivity.REQUEST_COMIC_ADD:
-        message = data.getStringExtra(BaseActivity.ARG_MESSAGE);
+    if (requestCode == BaseActivity.REQUEST_COMIC_ADD) {
+      message = data.getStringExtra(BaseActivity.ARG_MESSAGE);
+      if (resultCode != RESULT_OK) {
         if (message != null && message.length() > 0) {
           showDismissableSnackbar(message);
+        } else {
+          LogUtils.error(TAG, "Activity result failed for an unknown reason.");
         }
-
+      } else {
         ComicSeries series = data.getParcelableExtra(BaseActivity.ARG_COMIC_SERIES);
         if (series != null) {
           if (!mComicSeries.containsKey(series.getProductId())) {
@@ -227,12 +237,13 @@ public class MainActivity extends BaseActivity implements
           ComicPublisher comicPublisher = mPublishers.get(book.PublisherId);
           replaceFragment(ComicBookFragment.newInstance(mUser.Id, book, comicPublisher, series));
         }
-        break;
-      default:
-        message = String.format(Locale.US, "Unknown request code: %d", requestCode);
-        showDismissableSnackbar(message);
-        LogUtils.warn(TAG, message);
-        break;
+
+        if (message != null && message.length() > 0) {
+          showDismissableSnackbar(message);
+        }
+      }
+    } else {
+      LogUtils.warn(TAG, String.format(Locale.US, "Unexpected activity result: %d", requestCode));
     }
   }
 
@@ -240,28 +251,18 @@ public class MainActivity extends BaseActivity implements
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
     LogUtils.debug(TAG, "++onRequestPermissionsResult(int, String[], int[])");
-    switch (requestCode) {
-      case BaseActivity.REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS:
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-          LogUtils.debug(TAG, "WRITE_EXTERNAL_STORAGE permission granted.");
-          mComicBooks = ComicBook.readLocalLibrary(getFilesDir());
-          if (mComicBooks == null || mComicBooks.size() == 0) {
-            readServerLibrary(); // attempt to get user's book library from cloud
-          } else {
-            mComicBooks.sort(new SortUtils.ByPublicationDate());
-            mProgressBar.setIndeterminate(false);
-            replaceFragment(ComicBookListFragment.newInstance(mComicBooks, mPublishers, mComicSeries));
-          }
-        } else {
-          LogUtils.debug(TAG, "WRITE_EXTERNAL_STORAGE permission denied.");
-          mProgressBar.setIndeterminate(false);
-          showDismissableSnackbar(getString(R.string.permission_storage));
-        }
-
-        break;
-      default:
-        LogUtils.debug(TAG, "Unknown request code: %d", requestCode);
-        break;
+    if (requestCode == BaseActivity.REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS) {
+      if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        LogUtils.debug(TAG, "WRITE_EXTERNAL_STORAGE permission granted.");
+        mComicBooks = ComicBook.readLocalLibrary(getFilesDir());
+        mComicBooks.sort(new ByPublicationDate());
+        replaceFragment(ComicBookListFragment.newInstance(mComicBooks, mPublishers, mComicSeries));
+      } else {
+        mProgressBar.setIndeterminate(false);
+        showDismissableSnackbar(getString(R.string.permission_storage));
+      }
+    } else {
+      LogUtils.debug(TAG, "Unknown request code: %d", requestCode);
     }
   }
 
@@ -390,26 +391,6 @@ public class MainActivity extends BaseActivity implements
   }
 
   @Override
-  public void onComicListSynchronize() {
-
-    LogUtils.debug(TAG, "++onComicListSynchronize()");
-    mProgressBar.setIndeterminate(true);
-    if (mMainToolbar != null && mMainToolbar.getMenu() != null) {
-      MenuItem item = mMainToolbar.getMenu().findItem(R.id.action_add);
-      if (item != null) {
-        item.setEnabled(false);
-      }
-
-      item = mMainToolbar.getMenu().findItem(R.id.action_home);
-      if (item != null) {
-        item.setEnabled(false);
-      }
-    }
-
-    readServerComicPublishers();
-  }
-
-  @Override
   public void onPreferenceChanged() {
 
     LogUtils.debug(TAG, "++onPreferenceChanged()");
@@ -460,11 +441,11 @@ public class MainActivity extends BaseActivity implements
     startActivityForResult(intent, BaseActivity.REQUEST_COMIC_ADD);
   }
 
-  private void checkDevicePermission(String permission, int permissionCode) {
+  private void checkDevicePermission() {
 
-    LogUtils.debug(TAG, "++checkDevicePermission(%s, %d)", permission, permissionCode);
-    if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-      if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+    LogUtils.debug(TAG, "++checkDevicePermission()");
+    if (ContextCompat.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+      if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission.WRITE_EXTERNAL_STORAGE)) {
         Snackbar.make(
           findViewById(R.id.main_fragment_container),
           getString(R.string.permission_denied_explanation),
@@ -473,27 +454,20 @@ public class MainActivity extends BaseActivity implements
             getString(R.string.ok),
             view -> ActivityCompat.requestPermissions(
               MainActivity.this,
-              new String[]{permission},
-              permissionCode))
+              new String[]{permission.WRITE_EXTERNAL_STORAGE},
+              BaseActivity.REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS))
           .show();
       } else {
-        ActivityCompat.requestPermissions(this, new String[]{permission}, permissionCode);
+        ActivityCompat.requestPermissions(
+          this,
+          new String[]{permission.WRITE_EXTERNAL_STORAGE},
+          BaseActivity.REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS);
       }
     } else {
-      switch (permissionCode) {
-        case BaseActivity.REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS:
-          LogUtils.debug(TAG, "%s permission granted.", permission);
-          mComicBooks = ComicBook.readLocalLibrary(getFilesDir());
-          if (mComicBooks == null || mComicBooks.size() == 0) {
-            readServerLibrary(); // attempt to get user's book library from cloud
-          } else {
-            mComicBooks.sort(new SortUtils.ByBookName());
-            mProgressBar.setIndeterminate(false);
-            replaceFragment(ComicBookListFragment.newInstance(mComicBooks, mPublishers, mComicSeries));
-          }
-
-          break;
-      }
+      LogUtils.debug(TAG, "%s permission granted.", permission.WRITE_EXTERNAL_STORAGE);
+      mComicBooks = ComicBook.readLocalLibrary(getFilesDir());
+      mComicBooks.sort(new SortUtils.ByBookName());
+      replaceFragment(ComicBookListFragment.newInstance(mComicBooks, mPublishers, mComicSeries));
     }
   }
 
@@ -503,38 +477,40 @@ public class MainActivity extends BaseActivity implements
     mPublishers = new HashMap<>();
     Trace comicPublisherTrace = FirebasePerformance.getInstance().newTrace("get_comic_publishers");
     comicPublisherTrace.start();
-    FirebaseFirestore.getInstance().collection(ComicPublisher.ROOT).get().addOnCompleteListener(task -> {
+    mComicPublishersRegistration = mFirestore.collection(ComicPublisher.ROOT).addSnapshotListener((snapshots, ffe) -> {
 
-      if (task.isSuccessful() && task.getResult() != null) {
-        for (DocumentSnapshot snapshot : task.getResult()) {
-          ComicPublisher publisher = snapshot.toObject(ComicPublisher.class);
-          if (publisher != null && !publisher.IsFlagged) {
-            publisher.Id = snapshot.getId();
+      if (ffe != null) {
+        LogUtils.warn(TAG, "Comic Publishers listen error: %s", ffe.getMessage());
+        return;
+      }
+
+      if (snapshots == null) {
+        LogUtils.error(TAG, "Comic Publisher snapshot was null.");
+        return;
+      }
+
+      for (DocumentChange dc : snapshots.getDocumentChanges()) {
+        ComicPublisher publisher = dc.getDocument().toObject(ComicPublisher.class);
+        publisher.Id = dc.getDocument().getId();
+        comicPublisherTrace.incrementMetric("comic_publisher_read", 1);
+        switch (dc.getType()) {
+          case ADDED:
+            LogUtils.debug(TAG, "New publisher: %s", publisher.toString());
             mPublishers.put(publisher.Id, publisher);
-            comicPublisherTrace.incrementMetric("comic_publisher_read", 1);
-          } else {
-            comicPublisherTrace.incrementMetric("comic_publisher_unread", 1);
-          }
+            break;
+          case MODIFIED:
+            LogUtils.debug(TAG, "Modified publisher: %s", publisher.toString());
+            mPublishers.put(publisher.Id, publisher);
+            break;
+          case REMOVED:
+            LogUtils.debug(TAG, "Removed publisher: %s", publisher.toString());
+            mPublishers.remove(publisher.Id);
+            break;
         }
-      } else {
-        comicPublisherTrace.incrementMetric("comic_publisher_err", 1);
       }
 
       comicPublisherTrace.stop();
-      if (mPublishers.size() > 0) {
-        mComicSeries = ComicSeries.readLocalComicSeries(getFilesDir());
-        if (mComicSeries.size() == 0) {
-          readServerComicSeries();
-        } else {
-          if (!mUser.Id.isEmpty() && !mUser.Id.equals(BaseActivity.DEFAULT_USER_ID)) {
-            checkDevicePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, BaseActivity.REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS);
-          } else {
-            showDismissableSnackbar(getString(R.string.err_unknown_user));
-          }
-        }
-      } else {
-        showDismissableSnackbar(getString(R.string.err_setup_publisher_data));
-      }
+      readServerComicSeries();
     });
   }
 
@@ -544,90 +520,46 @@ public class MainActivity extends BaseActivity implements
     mComicSeries = new HashMap<>();
     Trace comicSeriesTrace = FirebasePerformance.getInstance().newTrace("get_comic_series");
     comicSeriesTrace.start();
-    FirebaseFirestore.getInstance().collection(ComicSeries.ROOT).get().addOnCompleteListener(task -> {
+    mComicSeriesRegistration = mFirestore.collection(ComicSeries.ROOT).addSnapshotListener((snapshots, ffe) -> {
 
-      if (task.isSuccessful() && task.getResult() != null) {
-        for (DocumentSnapshot snapshot : task.getResult()) {
-          ComicSeries series = snapshot.toObject(ComicSeries.class);
-          if (series != null) {
-            String seriesId = snapshot.getId();
-            if (seriesId.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) {
-              try {
-                series.PublisherId = seriesId.substring(0, BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length());
-                series.Id = seriesId.substring(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length());
-              } catch (Exception e) {
-                series.PublisherId = BaseActivity.DEFAULT_COMIC_PUBLISHER_ID;
-                series.Id = BaseActivity.DEFAULT_COMIC_SERIES_ID;
-              }
+      if (ffe != null) {
+        LogUtils.warn(TAG, "Comic Series listen error: %s", ffe.getMessage());
+        return;
+      }
 
-              if (!series.PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) ||
-                !series.Id.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID)) {
-                mComicSeries.put(seriesId, series);
-                comicSeriesTrace.incrementMetric("comic_series_read", 1);
-              } else {
-                comicSeriesTrace.incrementMetric("comic_series_bad_format", 1);
-              }
+      if (snapshots == null) {
+        LogUtils.error(TAG, "Comic Series snapshot was null.");
+        return;
+      }
+
+      for (DocumentChange dc : snapshots.getDocumentChanges()) {
+        ComicSeries series = dc.getDocument().toObject(ComicSeries.class);
+        series.parseProductCode(dc.getDocument().getId());
+        switch (dc.getType()) {
+          case ADDED:
+            LogUtils.debug(TAG, "New series: %s", series.toString());
+            if (!series.PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) ||
+              !series.Id.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID)) {
+              mComicSeries.put(series.getProductId(), series);
+              comicSeriesTrace.incrementMetric("comic_series_read", 1);
             } else {
               comicSeriesTrace.incrementMetric("comic_series_bad_format", 1);
             }
-          } else {
-            comicSeriesTrace.incrementMetric("comic_series_unread", 1);
-          }
+
+            break;
+          case MODIFIED:
+            LogUtils.debug(TAG, "Modified series: %s", series.toString());
+            mComicSeries.put(series.getProductId(), series);
+            break;
+          case REMOVED:
+            LogUtils.debug(TAG, "Removed series: %s", series.toString());
+            mComicSeries.remove(series.getProductId());
+            break;
         }
-
-        // update our local cache with data from cloud
-        new WriteToLocalComicSeriesTask(this, new ArrayList<>(mComicSeries.values())).execute();
-      } else {
-        LogUtils.warn(TAG, "Reverting to asset data for ComicSeries.");
-        comicSeriesTrace.incrementMetric("comic_series_err", 1);
-        mComicSeries = ComicSeries.parseComicSeriesAssetFile(getAssets());
       }
 
-      comicSeriesTrace.stop();
-
-      // series data is loaded from either remote or last resort, time for comic library data
-      if (!mUser.Id.isEmpty() && !mUser.Id.equals(BaseActivity.DEFAULT_USER_ID)) {
-        checkDevicePermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, BaseActivity.REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS);
-      } else {
-        showDismissableSnackbar(getString(R.string.err_unknown_user));
-      }
-    });
-  }
-
-  private void readServerLibrary() {
-
-    LogUtils.debug(TAG, "++readServerLibrary()");
-    String queryPath = PathUtils.combine(User.ROOT, mUser.Id, ComicBook.ROOT);
-    LogUtils.debug(TAG, "QueryPath: %s", queryPath);
-    mComicBooks = new ArrayList<>();
-    Trace comicBookTrace = FirebasePerformance.getInstance().newTrace("get_user_comics");
-    comicBookTrace.start();
-    FirebaseFirestore.getInstance().collection(queryPath).get().addOnCompleteListener(this, task -> {
-
-      if (task.isSuccessful() && task.getResult() != null) {
-        for (DocumentSnapshot document : task.getResult().getDocuments()) {
-          ComicBook comicBook = document.toObject(ComicBook.class);
-          if (comicBook != null) {
-            String[] segments = document.getId().split("-");
-            comicBook.parseProductCode(segments[0]);
-            comicBook.parseIssueCode(segments[1]);
-            mComicBooks.add(comicBook);
-            comicBookTrace.incrementMetric("comic_book_read", 1);
-          } else {
-            LogUtils.warn(TAG, "Unable to convert user book: %s", queryPath);
-            comicBookTrace.incrementMetric("comic_book_unread", 1);
-          }
-        }
-
-        mComicBooks.sort(new SortUtils.ByBookName());
-        new WriteToLocalLibraryTask(this, mComicBooks).execute();
-      } else {
-        LogUtils.debug(TAG, "Could not get user book list: %s", queryPath);
-        comicBookTrace.incrementMetric("comic_book_err", 1);
-        onComicListPopulated(0);
-      }
-
-      comicBookTrace.stop();
+      // series data is loaded, proceed to loading comic library data
+      checkDevicePermission();
     });
   }
 
@@ -656,26 +588,5 @@ public class MainActivity extends BaseActivity implements
       Snackbar.LENGTH_INDEFINITE);
     mSnackbar.setAction(R.string.dismiss, v -> mSnackbar.dismiss());
     mSnackbar.show();
-  }
-
-  private void updateTitle(Fragment fragment) {
-
-    LogUtils.debug(TAG, "++updateTitle(%s)", fragment.getClass().getName());
-    String fragmentClassName = fragment.getClass().getName();
-    if (fragmentClassName.equals(ComicBookListFragment.class.getName())) {
-      setTitle(getString(R.string.title_comic_library));
-    } else if (fragmentClassName.equals(ComicBookFragment.class.getName())) {
-      setTitle(getString(R.string.title_comic_book));
-    } else if (fragmentClassName.equals(UserPreferenceFragment.class.getName())) {
-      setTitle(getString(R.string.title_preferences));
-    } else if (fragmentClassName.equals(TutorialFragment.class.getName())) {
-      setTitle(getString(R.string.title_tutorial));
-    } else if (fragmentClassName.equals(ComicSeriesFragment.class.getName())) {
-      setTitle(getString(R.string.title_comic_series));
-    } else if (fragmentClassName.equals(InterludeFragment.class.getName())) {
-      setTitle(getString(R.string.title_please_wait));
-    } else if (fragmentClassName.equals(ManualSearchFragment.class.getName())) {
-      setTitle(getString(R.string.title_gathering_data));
-    }
   }
 }

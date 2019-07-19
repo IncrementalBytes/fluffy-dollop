@@ -2,8 +2,11 @@ package net.frostedbytes.android.comiccollector.models;
 
 import java.io.Serializable;
 import net.frostedbytes.android.comiccollector.BaseActivity;
+import net.frostedbytes.android.comiccollector.common.LogUtils;
 
 public class User implements Serializable {
+
+    private static final String TAG = BaseActivity.BASE_TAG + "User";
 
     public static final String ROOT = "Users";
 
@@ -28,6 +31,7 @@ public class User implements Serializable {
 
     public static boolean isValid(User user) {
 
+        LogUtils.debug(TAG, "++isValid(User)");
         return user != null &&
           !user.Id.isEmpty() &&
           !user.Id.equals(BaseActivity.DEFAULT_USER_ID) &&

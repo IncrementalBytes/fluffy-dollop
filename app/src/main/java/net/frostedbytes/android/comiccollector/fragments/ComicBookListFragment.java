@@ -40,8 +40,6 @@ public class ComicBookListFragment extends Fragment {
     void onComicListItemSelected(ComicBook comicBook);
 
     void onComicListPopulated(int size);
-
-    void onComicListSynchronize();
   }
 
   private OnComicBookListListener mCallback;
@@ -101,13 +99,11 @@ public class ComicBookListFragment extends Fragment {
 
     FloatingActionButton mAddButton = view.findViewById(R.id.comic_fab_add);
     mRecyclerView = view.findViewById(R.id.comic_list_view);
-    FloatingActionButton mSyncButton = view.findViewById(R.id.comic_fab_sync);
 
     final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager(manager);
 
     mAddButton.setOnClickListener(pickView -> mCallback.onComicListAddBook());
-    mSyncButton.setOnClickListener(pickView -> mCallback.onComicListSynchronize());
 
     updateUI();
     return view;
@@ -228,7 +224,7 @@ public class ComicBookListFragment extends Fragment {
       if (mComicSeries != null) {
         ComicSeries series = mComicSeries.get(mComicBook.getProductId());
         if (series != null) {
-          mSeriesNameTextView.setText(series.SeriesName);
+          mSeriesNameTextView.setText(String.format(Locale.US, "%s%s", series.SeriesName, series.IsFlagged ? " (pending)" : ""));
           mVolumeTextView.setText(String.valueOf(series.Volume));
         } else {
           mSeriesNameTextView.setText("N/A");

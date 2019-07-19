@@ -1,6 +1,6 @@
 package net.frostedbytes.android.comiccollector;
 
-import android.Manifest;
+import android.Manifest.permission;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import androidx.annotation.NonNull;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -51,8 +52,8 @@ import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.common.RetrieveComicSeriesDataTask;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookListFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicSeriesFragment;
-import net.frostedbytes.android.comiccollector.fragments.InterludeFragment;
 import net.frostedbytes.android.comiccollector.fragments.ManualSearchFragment;
+import net.frostedbytes.android.comiccollector.fragments.SystemMessageFragment;
 import net.frostedbytes.android.comiccollector.fragments.TutorialFragment;
 import net.frostedbytes.android.comiccollector.fragments.UserPreferenceFragment;
 import net.frostedbytes.android.comiccollector.models.ComicBook;
@@ -112,7 +113,7 @@ public class AddActivity extends BaseActivity implements
 
     if (User.isValid(mUser)) {
       if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-        checkDevicePermission(Manifest.permission.CAMERA, BaseActivity.REQUEST_CAMERA_PERMISSIONS);
+        checkDevicePermission();
       } else {
         setResultAndFinish(getString(R.string.err_no_camera_detected));
       }
@@ -159,48 +160,63 @@ public class AddActivity extends BaseActivity implements
       return;
     }
 
-    switch (requestCode) {
-      case BaseActivity.REQUEST_IMAGE_CAPTURE:
-        if (BuildConfig.DEBUG) {
-          File f = new File(getString(R.string.debug_path), getString(R.string.debug_file_name));
+    if (requestCode == BaseActivity.REQUEST_IMAGE_CAPTURE) {
+      if (BuildConfig.DEBUG) {
+        File f = new File(getString(R.string.debug_path), getString(R.string.debug_file_name));
+        try {
+          mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
+        } catch (FileNotFoundException e) {
+          Crashlytics.logException(e);
+        }
+      } else {
+        if (mCurrentImageFile == null) {
           try {
-            mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
-          } catch (FileNotFoundException e) {
-            Crashlytics.logException(e);
-          }
-        } else {
-          if (mCurrentImageFile == null) {
-            try {
-              mCurrentImageFile = createImageFile();
-            } catch (IOException e) {
-              Crashlytics.logException(e);
-            }
-          }
-
-          try {
-            mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(mCurrentImageFile));
-          } catch (FileNotFoundException e) {
+            mCurrentImageFile = createImageFile();
+          } catch (IOException e) {
             Crashlytics.logException(e);
           }
         }
 
-        if (mImageBitmap != null) {
-          Bitmap emptyBitmap = Bitmap.createBitmap(
-            mImageBitmap.getWidth(),
-            mImageBitmap.getHeight(),
-            mImageBitmap.getConfig());
-          if (!mImageBitmap.sameAs(emptyBitmap)) {
-            scanImageForProductCode();
-          } else {
-            setResultAndFinish(getString(R.string.err_image_empty));
-          }
-        } else {
-          setResultAndFinish(getString(R.string.err_image_not_found));
+        try {
+          mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(mCurrentImageFile));
+        } catch (FileNotFoundException e) {
+          Crashlytics.logException(e);
         }
-        break;
-      default:
-        setResultAndFinish(getString(R.string.unknown_request_code));
-        break;
+      }
+
+      if (mImageBitmap != null) {
+        Bitmap emptyBitmap = Bitmap.createBitmap(
+          mImageBitmap.getWidth(),
+          mImageBitmap.getHeight(),
+          mImageBitmap.getConfig());
+        if (!mImageBitmap.sameAs(emptyBitmap)) {
+          scanImageForProductCode();
+        } else {
+          setResultAndFinish(getString(R.string.err_image_empty));
+        }
+      } else {
+        setResultAndFinish(getString(R.string.err_image_not_found));
+      }
+    } else {
+      setResultAndFinish(getString(R.string.unknown_request_code));
+    }
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+    LogUtils.debug(TAG, "++onRequestPermissionsResult(int, String[], int[])");
+    if (requestCode == BaseActivity.REQUEST_CAMERA_PERMISSIONS) {
+      if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        LogUtils.debug(TAG, "CAMERA_PERMISSIONS_REQUEST permission granted.");
+        takePictureIntent();
+      } else {
+        LogUtils.debug(TAG, "CAMERA_PERMISSIONS_REQUEST permission denied.");
+        mProgressBar.setIndeterminate(false);
+        setResultAndFinish(getString(R.string.permission_camera));
+      }
+    } else {
+      LogUtils.debug(TAG, "Unknown request code: %d", requestCode);
     }
   }
 
@@ -291,11 +307,11 @@ public class AddActivity extends BaseActivity implements
   /*
     Private Method(s)
    */
-  private void checkDevicePermission(String permission, int permissionCode) {
+  private void checkDevicePermission() {
 
-    LogUtils.debug(TAG, "++checkDevicePermission(%s, %d)", permission, permissionCode);
-    if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-      if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+    LogUtils.debug(TAG, "++checkDevicePermission()");
+    if (ContextCompat.checkSelfPermission(this, permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+      if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission.CAMERA)) {
         Snackbar.make(
           findViewById(R.id.main_fragment_container),
           getString(R.string.permission_denied_explanation),
@@ -304,19 +320,15 @@ public class AddActivity extends BaseActivity implements
             getString(R.string.ok),
             view -> ActivityCompat.requestPermissions(
               AddActivity.this,
-              new String[]{permission},
-              permissionCode))
+              new String[]{permission.CAMERA},
+              BaseActivity.REQUEST_CAMERA_PERMISSIONS))
           .show();
       } else {
-        ActivityCompat.requestPermissions(this, new String[]{permission}, permissionCode);
+        ActivityCompat.requestPermissions(this, new String[]{permission.CAMERA}, BaseActivity.REQUEST_CAMERA_PERMISSIONS);
       }
     } else {
-      switch (permissionCode) {
-        case BaseActivity.REQUEST_CAMERA_PERMISSIONS:
-          LogUtils.debug(TAG, "%s permission granted.", permission);
-          takePictureIntent();
-          break;
-      }
+      LogUtils.debug(TAG, "%s permission granted.", permission.CAMERA);
+      takePictureIntent();
     }
   }
 
@@ -488,7 +500,7 @@ public class AddActivity extends BaseActivity implements
   private void showPictureIntent() {
 
     LogUtils.debug(TAG, "++showPictureIntent()");
-    replaceFragment(InterludeFragment.newInstance());
+    replaceFragment(SystemMessageFragment.newInstance(""));
     deleteImageFile();
     Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     if (takePictureIntent.resolveActivity(getPackageManager()) != null) {

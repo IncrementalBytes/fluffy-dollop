@@ -183,6 +183,25 @@ public class ComicSeries implements Parcelable {
   }
 
   /**
+   * Attempts to extract the Publisher and Series identifiers from the product code.
+   * @param productCode 12 character string representing the product code.
+   */
+  public void parseProductCode(String productCode) {
+
+    LogUtils.debug(TAG, "++parseProductCode(%s)", productCode);
+    if (productCode != null && productCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) {
+      try {
+        PublisherId = productCode.substring(0, BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length());
+        Id = productCode.substring(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length());
+      } catch (Exception e) {
+        LogUtils.warn(TAG, "Could not parse product code: %s", productCode);
+        PublisherId = "";
+        Id = "";
+      }
+    }
+  }
+
+  /**
    * Attempts to read the local copy of comic series. If a failure is encountered, an empty collection is returned.
    * @param fileDir File path of local comic series data.
    * @return Populated collection of comic series.

@@ -71,13 +71,23 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:autofillHints="@string/hint_series_name"
+    android:autofillHints=""
     android:ems="10"
     android:inputType="textPersonName"
     android:textColor="@color/secondaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/comic_series_text_name"/>
+  <TextView
+    android:id="@+id/comic_series_text_name_hint"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:text="@string/hint_series_name"
+    android:textStyle="italic"
+    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_name"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"/>
 
   <TextView
     android:id="@+id/comic_series_text_volume"
@@ -89,7 +99,8 @@
     android:text="@string/volume_number"
     android:textSize="18sp"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_name"/>
+    app:layout_constraintTop_toTopOf="@id/comic_series_edit_volume"
+    app:layout_constraintBottom_toBottomOf="@id/comic_series_edit_volume"/>
   <EditText
     android:id="@+id/comic_series_edit_volume"
     android:layout_width="wrap_content"
@@ -100,7 +111,7 @@
     android:inputType="number"
     android:textColor="@color/secondaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_series_text_volume"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_series_text_name_hint"/>
 
   <Button
     android:id="@+id/comic_series_button_continue"

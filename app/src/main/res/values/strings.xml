@@ -18,7 +18,6 @@
   <string name="err_camera_intent_failed">Unable to create camera intent.</string>
   <string name="err_image_empty">Image was empty.</string>
   <string name="err_image_not_found">Image does not exist.</string>
-  <string name="err_camera_data_unexpected">Unexpected data from camera.</string>
   <string name="err_image_not_loaded">Image not loaded.</string>
   <string name="err_bar_code_task">Bar code detection task failed.</string>
   <string name="err_no_camera_detected">Camera was not detected.</string>
@@ -43,11 +42,11 @@
   <string name="volume">Volume:</string>
   <string name="issue">Issue:</string>
   <string name="search">Search</string>
-  <string name="search_product_hint">12 digit Product UPC</string>
-  <string name="search_issue_hint">5 digit Issue UPC</string>
+  <string name="hint_search_product">12 digit Product UPC</string>
+  <string name="hint_search_issue">5 digit Issue UPC</string>
   <string name="title_comic_book">Comic Book</string>
   <string name="published_date">Published:</string>
-  <string name="hint_series_name">Character name or series</string>
+  <string name="hint_series_name">E.g. Captain Marvel, Daredevil, Friendly Neighborhood Spider-Man, X-Men</string>
   <string name="hint_publisher">Publishing house name</string>
   <string name="series_id">Series Id:</string>
   <string name="series_name">Character or story arc for series name:</string>
@@ -63,11 +62,10 @@
   <string name="hint_image_description">Thumbnail of image from camera.</string>
   <string name="menu_settings">Settings</string>
   <string name="title_preferences">User Preferences</string>
-  <string name="img_issue_code_hint">Photo hint for issue code location.</string>
-  <string name="img_product_code_hint">Photo hint for product code location.</string>
+  <string name="hint_img_issue_code">Photo hint for issue code location.</string>
+  <string name="hint_img_product_code">Photo hint for product code location.</string>
   <string name="disclaimer_comic_series">Note: Comic series are subject to review and may not show up immediately.</string>
-  <string name="err_setup_publisher_data">Unable to gather initial data sets, please try again later.</string>
-  <string name="tutorial_hint">To add a comic book, take a photo of the bar code. An example of a bar code:</string>
+  <string name="hint_tutorial">To add a comic book, take a photo of the bar code. An example of a bar code:</string>
   <string name="hint_barcode">Picture of barcode.</string>
   <string name="show_hint">Show this hint in the future.</string>
   <string name="note_manual_bar_code">Note: if a bar code cannot be read, you will be prompted to enter the bar code manually.</string>
@@ -81,13 +79,11 @@
   <string name="toggle_read">Read</string>
   <string name="bar_code_not_found">Barcode not found in image, try entering product code.</string>
   <string name="err_unknown_publisher">The Publisher Id is unknown. It has been logged for review. Please try again later.</string>
-  <string name="title_please_wait">Please Wait</string>
   <string name="title_gathering_data">Gathering Data</string>
   <string name="permission_storage">Permission needed for storing data locally to reduce network usage.</string>
   <string name="permission_camera">Permission needed for capturing barcode images for processing.</string>
   <string name="add_comic_book_canceled">Adding comic book canceled by user.</string>
   <string name="err_unexpected_activity_code">Unexpected return code from activity.</string>
   <string name="unknown_request_code">Unknown request code.</string>
-  <string name="menu_back">Back</string>
   <string name="menu_cancel">Cancel</string>
 </resources>

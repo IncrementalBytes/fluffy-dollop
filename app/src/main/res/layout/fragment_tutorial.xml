@@ -10,7 +10,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:layout_marginTop="8dp"
-    android:text="@string/tutorial_hint"
+    android:text="@string/hint_tutorial"
     android:textSize="18sp"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"

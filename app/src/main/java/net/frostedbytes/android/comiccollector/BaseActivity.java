@@ -1,6 +1,15 @@
 package net.frostedbytes.android.comiccollector;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import net.frostedbytes.android.comiccollector.common.LogUtils;
+import net.frostedbytes.android.comiccollector.fragments.ComicBookFragment;
+import net.frostedbytes.android.comiccollector.fragments.ComicBookListFragment;
+import net.frostedbytes.android.comiccollector.fragments.ComicSeriesFragment;
+import net.frostedbytes.android.comiccollector.fragments.ManualSearchFragment;
+import net.frostedbytes.android.comiccollector.fragments.SystemMessageFragment;
+import net.frostedbytes.android.comiccollector.fragments.TutorialFragment;
+import net.frostedbytes.android.comiccollector.fragments.UserPreferenceFragment;
 
 public class BaseActivity  extends AppCompatActivity {
 
@@ -30,4 +39,30 @@ public class BaseActivity  extends AppCompatActivity {
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS = 4704;
 
     public static final String BASE_TAG = "ComicCollector::";
+    public static final String TAG = BASE_TAG + "BaseActivity";
+
+    /**
+     * Provides a varying title for the main window based on which fragment is currently being used.
+     * @param fragment Fragment currently being displayed.
+     */
+    protected void updateTitle(Fragment fragment) {
+
+        LogUtils.debug(TAG, "++updateTitle(%s)", fragment.getClass().getSimpleName());
+        String fragmentClassName = fragment.getClass().getName();
+        if (fragmentClassName.equals(ComicBookListFragment.class.getName())) {
+            setTitle(getString(R.string.title_comic_library));
+        } else if (fragmentClassName.equals(ComicBookFragment.class.getName())) {
+            setTitle(getString(R.string.title_comic_book));
+        } else if (fragmentClassName.equals(UserPreferenceFragment.class.getName())) {
+            setTitle(getString(R.string.title_preferences));
+        } else if (fragmentClassName.equals(TutorialFragment.class.getName())) {
+            setTitle(getString(R.string.title_tutorial));
+        } else if (fragmentClassName.equals(ComicSeriesFragment.class.getName())) {
+            setTitle(getString(R.string.title_comic_series));
+        } else if (fragmentClassName.equals(SystemMessageFragment.class.getName())) {
+            setTitle(getString(R.string.app_name));
+        } else if (fragmentClassName.equals(ManualSearchFragment.class.getName())) {
+            setTitle(getString(R.string.title_gathering_data));
+        }
+    }
 }

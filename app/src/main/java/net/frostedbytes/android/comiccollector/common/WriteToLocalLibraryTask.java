@@ -36,7 +36,9 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
         BaseActivity.DEFAULT_LIBRARY_FILE,
         Context.MODE_PRIVATE);
       for (ComicBook comicBook : mComicBooks) {
-        outputStream.write(comicBook.writeLine().getBytes());
+        String lineToWrite = comicBook.writeLine();
+        LogUtils.debug(TAG, "Writing: %s", lineToWrite);
+        outputStream.write(lineToWrite.getBytes());
         booksWritten.add(comicBook);
       }
     } catch (Exception e) {
