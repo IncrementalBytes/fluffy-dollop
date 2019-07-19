@@ -2,7 +2,7 @@ package net.frostedbytes.android.comiccollector;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
+import com.google.android.material.snackbar.Snackbar;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
@@ -74,6 +74,16 @@ public class SignInActivity extends BaseActivity implements OnClickListener {
       })
       .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
       .build();
+  }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+
+    LogUtils.debug(TAG, "++onDestroy()");
+    mAccount = null;
+    mAuth = null;
+    mGoogleApiClient = null;
   }
 
   @Override

@@ -92,7 +92,7 @@ public class ComicSeries implements Parcelable {
    * @return The unique combination of the publisher and series identifiers.
    */
   @Exclude
-  public String getId() {
+  public String getProductId() {
 
     return String.format(Locale.US, "%s%s", PublisherId, Id);
   }
@@ -216,7 +216,7 @@ public class ComicSeries implements Parcelable {
           ComicSeries series = ComicSeries.fromList(elements);
           if (series != null) {
             if (!comicSeries.containsKey(series.Id)) {
-              comicSeries.put(series.getId(), series);
+              comicSeries.put(series.getProductId(), series);
               LogUtils.debug(TAG, "Adding %s to collection.", series.toString());
             }
           } else {

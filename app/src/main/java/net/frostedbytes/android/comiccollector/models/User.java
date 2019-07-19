@@ -25,4 +25,12 @@ public class User implements Serializable {
         this.IsGeek = false;
         this.ShowBarcodeHint = true;
     }
+
+    public static boolean isValid(User user) {
+
+        return user != null &&
+          !user.Id.isEmpty() &&
+          !user.Id.equals(BaseActivity.DEFAULT_USER_ID) &&
+          user.Id.length() == BaseActivity.DEFAULT_USER_ID.length();
+    }
 }

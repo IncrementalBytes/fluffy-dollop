@@ -20,7 +20,7 @@ import net.frostedbytes.android.comiccollector.common.LogUtils;
 public class ComicBook implements Parcelable {
 
   private static final String TAG = BaseActivity.BASE_TAG + "ComicBook";
-  private static final int SCHEMA_FIELDS = 7;
+  private static final int SCHEMA_FIELDS = 8;
 
   @Exclude
   public static final String ROOT = "ComicBooks";
@@ -151,7 +151,7 @@ public class ComicBook implements Parcelable {
 
   /**
    * Gets the unique identifier for the comic book.
-   * @return A string that reprents the PublisherId and Series Id.
+   * @return A string that represents the PublisherId and Series Id.
    */
   @Exclude
   public String getProductId() {
@@ -347,7 +347,7 @@ public class ComicBook implements Parcelable {
 
     return String.format(
       Locale.US,
-      "%s%s-%s|%s|%s|%s|%s|%s|%s\r\n",
+      "%s%s|%s|%s|%s|%s|%s|%s|%s\r\n",
       PublisherId,
       SeriesId,
       IssueCode,

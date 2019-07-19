@@ -11,7 +11,7 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
-import net.frostedbytes.android.comiccollector.MainActivity;
+import net.frostedbytes.android.comiccollector.AddActivity;
 import net.frostedbytes.android.comiccollector.models.ComicSeries;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,10 +21,10 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
 
   private static final String TAG = BASE_TAG + "RetrieveComicSeriesDataTask";
 
-  private WeakReference<MainActivity> mActivityWeakReference;
+  private WeakReference<AddActivity> mActivityWeakReference;
   private ComicSeries mQueryForSeries;
 
-  public RetrieveComicSeriesDataTask(MainActivity context, ComicSeries queryForSeries) {
+  public RetrieveComicSeriesDataTask(AddActivity context, ComicSeries queryForSeries) {
 
     mActivityWeakReference = new WeakReference<>(context);
     mQueryForSeries = queryForSeries;
@@ -38,7 +38,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
     String urlString = String.format(
       Locale.US,
       "https://api.upcitemdb.com/prod/trial/lookup?upc=%s",
-      mQueryForSeries.getId());
+      mQueryForSeries.getProductId());
 
     LogUtils.debug(TAG, "Query: %s", urlString);
     HttpURLConnection connection = null;
@@ -103,7 +103,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
   protected void onPostExecute(ComicSeries comicSeries) {
 
     LogUtils.debug(TAG, "++onPostExecute(%s)", comicSeries.toString());
-    MainActivity activity = mActivityWeakReference.get();
+    AddActivity activity = mActivityWeakReference.get();
     if (activity == null) {
       LogUtils.error(TAG, "MainActivity is null or detached.");
       return;
