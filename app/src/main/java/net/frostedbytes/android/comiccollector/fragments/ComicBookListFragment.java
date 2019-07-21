@@ -40,25 +40,27 @@ public class ComicBookListFragment extends Fragment {
     void onComicListItemSelected(ComicBook comicBook);
 
     void onComicListPopulated(int size);
+
+    void onComicListSynchronize();
   }
 
   private OnComicBookListListener mCallback;
 
   private RecyclerView mRecyclerView;
 
-  private ArrayList<ComicBook> mComicBooks;
+  private HashMap<String, ComicBook> mComicBooks;
   private HashMap<String, ComicPublisher> mComicPublishers;
   private HashMap<String, ComicSeries> mComicSeries;
 
   public static ComicBookListFragment newInstance(
-    ArrayList<ComicBook> comicBooks,
+    HashMap<String, ComicBook> comicBooks,
     HashMap<String, ComicPublisher> publishers,
     HashMap<String, ComicSeries> series) {
 
     LogUtils.debug(TAG, "++newInstance(%d)", comicBooks.size());
     ComicBookListFragment fragment = new ComicBookListFragment();
     Bundle args = new Bundle();
-    args.putParcelableArrayList(BaseActivity.ARG_COMIC_BOOK_LIST, comicBooks);
+    args.putSerializable(BaseActivity.ARG_COMIC_BOOK_LIST, comicBooks);
     args.putSerializable(BaseActivity.ARG_COMIC_PUBLISHERS, publishers);
     args.putSerializable(BaseActivity.ARG_COMIC_SERIES, series);
     fragment.setArguments(args);
@@ -83,7 +85,7 @@ public class ComicBookListFragment extends Fragment {
 
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicBooks = arguments.getParcelableArrayList(BaseActivity.ARG_COMIC_BOOK_LIST);
+      mComicBooks = (HashMap<String, ComicBook>) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK_LIST);
       mComicPublishers = (HashMap<String, ComicPublisher>) arguments.getSerializable(BaseActivity.ARG_COMIC_PUBLISHERS);
       mComicSeries = (HashMap<String, ComicSeries>) arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
     } else {
@@ -97,13 +99,14 @@ public class ComicBookListFragment extends Fragment {
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     final View view = inflater.inflate(R.layout.fragment_comic_book_list, container, false);
 
-    FloatingActionButton mAddButton = view.findViewById(R.id.comic_fab_add);
+    FloatingActionButton addButton = view.findViewById(R.id.comic_fab_add);
+    FloatingActionButton syncButton = view.findViewById(R.id.comic_fab_sync);
     mRecyclerView = view.findViewById(R.id.comic_list_view);
 
     final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager(manager);
-
-    mAddButton.setOnClickListener(pickView -> mCallback.onComicListAddBook());
+    addButton.setOnClickListener(pickView -> mCallback.onComicListAddBook());
+    syncButton.setOnClickListener(pickView -> mCallback.onComicListSynchronize());
 
     updateUI();
     return view;
@@ -115,6 +118,8 @@ public class ComicBookListFragment extends Fragment {
 
     LogUtils.debug(TAG, "++onDestroy()");
     mComicBooks = null;
+    mComicSeries = null;
+    mComicPublishers = null;
   }
 
   /*
@@ -126,8 +131,9 @@ public class ComicBookListFragment extends Fragment {
       mCallback.onComicListPopulated(0);
     } else {
       LogUtils.debug(TAG, "++updateUI()");
-      mComicBooks.sort(new SortUtils.ByPublicationDate());
-      ComicBookAdapter comicAdapter = new ComicBookAdapter(mComicBooks);
+      ArrayList<ComicBook> comicBooks = new ArrayList<>(mComicBooks.values());
+      comicBooks.sort(new SortUtils.ByPublicationDateAndIssueNumber());
+      ComicBookAdapter comicAdapter = new ComicBookAdapter(comicBooks);
       mRecyclerView.setAdapter(comicAdapter);
       mCallback.onComicListPopulated(comicAdapter.getItemCount());
     }

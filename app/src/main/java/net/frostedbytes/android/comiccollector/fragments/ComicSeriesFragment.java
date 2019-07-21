@@ -85,61 +85,66 @@ public class ComicSeriesFragment extends Fragment {
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     View view = inflater.inflate(R.layout.fragment_comic_series, container, false);
 
-    EditText seriesIdEdit = view.findViewById(R.id.comic_series_edit_code);
-    seriesIdEdit.setText(mComicSeries.Id);
-    seriesIdEdit.setEnabled(false);
+    if ((mComicSeries != null && mComicSeries.isValid()) &&
+      (mComicPublisher != null)) {
+      EditText seriesIdEdit = view.findViewById(R.id.comic_series_edit_code);
+      EditText mPublisherNameEdit = view.findViewById(R.id.comic_series_edit_publisher);
+      mSeriesNameEdit = view.findViewById(R.id.comic_series_edit_name);
+      mSeriesVolumeEdit = view.findViewById(R.id.comic_series_edit_volume);
+      Button cancelButton = view.findViewById(R.id.comic_series_button_cancel);
+      mContinueButton = view.findViewById(R.id.comic_series_button_continue);
 
-    EditText mPublisherNameEdit = view.findViewById(R.id.comic_series_edit_publisher);
-    mPublisherNameEdit.setText(mComicPublisher.Name);
-    mPublisherNameEdit.setEnabled(false);
+      seriesIdEdit.setText(mComicSeries.Id);
+      seriesIdEdit.setEnabled(false);
+      mPublisherNameEdit.setText(mComicPublisher.Name);
+      mPublisherNameEdit.setEnabled(false);
 
-    mSeriesNameEdit = view.findViewById(R.id.comic_series_edit_name);
-    mSeriesNameEdit.setText(mComicSeries.SeriesName);
-    mSeriesNameEdit.addTextChangedListener(new TextWatcher() {
-      @Override
-      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-      }
+      mSeriesNameEdit.setText(mComicSeries.SeriesName);
+      mSeriesNameEdit.addTextChangedListener(new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
 
-      @Override
-      public void onTextChanged(CharSequence s, int start, int before, int count) {
-      }
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
 
-      @Override
-      public void afterTextChanged(Editable s) {
-        validateAll();
-      }
-    });
+        @Override
+        public void afterTextChanged(Editable s) {
+          validateAll();
+        }
+      });
 
-    mSeriesVolumeEdit = view.findViewById(R.id.comic_series_edit_volume);
-    mSeriesVolumeEdit.addTextChangedListener(new TextWatcher() {
-      @Override
-      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-      }
+      mSeriesVolumeEdit.addTextChangedListener(new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
 
-      @Override
-      public void onTextChanged(CharSequence s, int start, int before, int count) {
-      }
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
 
-      @Override
-      public void afterTextChanged(Editable s) {
-        validateAll();
-      }
-    });
+        @Override
+        public void afterTextChanged(Editable s) {
+          validateAll();
+        }
+      });
 
-    Button cancelButton = view.findViewById(R.id.comic_series_button_cancel);
-    cancelButton.setOnClickListener(v -> mCallback.onComicSeriesActionComplete(null));
+      cancelButton.setOnClickListener(v -> mCallback.onComicSeriesActionComplete(null));
 
-    mContinueButton = view.findViewById(R.id.comic_series_button_continue);
-    mContinueButton.setEnabled(false);
-    mContinueButton.setOnClickListener(v -> {
+      mContinueButton.setEnabled(false);
+      mContinueButton.setOnClickListener(v -> {
 
-      mComicSeries.SeriesName = mSeriesNameEdit.getText().toString().trim();
-      if (!mSeriesVolumeEdit.getText().toString().isEmpty()) {
-        mComicSeries.Volume = Integer.parseInt(mSeriesVolumeEdit.getText().toString());
-      }
+        mComicSeries.SeriesName = mSeriesNameEdit.getText().toString().trim();
+        if (!mSeriesVolumeEdit.getText().toString().isEmpty()) {
+          mComicSeries.Volume = Integer.parseInt(mSeriesVolumeEdit.getText().toString());
+        }
 
-      mCallback.onComicSeriesActionComplete(mComicSeries);
-    });
+        mCallback.onComicSeriesActionComplete(mComicSeries);
+      });
+    } else {
+      mCallback.onComicSeriesActionComplete(null);
+    }
 
     return view;
   }

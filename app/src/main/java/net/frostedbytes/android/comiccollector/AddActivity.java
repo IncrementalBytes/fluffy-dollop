@@ -396,6 +396,7 @@ public class AddActivity extends BaseActivity implements
     if (mComicBooks != null) {
       for (ComicBook comic : mComicBooks) {
         if (!comicBook.getFullId().isEmpty() && comic.getFullId().equals(comicBook.getFullId())) {
+          LogUtils.debug(TAG, "Found %s", comic.toString());
           foundBook = comic;
           break;
         }

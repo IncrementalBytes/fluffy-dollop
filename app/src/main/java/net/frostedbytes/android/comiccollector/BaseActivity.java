@@ -31,6 +31,7 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String DEFAULT_ISSUE_CODE = "00000";
     public static final String DEFAULT_LIBRARY_FILE = "localLibrary.v02.txt";
     public static final String DEFAULT_PRODUCT_CODE = "000000000000";
+    public static final String DEFAULT_PUBLISHED_DATE = "00/0000";
     public static final String DEFAULT_USER_ID = "0000000000000000000000000000";
 
     public static final int REQUEST_IMAGE_CAPTURE = 4701;

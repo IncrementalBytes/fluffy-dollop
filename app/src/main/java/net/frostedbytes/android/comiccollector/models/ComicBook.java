@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 
@@ -20,15 +21,7 @@ import net.frostedbytes.android.comiccollector.common.LogUtils;
 public class ComicBook implements Parcelable {
 
   private static final String TAG = BaseActivity.BASE_TAG + "ComicBook";
-  private static final int SCHEMA_FIELDS = 8;
-
-  @Exclude
-  public static final String ROOT = "ComicBooks";
-
-  /**
-   * Date comic was added to user's library.
-   */
-  public long AddedDate;
+  private static final int SCHEMA_FIELDS = 6;
 
   /**
    * Cover version of comic.
@@ -49,11 +42,6 @@ public class ComicBook implements Parcelable {
   public int IssueNumber;
 
   /**
-   * Date this comic instance was modified in user's library.
-   */
-  public long ModifiedDate;
-
-  /**
    * Whether or not comic is owned by the user, otherwise it's on their wishlist.
    */
   public boolean OwnedState;
@@ -67,7 +55,7 @@ public class ComicBook implements Parcelable {
   /**
    * Date comic was published.
    */
-  public long PublishedDate;
+  public String PublishedDate;
 
   /**
    * Unique identifier for publisher of comic.
@@ -93,14 +81,12 @@ public class ComicBook implements Parcelable {
 
   public ComicBook() {
 
-    AddedDate = 0;
     CoverVersion = -1;
     IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
     IssueNumber = -1;
-    ModifiedDate = 0;
     OwnedState = false;
     PrintRun = -1;
-    PublishedDate = 0;
+    PublishedDate = "00/0000";
     PublisherId = BaseActivity.DEFAULT_COMIC_PUBLISHER_ID;
     ReadState = false;
     SeriesId = BaseActivity.DEFAULT_COMIC_SERIES_ID;
@@ -109,11 +95,9 @@ public class ComicBook implements Parcelable {
 
   public ComicBook(ComicBook comicBook) {
 
-    AddedDate = comicBook.AddedDate;
     CoverVersion = comicBook.CoverVersion;
     IssueCode = comicBook.IssueCode;
     IssueNumber = comicBook.IssueNumber;
-    ModifiedDate = comicBook.ModifiedDate;
     OwnedState = comicBook.OwnedState;
     PrintRun = comicBook.PrintRun;
     PublisherId = comicBook.PublisherId;
@@ -125,15 +109,13 @@ public class ComicBook implements Parcelable {
 
   protected ComicBook(Parcel in) {
 
-    AddedDate = in.readLong();
     CoverVersion = in.readInt();
     IssueCode = in.readString();
     IssueNumber = in.readInt();
-    ModifiedDate = in.readLong();
     OwnedState = in.readInt() != 0;
     PrintRun = in.readInt();
     PublisherId = in.readString();
-    PublishedDate = in.readLong();
+    PublishedDate = in.readString();
     ReadState = in.readInt() != 0;
     SeriesId = in.readString();
     Title = in.readString();
@@ -181,15 +163,13 @@ public class ComicBook implements Parcelable {
   @Override
   public void writeToParcel(Parcel dest, int flags) {
 
-    dest.writeLong(AddedDate);
     dest.writeInt(CoverVersion);
     dest.writeString(IssueCode);
     dest.writeInt(IssueNumber);
-    dest.writeLong(ModifiedDate);
     dest.writeByte((byte) (OwnedState ? 1 : 0));
     dest.writeInt(PrintRun);
     dest.writeString(PublisherId);
-    dest.writeLong(PublishedDate);
+    dest.writeString(PublishedDate);
     dest.writeByte((byte) (ReadState ? 1 : 0));
     dest.writeString(SeriesId);
     dest.writeString(Title);
@@ -212,14 +192,14 @@ public class ComicBook implements Parcelable {
    * @param fileDir Path to local library.
    * @return List of comic books parsed from local library. An empty list if library not found.
    */
-  public static ArrayList<ComicBook> readLocalLibrary(File fileDir) {
+  public static HashMap<String, ComicBook> readLocalLibrary(File fileDir) {
 
     LogUtils.debug(TAG, "++readLocalLibrary()");
     String parsableString;
     String resourcePath = BaseActivity.DEFAULT_LIBRARY_FILE;
     File file = new File(fileDir, resourcePath);
     LogUtils.debug(TAG, "Loading %s", file.getAbsolutePath());
-    ArrayList<ComicBook> comicBooks = new ArrayList<>();
+    HashMap<String, ComicBook> comicBooks = new HashMap<>();
     try {
       if (file.exists() && file.canRead()) {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
@@ -240,7 +220,7 @@ public class ComicBook implements Parcelable {
 
           ComicBook comicBook = ComicBook.fromList(elements);
           if (comicBook != null) {
-            comicBooks.add(comicBook);
+            comicBooks.put(comicBook.getFullId(), comicBook);
             LogUtils.debug(TAG, "Adding %s to collection.", comicBook.toString());
           } else {
             LogUtils.warn(TAG, "Could not create ComicBook from: %s", parsableString);
@@ -347,16 +327,14 @@ public class ComicBook implements Parcelable {
 
     return String.format(
       Locale.US,
-      "%s%s|%s|%s|%s|%s|%s|%s|%s\r\n",
+      "%s%s|%s|%s|%s|%s|%s\r\n",
       PublisherId,
       SeriesId,
       IssueCode,
-      String.valueOf(PublishedDate),
+      PublishedDate,
       Title,
       String.valueOf(OwnedState),
-      String.valueOf(ReadState),
-      String.valueOf(AddedDate),
-      String.valueOf(ModifiedDate));
+      String.valueOf(ReadState));
   }
 
   /*
@@ -368,12 +346,10 @@ public class ComicBook implements Parcelable {
     try {
       comicBook.parseProductCode(elements.remove(0));
       comicBook.parseIssueCode(elements.remove(0));
-      comicBook.PublishedDate = Long.parseLong(elements.remove(0));
+      comicBook.PublishedDate = elements.remove(0);
       comicBook.Title = elements.remove(0);
       comicBook.OwnedState = Boolean.parseBoolean(elements.remove(0));
       comicBook.ReadState = Boolean.parseBoolean(elements.remove(0));
-      comicBook.AddedDate = Long.parseLong(elements.remove(0));
-      comicBook.ModifiedDate = Long.parseLong(elements.remove(0));
     } catch (Exception ex) {
       return null;
     }

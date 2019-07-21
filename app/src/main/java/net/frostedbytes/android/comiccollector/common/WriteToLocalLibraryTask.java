@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.crashlytics.android.Crashlytics;
+import java.util.HashMap;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.MainActivity;
 import net.frostedbytes.android.comiccollector.models.ComicBook;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 
 import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
-public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<ComicBook>> {
+public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, HashMap<String, ComicBook>> {
 
   private static final String TAG = BASE_TAG + "WriteToLocalLibraryTask";
 
@@ -27,9 +28,9 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
     mComicBooks = comicBooks;
   }
 
-  protected ArrayList<ComicBook> doInBackground(Void... params) {
+  protected HashMap<String, ComicBook> doInBackground(Void... params) {
 
-    ArrayList<ComicBook> booksWritten = new ArrayList<>();
+    HashMap<String, ComicBook> booksWritten = new HashMap<>();
     FileOutputStream outputStream;
     try {
       outputStream = mFragmentWeakReference.get().getApplicationContext().openFileOutput(
@@ -39,7 +40,7 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
         String lineToWrite = comicBook.writeLine();
         LogUtils.debug(TAG, "Writing: %s", lineToWrite);
         outputStream.write(lineToWrite.getBytes());
-        booksWritten.add(comicBook);
+        booksWritten.put(comicBook.getFullId(), comicBook);
       }
     } catch (Exception e) {
       LogUtils.warn(TAG, "Exception when writing local library.");
@@ -49,7 +50,7 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
     return booksWritten;
   }
 
-  protected void onPostExecute(ArrayList<ComicBook> comicBooks) {
+  protected void onPostExecute(HashMap<String, ComicBook> comicBooks) {
 
     LogUtils.debug(TAG, "++onPostExecute(%d)", comicBooks.size());
     MainActivity activity = mFragmentWeakReference.get();
