@@ -4,13 +4,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.firebase.firestore.Exclude;
 
-import java.io.BufferedReader;
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileReader;
+import java.io.Reader;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import net.frostedbytes.android.comiccollector.BaseActivity;
@@ -21,62 +23,62 @@ import net.frostedbytes.android.comiccollector.common.LogUtils;
 public class ComicBook implements Parcelable {
 
   private static final String TAG = BaseActivity.BASE_TAG + "ComicBook";
-  private static final int SCHEMA_FIELDS = 6;
 
   /**
    * Cover version of comic.
    */
-  @Exclude
   public int CoverVersion;
 
   /**
    * Unique code for issue (paired with SeriesId); populates IssueNumber, CoverVersion, and PrintRun.
    */
-  @Exclude
+  @SerializedName("issue_code")
   public String IssueCode;
 
   /**
    * Specific issue number.
    */
-  @Exclude
   public int IssueNumber;
 
   /**
    * Whether or not comic is owned by the user, otherwise it's on their wishlist.
    */
+  @SerializedName("owned")
   public boolean OwnedState;
 
   /**
    * Print run number.
    */
-  @Exclude
   public int PrintRun;
 
   /**
    * Date comic was published.
    */
+  @SerializedName("publish_date")
   public String PublishedDate;
 
   /**
    * Unique identifier for publisher of comic.
    */
-  @Exclude
+  @SerializedName("publish_id")
   public String PublisherId;
 
   /**
    * Whether or not comic is read by the user, otherwise it's unread.
    */
+  @SerializedName("read")
   public boolean ReadState;
 
   /**
    * Unique identifier for the series this comic is published under.
    */
-  @Exclude
+  @SerializedName("series_id")
   public String SeriesId;
 
   /**
    * Title for comic; can be blank.
    */
+  @SerializedName("title")
   public String Title;
 
   public ComicBook() {
@@ -125,7 +127,6 @@ public class ComicBook implements Parcelable {
    * Gets the full unique identifier for the comic book.
    * @return A string that represents the PublisherId, SeriesId, and the IssueCode.
    */
-  @Exclude
   public String getFullId() {
 
     return String.format(Locale.US, "%s-%s", getProductId(), IssueCode);
@@ -135,7 +136,6 @@ public class ComicBook implements Parcelable {
    * Gets the unique identifier for the comic book.
    * @return A string that represents the PublisherId and Series Id.
    */
-  @Exclude
   public String getProductId() {
 
     return String.format(Locale.US, "%s%s", PublisherId, SeriesId);
@@ -195,43 +195,27 @@ public class ComicBook implements Parcelable {
   public static HashMap<String, ComicBook> readLocalLibrary(File fileDir) {
 
     LogUtils.debug(TAG, "++readLocalLibrary()");
-    String parsableString;
     String resourcePath = BaseActivity.DEFAULT_LIBRARY_FILE;
     File file = new File(fileDir, resourcePath);
     LogUtils.debug(TAG, "Loading %s", file.getAbsolutePath());
     HashMap<String, ComicBook> comicBooks = new HashMap<>();
-    try {
-      if (file.exists() && file.canRead()) {
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-        while ((parsableString = bufferedReader.readLine()) != null) { //process line
-          if (parsableString.startsWith("--")) { // comment line; ignore
-            continue;
-          }
 
-          List<String> elements = new ArrayList<>(Arrays.asList(parsableString.split("\\|")));
-          if (elements.size() != ComicBook.SCHEMA_FIELDS) {
-            LogUtils.debug(
-              TAG,
-              "Local library schema mismatch. Got: %d Expected: %d",
-              elements.size(),
-              ComicBook.SCHEMA_FIELDS);
-            continue;
-          }
-
-          ComicBook comicBook = ComicBook.fromList(elements);
-          if (comicBook != null) {
-            comicBooks.put(comicBook.getFullId(), comicBook);
-            LogUtils.debug(TAG, "Adding %s to collection.", comicBook.toString());
-          } else {
-            LogUtils.warn(TAG, "Could not create ComicBook from: %s", parsableString);
+    if (file.exists() && file.canRead()) {
+      try (Reader reader = new FileReader(file.getAbsolutePath())) {
+        Gson gson = new Gson();
+        Type collectionType = new TypeToken<ArrayList<ComicBook>>() { }.getType();
+        List<ComicBook> comics = gson.fromJson(reader, collectionType);
+        for (ComicBook comic : comics) {
+          if (comic.isValid()) {
+            comicBooks.put(comic.getFullId(), comic);
           }
         }
-      } else {
-        LogUtils.debug(TAG, "%s does not exist yet.", resourcePath);
+      } catch (Exception e) {
+        LogUtils.warn(TAG, "Failed reading local library: %s", e.getMessage());
+        Crashlytics.logException(e);
       }
-    } catch (Exception e) {
-      LogUtils.warn(TAG, "Exception when reading local library data.");
-      Crashlytics.logException(e);
+    } else {
+      LogUtils.debug(TAG, "%s does not exist yet.", resourcePath);
     }
 
     return comicBooks;
@@ -241,7 +225,6 @@ public class ComicBook implements Parcelable {
    * Validates the properties of the comic book.
    * @return TRUE if all properties are within expected parameters, otherwise FALSE.
    */
-  @Exclude
   public boolean isValid() {
 
     LogUtils.debug(TAG, "++isValid()");
@@ -317,43 +300,5 @@ public class ComicBook implements Parcelable {
         SeriesId = "";
       }
     }
-  }
-
-  /**
-   * Provides a single line of text representing the comic book, delimited by the '|' character.
-   * @return Single line text representing this comic book.
-   */
-  public String writeLine() {
-
-    return String.format(
-      Locale.US,
-      "%s%s|%s|%s|%s|%s|%s\r\n",
-      PublisherId,
-      SeriesId,
-      IssueCode,
-      PublishedDate,
-      Title,
-      String.valueOf(OwnedState),
-      String.valueOf(ReadState));
-  }
-
-  /*
-    Private Method(s)
-   */
-  private static ComicBook fromList(List<String> elements) {
-
-    ComicBook comicBook = new ComicBook();
-    try {
-      comicBook.parseProductCode(elements.remove(0));
-      comicBook.parseIssueCode(elements.remove(0));
-      comicBook.PublishedDate = elements.remove(0);
-      comicBook.Title = elements.remove(0);
-      comicBook.OwnedState = Boolean.parseBoolean(elements.remove(0));
-      comicBook.ReadState = Boolean.parseBoolean(elements.remove(0));
-    } catch (Exception ex) {
-      return null;
-    }
-
-    return comicBook;
   }
 }

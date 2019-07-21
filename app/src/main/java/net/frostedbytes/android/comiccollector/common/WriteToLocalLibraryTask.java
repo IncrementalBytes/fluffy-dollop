@@ -4,6 +4,9 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.MainActivity;
@@ -33,15 +36,19 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, HashMap<Strin
     HashMap<String, ComicBook> booksWritten = new HashMap<>();
     FileOutputStream outputStream;
     try {
+      // for future processing consideration
+      for (ComicBook comicBook : mComicBooks) {
+        if (comicBook.isValid()) {
+          booksWritten.put(comicBook.getFullId(), comicBook);
+        }
+      }
+
       outputStream = mFragmentWeakReference.get().getApplicationContext().openFileOutput(
         BaseActivity.DEFAULT_LIBRARY_FILE,
         Context.MODE_PRIVATE);
-      for (ComicBook comicBook : mComicBooks) {
-        String lineToWrite = comicBook.writeLine();
-        LogUtils.debug(TAG, "Writing: %s", lineToWrite);
-        outputStream.write(lineToWrite.getBytes());
-        booksWritten.put(comicBook.getFullId(), comicBook);
-      }
+      Gson gson = new Gson();
+      Type collectionType = new TypeToken<ArrayList<ComicBook>>(){}.getType();
+      outputStream.write(gson.toJson(mComicBooks, collectionType).getBytes());
     } catch (Exception e) {
       LogUtils.warn(TAG, "Exception when writing local library.");
       Crashlytics.logException(e);

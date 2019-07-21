@@ -21,6 +21,7 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String ARG_EMAIL = "email";
     public static final String ARG_FIREBASE_USER_ID = "firebase_user_id";
     public static final String ARG_MESSAGE = "message";
+    public static final String ARG_NEW_COMIC_BOOK = "new_comic_book";
     public static final String ARG_USER = "user";
     public static final String ARG_USER_ID = "user_id";
     public static final String ARG_USER_NAME = "user_name";
@@ -29,7 +30,7 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String DEFAULT_COMIC_SERIES_FILE = "localComicSeries.v02.txt";
     public static final String DEFAULT_COMIC_SERIES_ID = "000000";
     public static final String DEFAULT_ISSUE_CODE = "00000";
-    public static final String DEFAULT_LIBRARY_FILE = "localLibrary.v02.txt";
+    public static final String DEFAULT_LIBRARY_FILE = "localLibrary.txt";
     public static final String DEFAULT_PRODUCT_CODE = "000000000000";
     public static final String DEFAULT_PUBLISHED_DATE = "00/0000";
     public static final String DEFAULT_USER_ID = "0000000000000000000000000000";

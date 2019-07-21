@@ -181,7 +181,7 @@ public class AddComicActivityTest {
     toggleButton2.check(matches(isDisplayed()));
 
     ViewInteraction button4 = onView(
-      allOf(withId(R.id.comic_book_button_add),
+      allOf(withId(R.id.comic_book_button_save),
         childAtPosition(
           childAtPosition(
             withId(R.id.main_fragment_container),
@@ -191,7 +191,7 @@ public class AddComicActivityTest {
     button4.check(matches(isDisplayed()));
 
     ViewInteraction appCompatButton3 = onView(
-      allOf(withId(R.id.comic_book_button_add), withText("Add to Library?"),
+      allOf(withId(R.id.comic_book_button_save), withText("Save"),
         childAtPosition(
           childAtPosition(
             withId(R.id.main_fragment_container),

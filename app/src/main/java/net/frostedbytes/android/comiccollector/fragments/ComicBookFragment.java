@@ -50,15 +50,28 @@ public class ComicBookFragment extends Fragment {
   private ComicBook mComicBook;
   private ComicPublisher mComicPublisher;
   private ComicSeries mComicSeries;
+  private boolean mIsNew;
 
   public static ComicBookFragment newInstance(ComicBook comicBook, ComicPublisher comicPublisher, ComicSeries comicSeries) {
 
-    LogUtils.debug(TAG, "++newInstance(%s, %s, %s)", comicBook.toString(), comicPublisher.toString(), comicSeries.toString());
+    return newInstance(comicBook, comicPublisher, comicSeries, false);
+  }
+
+  public static ComicBookFragment newInstance(ComicBook comicBook, ComicPublisher comicPublisher, ComicSeries comicSeries, boolean isNew) {
+
+    LogUtils.debug(
+      TAG,
+      "++newInstance(%s, %s, %s, %s)",
+      comicBook.toString(),
+      comicPublisher.toString(),
+      comicSeries.toString(),
+      String.valueOf(isNew));
     ComicBookFragment fragment = new ComicBookFragment();
     Bundle args = new Bundle();
     args.putParcelable(BaseActivity.ARG_COMIC_BOOK, comicBook);
     args.putParcelable(BaseActivity.ARG_COMIC_PUBLISHER, comicPublisher);
     args.putParcelable(BaseActivity.ARG_COMIC_SERIES, comicSeries);
+    args.putBoolean(BaseActivity.ARG_NEW_COMIC_BOOK, isNew);
     fragment.setArguments(args);
     return fragment;
   }
@@ -83,6 +96,7 @@ public class ComicBookFragment extends Fragment {
       mComicBook = arguments.getParcelable(BaseActivity.ARG_COMIC_BOOK);
       mComicPublisher = arguments.getParcelable(BaseActivity.ARG_COMIC_PUBLISHER);
       mComicSeries = arguments.getParcelable(BaseActivity.ARG_COMIC_SERIES);
+      mIsNew = arguments.getBoolean(BaseActivity.ARG_NEW_COMIC_BOOK);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
     }
@@ -146,26 +160,30 @@ public class ComicBookFragment extends Fragment {
         mCallback.onComicBookAddedToLibrary(updatedBook);
       });
 
-      removeButton.setOnClickListener(v -> {
+      if (mIsNew) {
+        removeButton.setVisibility(View.INVISIBLE);
+      } else {
+        removeButton.setOnClickListener(v -> {
 
-        if (getActivity() != null) {
-          String message = String.format(Locale.US, getString(R.string.remove_book_message), mComicBook.Title);
-          if (mComicBook.Title.isEmpty()) {
-            message = "Remove comic book from your library?";
+          if (getActivity() != null) {
+            String message = String.format(Locale.US, getString(R.string.remove_book_message), mComicBook.Title);
+            if (mComicBook.Title.isEmpty()) {
+              message = "Remove comic book from your library?";
+            }
+
+            AlertDialog removeBookDialog = new AlertDialog.Builder(getActivity())
+              .setMessage(message)
+              .setPositiveButton(android.R.string.yes, (dialog, which) -> mCallback.onComicBookRemoved(mComicBook))
+              .setNegativeButton(android.R.string.no, null)
+              .create();
+            removeBookDialog.show();
+          } else {
+            String message = "Unable to get activity; cannot remove book.";
+            LogUtils.debug(TAG, message);
+            mCallback.onComicBookActionComplete(message);
           }
-
-          AlertDialog removeBookDialog = new AlertDialog.Builder(getActivity())
-            .setMessage(message)
-            .setPositiveButton(android.R.string.yes, (dialog, which) -> mCallback.onComicBookRemoved(mComicBook))
-            .setNegativeButton(android.R.string.no, null)
-            .create();
-          removeBookDialog.show();
-        } else {
-          String message = "Unable to get activity; cannot remove book.";
-          LogUtils.debug(TAG, message);
-          mCallback.onComicBookActionComplete(message);
-        }
-      });
+        });
+      }
     }
 
     mCallback.onComicBookInit(true);

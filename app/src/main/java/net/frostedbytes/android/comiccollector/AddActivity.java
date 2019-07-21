@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
@@ -113,7 +114,7 @@ public class AddActivity extends BaseActivity implements
 
     if (User.isValid(mUser)) {
       if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-        checkDevicePermission();
+        checkForCameraPermission();
       } else {
         setResultAndFinish(getString(R.string.err_no_camera_detected));
       }
@@ -141,6 +142,17 @@ public class AddActivity extends BaseActivity implements
     mImageBitmap = null;
     mPublishers = null;
     mUser = null;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+
+    LogUtils.debug(TAG, "++onOptionsItemSelected(%s)", item.getTitle());
+    if (item.getItemId() == R.id.action_cancel) {
+      setResultAndFinish("");
+    }
+
+    return super.onOptionsItemSelected(item);
   }
 
   @Override
@@ -206,18 +218,7 @@ public class AddActivity extends BaseActivity implements
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
     LogUtils.debug(TAG, "++onRequestPermissionsResult(int, String[], int[])");
-    if (requestCode == BaseActivity.REQUEST_CAMERA_PERMISSIONS) {
-      if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        LogUtils.debug(TAG, "CAMERA_PERMISSIONS_REQUEST permission granted.");
-        takePictureIntent();
-      } else {
-        LogUtils.debug(TAG, "CAMERA_PERMISSIONS_REQUEST permission denied.");
-        mProgressBar.setIndeterminate(false);
-        setResultAndFinish(getString(R.string.permission_camera));
-      }
-    } else {
-      LogUtils.debug(TAG, "Unknown request code: %d", requestCode);
-    }
+    checkForCameraPermission();
   }
 
   /*
@@ -307,13 +308,13 @@ public class AddActivity extends BaseActivity implements
   /*
     Private Method(s)
    */
-  private void checkDevicePermission() {
+  private void checkForCameraPermission() {
 
     LogUtils.debug(TAG, "++checkDevicePermission()");
     if (ContextCompat.checkSelfPermission(this, permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
       if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission.CAMERA)) {
         Snackbar.make(
-          findViewById(R.id.main_fragment_container),
+          findViewById(R.id.add_fragment_container),
           getString(R.string.permission_denied_explanation),
           Snackbar.LENGTH_INDEFINITE)
           .setAction(

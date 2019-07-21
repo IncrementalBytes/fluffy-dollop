@@ -23,8 +23,8 @@
   <string name="err_no_camera_detected">Camera was not detected.</string>
 
   <string name="debug_path">/storage/self/primary/DCIM/Camera</string>
-  <!--<string name="debug_file_name">20190511_060443.jpg</string>-->
-  <string name="debug_file_name">20190718_171143.jpg</string>
+  <string name="debug_file_name">20190511_060443.jpg</string>
+  <!--<string name="debug_file_name">20190718_171143.jpg</string>-->
   <!--<string name="debug_file_name">20190419_131840.jpg</string>-->
   <string name="cancel">Cancel</string>
   <string name="title">Title:</string>
@@ -75,7 +75,7 @@
   <string name="toggle_not_read">Not Read</string>
   <string name="toggle_read">Read</string>
   <string name="bar_code_not_found">Barcode not found in image, try entering product code.</string>
-  <string name="err_unknown_publisher">The Publisher Id is unknown. It has been logged for review. Please try again later.</string>
+  <string name="err_unknown_publisher">The Product Code is unknown and has been logged for review. Please try again later.</string>
   <string name="title_gathering_data">Gathering Data</string>
   <string name="permission_storage">Permission needed for storing data locally to reduce network usage.</string>
   <string name="permission_camera">Permission needed for capturing barcode images for processing.</string>
@@ -84,4 +84,5 @@
   <string name="unknown_request_code">Unknown request code.</string>
   <string name="menu_cancel">Cancel</string>
   <string name="save_comic_book">Save</string>
+  <string name="err_save_comic_books">Unable to save comic book list at this time.</string>
 </resources>

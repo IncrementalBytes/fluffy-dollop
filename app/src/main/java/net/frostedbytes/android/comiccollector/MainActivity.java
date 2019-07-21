@@ -32,7 +32,6 @@ import com.google.firebase.perf.FirebasePerformance;
 import com.google.firebase.perf.metrics.Trace;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
-import net.frostedbytes.android.comiccollector.common.WriteToLocalComicSeriesTask;
 import net.frostedbytes.android.comiccollector.common.WriteToLocalLibraryTask;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookListFragment;
@@ -154,7 +153,7 @@ public class MainActivity extends BaseActivity implements
     switch (item.getItemId()) {
       case R.id.action_home:
         if (!mUser.Id.isEmpty() && !mUser.Id.equals(BaseActivity.DEFAULT_USER_ID)) {
-          checkDevicePermission();
+          checkForWritePermission();
         } else {
           showDismissableSnackbar(getString(R.string.err_unknown_user));
         }
@@ -222,7 +221,6 @@ public class MainActivity extends BaseActivity implements
         if (series != null) {
           if (!mComicSeries.containsKey(series.getProductId())) {
             mComicSeries.put(series.getProductId(), series);
-            new WriteToLocalComicSeriesTask(this, new ArrayList<>(mComicSeries.values()));
           }
         }
 
@@ -231,7 +229,7 @@ public class MainActivity extends BaseActivity implements
           ComicPublisher comicPublisher = mPublishers.get(book.PublisherId);
           ComicSeries comicSeries = mComicSeries.get(book.getProductId());
           if (comicPublisher != null && comicSeries != null) {
-            replaceFragment(ComicBookFragment.newInstance(book, comicPublisher, comicSeries));
+            replaceFragment(ComicBookFragment.newInstance(book, comicPublisher, comicSeries, true));
           } else {
             LogUtils.warn(TAG, "Publisher and/or Series data is unexpected.");
           }
@@ -250,18 +248,7 @@ public class MainActivity extends BaseActivity implements
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
     LogUtils.debug(TAG, "++onRequestPermissionsResult(int, String[], int[])");
-    if (requestCode == BaseActivity.REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS) {
-      if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        LogUtils.debug(TAG, "WRITE_EXTERNAL_STORAGE permission granted.");
-        mComicBooks = ComicBook.readLocalLibrary(getFilesDir());
-        replaceFragment(ComicBookListFragment.newInstance(mComicBooks, mPublishers, mComicSeries));
-      } else {
-        mProgressBar.setIndeterminate(false);
-        showDismissableSnackbar(getString(R.string.permission_storage));
-      }
-    } else {
-      LogUtils.debug(TAG, "Unknown request code: %d", requestCode);
-    }
+    checkForWritePermission();
   }
 
   /*
@@ -388,17 +375,6 @@ public class MainActivity extends BaseActivity implements
   /*
       Public Method(s)
    */
-  public void writeComicSeriesComplete(ArrayList<ComicSeries> comicSeries) {
-
-    LogUtils.debug(TAG, "++writeComicSeriesComplete(%d)", comicSeries.size());
-    mComicSeries = new HashMap<>();
-    for (ComicSeries series : comicSeries) {
-      if (!mComicSeries.containsKey(series.getProductId())) {
-        mComicSeries.put(series.getProductId(), series);
-      }
-    }
-  }
-
   public void writeLibraryComplete(HashMap<String, ComicBook> comicBooks) {
 
     LogUtils.debug(TAG, "++writeLibraryComplete(%d)", comicBooks.size());
@@ -422,14 +398,14 @@ public class MainActivity extends BaseActivity implements
     startActivityForResult(intent, BaseActivity.REQUEST_COMIC_ADD);
   }
 
-  private void checkDevicePermission() {
+  private void checkForWritePermission() {
 
-    LogUtils.debug(TAG, "++checkDevicePermission()");
+    LogUtils.debug(TAG, "++checkForWritePermission()");
     if (ContextCompat.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
       if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission.WRITE_EXTERNAL_STORAGE)) {
         Snackbar.make(
           findViewById(R.id.main_fragment_container),
-          getString(R.string.permission_denied_explanation),
+          getString(R.string.permission_storage),
           Snackbar.LENGTH_INDEFINITE)
           .setAction(
             getString(R.string.ok),
@@ -539,7 +515,7 @@ public class MainActivity extends BaseActivity implements
       }
 
       // series data is loaded, proceed to loading comic library data
-      checkDevicePermission();
+      checkForWritePermission();
     });
   }
 
