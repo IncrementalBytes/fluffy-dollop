@@ -38,7 +38,7 @@
   <string name="err_no_data">No comic books found, try adding some.</string>
   <string name="series">Series:</string>
   <string name="volume">Volume:</string>
-  <string name="issue">Issue:</string>
+  <string name="issue_number">Issue Number:</string>
   <string name="search">Search</string>
   <string name="hint_search_product">12 digit Product UPC</string>
   <string name="hint_search_issue">5 digit Issue UPC</string>
@@ -101,4 +101,7 @@
   <string name="err_storage_task_unexpected">Could not complete storage task successfully, please try again later.</string>
   <string name="err_remote_library_not_found">Comic book library not found on remote storage.</string>
   <string name="status_export_complete">Comic book library backup complete!</string>
+  <string name="issue_owned">Issues Owned:</string>
+  <string name="desc_series_list">Comic series in library.</string>
+  <string name="title_series_library">Your Comic Series</string>
 </resources>

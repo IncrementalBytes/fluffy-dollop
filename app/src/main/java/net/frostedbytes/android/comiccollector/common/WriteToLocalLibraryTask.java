@@ -7,7 +7,6 @@ import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.MainActivity;
 import net.frostedbytes.android.comiccollector.models.ComicBook;
@@ -15,40 +14,37 @@ import net.frostedbytes.android.comiccollector.models.ComicBook;
 import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import net.frostedbytes.android.comiccollector.models.ComicSeries;
 
 import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
-public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, HashMap<String, ComicBook>> {
+public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<ComicBook>> {
 
   private static final String TAG = BASE_TAG + "WriteToLocalLibraryTask";
 
   private final WeakReference<MainActivity> mFragmentWeakReference;
-  private final ArrayList<ComicBook> mComicBooks;
+  private final ArrayList<ComicSeries> mComicSeries;
 
-  public WriteToLocalLibraryTask(MainActivity context, ArrayList<ComicBook> comicBooks) {
+  public WriteToLocalLibraryTask(MainActivity context, ArrayList<ComicSeries> comicSeries) {
 
     mFragmentWeakReference = new WeakReference<>(context);
-    mComicBooks = comicBooks;
+    mComicSeries = comicSeries;
   }
 
-  protected HashMap<String, ComicBook> doInBackground(Void... params) {
+  protected ArrayList<ComicBook> doInBackground(Void... params) {
 
-    HashMap<String, ComicBook> booksWritten = new HashMap<>();
+    ArrayList<ComicBook> booksWritten = new ArrayList<>();
     FileOutputStream outputStream;
     try {
-      // for future processing consideration
-      for (ComicBook comicBook : mComicBooks) {
-        if (comicBook.isValid()) {
-          booksWritten.put(comicBook.getFullId(), comicBook);
-        }
-      }
-
       outputStream = mFragmentWeakReference.get().getApplicationContext().openFileOutput(
         BaseActivity.DEFAULT_LIBRARY_FILE,
         Context.MODE_PRIVATE);
       Gson gson = new Gson();
-      Type collectionType = new TypeToken<ArrayList<ComicBook>>(){}.getType();
-      outputStream.write(gson.toJson(mComicBooks, collectionType).getBytes());
+      Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
+      for (ComicSeries series : mComicSeries) {
+        booksWritten.addAll(series.ComicBooks);
+        outputStream.write(gson.toJson(series.ComicBooks, collectionType).getBytes());
+      }
     } catch (Exception e) {
       LogUtils.warn(TAG, "Exception when writing local library.");
       Crashlytics.logException(e);
@@ -57,7 +53,7 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, HashMap<Strin
     return booksWritten;
   }
 
-  protected void onPostExecute(HashMap<String, ComicBook> comicBooks) {
+  protected void onPostExecute(ArrayList<ComicBook> comicBooks) {
 
     LogUtils.debug(TAG, "++onPostExecute(%d)", comicBooks.size());
     MainActivity activity = mFragmentWeakReference.get();

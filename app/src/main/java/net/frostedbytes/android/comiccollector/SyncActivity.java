@@ -40,7 +40,7 @@ public class SyncActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++onBackPressed()");
     if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
-      setResultAndFinish("");
+      setResultAndFinish(RESULT_CANCELED, "");
     } else {
       super.onBackPressed();
     }
@@ -93,7 +93,7 @@ public class SyncActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++onOptionsItemSelected(%s)", item.getTitle());
     if (item.getItemId() == R.id.action_cancel) {
-      setResultAndFinish(false);
+      setResultAndFinish(RESULT_CANCELED, false);
     }
 
     return super.onOptionsItemSelected(item);
@@ -121,28 +121,28 @@ public class SyncActivity extends BaseActivity implements
     List<FileDownloadTask> tasks = mStorage.getActiveDownloadTasks();
     if (tasks.size() > 0) {
       FileDownloadTask task = tasks.get(0);
-      task.addOnSuccessListener(this, state -> setResultAndFinish(true));
+      task.addOnSuccessListener(this, state -> setResultAndFinish(RESULT_OK, true));
     }
   }
 
   /*
     Private Method(s)
    */
-  private void setResultAndFinish(boolean reloadLibrary) {
+  private void setResultAndFinish(int resultCode, boolean reloadLibrary) {
 
     LogUtils.debug(TAG, "++setResultAndFinish(%s)", String.valueOf(reloadLibrary));
     Intent resultIntent = new Intent();
     resultIntent.putExtra(BaseActivity.ARG_RELOAD, reloadLibrary);
-    setResult(RESULT_OK, resultIntent);
+    setResult(resultCode, resultIntent);
     finish();
   }
 
-  private void setResultAndFinish(String message) {
+  private void setResultAndFinish(int resultCode, String message) {
 
     LogUtils.debug(TAG, "++setResultAndFinish(%s)", message);
     Intent resultIntent = new Intent();
     resultIntent.putExtra(BaseActivity.ARG_MESSAGE, message);
-    setResult(RESULT_OK, resultIntent);
+    setResult(resultCode, resultIntent);
     finish();
   }
 
@@ -162,23 +162,23 @@ public class SyncActivity extends BaseActivity implements
         if (task.isSuccessful()) {
           if (task.getResult() != null) {
             if (task.getResult().getMetadata() != null) {
-              setResultAndFinish(getString(R.string.status_export_complete));
+              setResultAndFinish(RESULT_OK, "");
             }
           } else {
             LogUtils.warn(TAG, "Storage task results were null; this is unexpected.");
-            setResultAndFinish(getString(R.string.err_storage_task_unexpected));
+            setResultAndFinish(RESULT_CANCELED, getString(R.string.err_storage_task_unexpected));
           }
         } else {
           if (task.getException() != null) {
             LogUtils.error(TAG, "Could not export library: %s", task.getException().getMessage());
           }
 
-          setResultAndFinish(getString(R.string.err_export_task));
+          setResultAndFinish(RESULT_CANCELED, getString(R.string.err_export_task));
         }
       });
     } catch (FileNotFoundException fe) {
       LogUtils.warn(TAG, fe.getMessage());
-      setResultAndFinish(getString(R.string.err_export));
+      setResultAndFinish(RESULT_CANCELED, getString(R.string.err_export));
     }
   }
 
@@ -191,15 +191,15 @@ public class SyncActivity extends BaseActivity implements
     libraryRef.getFile(localFile).addOnCompleteListener(task -> {
 
       if (task.isSuccessful() && task.getException() == null) {
-        setResultAndFinish(true);
+        setResultAndFinish(RESULT_OK, true);
       } else {
         if (task.getException() != null) {
           StorageException exception = (StorageException)task.getException();
           if (exception.getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
-            setResultAndFinish(getString(R.string.err_remote_library_not_found));
+            setResultAndFinish(RESULT_CANCELED, getString(R.string.err_remote_library_not_found));
           } else {
             LogUtils.error(TAG, "Could not import library: %s", task.getException().getMessage());
-            setResultAndFinish(getString(R.string.err_import_task));
+            setResultAndFinish(RESULT_CANCELED, getString(R.string.err_import_task));
           }
         }
       }
@@ -212,7 +212,7 @@ public class SyncActivity extends BaseActivity implements
     LogUtils.debug(TAG, "++onSyncFail()");
     String message = "Setting up synchronization failed; user unknown.";
     LogUtils.warn(TAG, message);
-    setResultAndFinish(message);
+    setResultAndFinish(RESULT_CANCELED, message);
   }
 
   /*

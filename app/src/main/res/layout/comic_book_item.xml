@@ -9,54 +9,26 @@
   android:background="?attr/colorPrimary">
 
   <TextView
-    android:id="@+id/comic_item_text_series"
+    android:id="@+id/comic_item_text_title"
     android:textStyle="bold"
-    android:layout_width="0dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:ellipsize="end"
     android:text="@string/placeholder"
-    app:layout_constraintEnd_toStartOf="@id/comic_item_text_publisher"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"/>
 
   <TextView
-    android:id="@+id/comic_item_text_publisher"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/default_view_margin"
-    android:text="@string/placeholder"
-    android:textColor="@color/primaryColor"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="parent"/>
-
-  <TextView
-    android:id="@+id/comic_item_text_title"
+    android:id="@+id/comic_item_text_series"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="@color/secondaryLightColor"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_series"/>
-
-  <TextView
-    android:id="@+id/comic_item_text_volume"
+    android:textColor="@color/secondaryColor"
+    android:textSize="16sp"
     android:textStyle="bold"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/default_view_margin"
-    android:text="@string/volume"
-    app:layout_constraintEnd_toStartOf="@id/comic_item_text_volume_value"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_title"/>
-  <TextView
-    android:id="@+id/comic_item_text_volume_value"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/default_view_margin"
-    android:text="@string/placeholder"
-    android:textColor="@color/primaryColor"
-    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/comic_item_text_title"/>
 
   <TextView
@@ -65,9 +37,9 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/owned"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_volume"/>
+    app:layout_constraintTop_toTopOf="@id/comic_item_image_own"
+    app:layout_constraintBottom_toBottomOf="@id/comic_item_image_own"
+    app:layout_constraintStart_toStartOf="parent"/>
   <ImageView
     android:id="@+id/comic_item_image_own"
     android:layout_width="wrap_content"
@@ -75,18 +47,17 @@
     android:layout_margin="@dimen/default_image_margin"
     android:contentDescription="@string/user_owns_this_comic"
     android:src="@drawable/ic_unchecked_dark"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toEndOf="@id/comic_item_text_own"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_volume"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_series"
+    app:layout_constraintStart_toEndOf="@id/comic_item_text_own"/>
   <TextView
     android:id="@+id/comic_item_text_read"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/read"
-    app:layout_constraintStart_toEndOf="@id/comic_item_image_own"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_volume"/>
+    app:layout_constraintTop_toTopOf="@id/comic_item_image_read"
+    app:layout_constraintBottom_toBottomOf="@id/comic_item_image_read"
+    app:layout_constraintStart_toEndOf="@id/comic_item_image_own"/>
   <ImageView
     android:id="@+id/comic_item_image_read"
     android:layout_width="wrap_content"
@@ -94,9 +65,8 @@
     android:layout_margin="@dimen/default_image_margin"
     android:contentDescription="@string/user_read_this_comic"
     android:src="@drawable/ic_unchecked_dark"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toEndOf="@id/comic_item_text_read"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_volume"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_series"
+    app:layout_constraintStart_toEndOf="@id/comic_item_text_read"/>
 
   <TextView
     android:id="@+id/comic_item_text_issue"
@@ -104,8 +74,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:text="@string/issue"
-    app:layout_constraintBottom_toBottomOf="parent"
+    android:text="@string/issue_number"
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_series"
     app:layout_constraintEnd_toStartOf="@id/comic_item_text_issue_value"/>
   <TextView
     android:id="@+id/comic_item_text_issue_value"
@@ -114,7 +84,8 @@
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
     android:textColor="@color/primaryColor"
-    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toTopOf="@id/comic_item_text_issue"
+    app:layout_constraintBottom_toBottomOf="@id/comic_item_text_issue"
     app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

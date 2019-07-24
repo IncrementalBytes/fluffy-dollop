@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.firebase.firestore.Exclude;
+import java.util.ArrayList;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
@@ -19,6 +20,12 @@ public class ComicSeries implements Parcelable {
    * Date when comic series was added to collection.
    */
   public long AddedDate;
+
+  /**
+   * Collection of comic books user added to this series.
+   */
+  @Exclude
+  public ArrayList<ComicBook> ComicBooks;
 
   /**
    * Unique identifier for series.
@@ -55,6 +62,7 @@ public class ComicSeries implements Parcelable {
   public ComicSeries() {
 
     AddedDate = 0;
+    ComicBooks = new ArrayList<>();
     Id = BaseActivity.DEFAULT_COMIC_SERIES_ID;
     IsFlagged = false;
     ModifiedDate = 0;
@@ -66,6 +74,7 @@ public class ComicSeries implements Parcelable {
   protected ComicSeries(Parcel in) {
 
     AddedDate = in.readLong();
+    ComicBooks = in.readArrayList(ComicBook.class.getClassLoader());
     Id = in.readString();
     IsFlagged = in.readInt() != 0;
     ModifiedDate = in.readLong();
@@ -107,6 +116,7 @@ public class ComicSeries implements Parcelable {
   public void writeToParcel(Parcel dest, int flags) {
 
     dest.writeLong(AddedDate);
+    dest.writeTypedList(ComicBooks);
     dest.writeString(Id);
     dest.writeInt(IsFlagged ? 1 : 0);
     dest.writeLong(ModifiedDate);

@@ -6,6 +6,7 @@ import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookListFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicSeriesFragment;
+import net.frostedbytes.android.comiccollector.fragments.ComicSeriesListFragment;
 import net.frostedbytes.android.comiccollector.fragments.ManualSearchFragment;
 import net.frostedbytes.android.comiccollector.fragments.SyncFragment;
 import net.frostedbytes.android.comiccollector.fragments.SystemMessageFragment;
@@ -19,13 +20,11 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String ARG_COMIC_PUBLISHER = "publisher";
     public static final String ARG_COMIC_PUBLISHERS = "publishers";
     public static final String ARG_COMIC_SERIES = "comic_series";
-    public static final String ARG_CREATION_TIME = "creation_time";
     public static final String ARG_EMAIL = "email";
     public static final String ARG_FIREBASE_USER_ID = "firebase_user_id";
     public static final String ARG_MESSAGE = "message";
     public static final String ARG_NEW_COMIC_BOOK = "new_comic_book";
     public static final String ARG_RELOAD = "reload";
-    public static final String ARG_REMOTE_PATH = "remote";
     public static final String ARG_USER = "user";
     public static final String ARG_USER_NAME = "user_name";
 
@@ -57,6 +56,8 @@ public class BaseActivity  extends AppCompatActivity {
         String fragmentClassName = fragment.getClass().getName();
         if (fragmentClassName.equals(ComicBookListFragment.class.getName())) {
             setTitle(getString(R.string.title_comic_library));
+        } else if (fragmentClassName.equals(ComicSeriesListFragment.class.getName())) {
+            setTitle(getString(R.string.title_series_library));
         } else if (fragmentClassName.equals(ComicBookFragment.class.getName())) {
             setTitle(getString(R.string.title_comic_book));
         } else if (fragmentClassName.equals(UserPreferenceFragment.class.getName())) {

@@ -188,40 +188,6 @@ public class ComicBook implements Parcelable {
   };
 
   /**
-   * Looks for local copy of library in the user's application data.
-   * @param fileDir Path to local library.
-   * @return List of comic books parsed from local library. An empty list if library not found.
-   */
-  public static HashMap<String, ComicBook> readLocalLibrary(File fileDir) {
-
-    LogUtils.debug(TAG, "++readLocalLibrary()");
-    String resourcePath = BaseActivity.DEFAULT_LIBRARY_FILE;
-    File file = new File(fileDir, resourcePath);
-    LogUtils.debug(TAG, "Loading %s", file.getAbsolutePath());
-    HashMap<String, ComicBook> comicBooks = new HashMap<>();
-
-    if (file.exists() && file.canRead()) {
-      try (Reader reader = new FileReader(file.getAbsolutePath())) {
-        Gson gson = new Gson();
-        Type collectionType = new TypeToken<ArrayList<ComicBook>>() { }.getType();
-        List<ComicBook> comics = gson.fromJson(reader, collectionType);
-        for (ComicBook comic : comics) {
-          if (comic.isValid()) {
-            comicBooks.put(comic.getFullId(), comic);
-          }
-        }
-      } catch (Exception e) {
-        LogUtils.warn(TAG, "Failed reading local library: %s", e.getMessage());
-        Crashlytics.logException(e);
-      }
-    } else {
-      LogUtils.debug(TAG, "%s does not exist yet.", resourcePath);
-    }
-
-    return comicBooks;
-  }
-
-  /**
    * Validates the properties of the comic book.
    * @return TRUE if all properties are within expected parameters, otherwise FALSE.
    */
