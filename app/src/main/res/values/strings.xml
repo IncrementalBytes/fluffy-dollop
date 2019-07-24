@@ -12,7 +12,8 @@
   <string name="title_comic_library">Your Comic Library</string>
   <string name="permission_denied_explanation">Permissions needed for full app functionality.</string>
   <string name="ok">OK</string>
-  <string name="remove_book_message">Remove \'%s\' from your library?</string>
+  <string name="remove_book_message">Remove comic book from your library?</string>
+  <string name="remove_specific_book_message">Remove \'%s\' from your library?</string>
 
   <string name="err_photo_file_not_found">Failed to get file for photo.</string>
   <string name="err_camera_intent_failed">Unable to create camera intent.</string>
@@ -23,8 +24,8 @@
   <string name="err_no_camera_detected">Camera was not detected.</string>
 
   <string name="debug_path">/storage/self/primary/DCIM/Camera</string>
-  <string name="debug_file_name">20190511_060443.jpg</string>
-  <!--<string name="debug_file_name">20190718_171143.jpg</string>-->
+  <!--<string name="debug_file_name">20190511_060443.jpg</string>-->
+  <string name="debug_file_name">20190718_171143.jpg</string>
   <!--<string name="debug_file_name">20190419_131840.jpg</string>-->
   <string name="cancel">Cancel</string>
   <string name="title">Title:</string>
@@ -85,4 +86,19 @@
   <string name="menu_cancel">Cancel</string>
   <string name="save_comic_book">Save</string>
   <string name="err_save_comic_books">Unable to save comic book list at this time.</string>
+  <string name="title_sync">Synchronize</string>
+  <string name="title_export">Export</string>
+  <string name="title_import">Import</string>
+  <string name="menu_sync">Sync</string>
+  <string name="err_export_task">Unable to export library at this time, please try again later.</string>
+  <string name="err_export">There was a problem exporting your library, please try again later.</string>
+  <string name="err_import_task">Unable to import library at this time, please try again later.</string>
+  <string name="err_import">There was a problem importing your library, please try again later.</string>
+  <string name="sync_import_explained">Download your library stored in the cloud.</string>
+  <string name="sync_export_explained">Save your current library to the cloud temporarily. Consider this option if you are upgrading your device and don\'t want to lose your library.</string>
+  <string name="sync_export_warning">WARNING! Uploaded library may be deleted after 30 days.</string>
+  <string name="sync_import_warning">WARNING! Importing library will delete local library.</string>
+  <string name="err_storage_task_unexpected">Could not complete storage task successfully, please try again later.</string>
+  <string name="err_remote_library_not_found">Comic book library not found on remote storage.</string>
+  <string name="status_export_complete">Comic book library backup complete!</string>
 </resources>

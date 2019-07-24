@@ -162,6 +162,9 @@ public class MainActivity extends BaseActivity implements
       case R.id.action_add:
         addComicBook();
         break;
+      case R.id.action_sync:
+        syncComicBooks();
+        break;
       case R.id.action_settings:
         replaceFragment(UserPreferenceFragment.newInstance(mUser));
         break;
@@ -208,39 +211,63 @@ public class MainActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++onActivityResult(%d, %d, Intent)", requestCode, resultCode);
     String message;
-    if (requestCode == BaseActivity.REQUEST_COMIC_ADD) {
-      message = data.getStringExtra(BaseActivity.ARG_MESSAGE);
-      if (resultCode != RESULT_OK) {
-        if (message != null && message.length() > 0) {
-          showDismissableSnackbar(message);
-        } else {
-          LogUtils.error(TAG, "Activity result failed for an unknown reason.");
-        }
-      } else {
-        ComicSeries series = data.getParcelableExtra(BaseActivity.ARG_COMIC_SERIES);
-        if (series != null) {
-          if (!mComicSeries.containsKey(series.getProductId())) {
-            mComicSeries.put(series.getProductId(), series);
-          }
-        }
-
-        ComicBook book = data.getParcelableExtra(BaseActivity.ARG_COMIC_BOOK);
-        if (book != null && book.isValid()) {
-          ComicPublisher comicPublisher = mPublishers.get(book.PublisherId);
-          ComicSeries comicSeries = mComicSeries.get(book.getProductId());
-          if (comicPublisher != null && comicSeries != null) {
-            replaceFragment(ComicBookFragment.newInstance(book, comicPublisher, comicSeries, true));
+    switch (requestCode) {
+      case BaseActivity.REQUEST_COMIC_ADD:
+        message = data.getStringExtra(BaseActivity.ARG_MESSAGE);
+        if (resultCode != RESULT_OK) {
+          if (message != null && message.length() > 0) {
+            showDismissableSnackbar(message);
           } else {
-            LogUtils.warn(TAG, "Publisher and/or Series data is unexpected.");
+            LogUtils.error(TAG, "Activity result failed for an unknown reason.");
+          }
+        } else {
+          ComicSeries series = data.getParcelableExtra(BaseActivity.ARG_COMIC_SERIES);
+          if (series != null) {
+            if (!mComicSeries.containsKey(series.getProductId())) {
+              mComicSeries.put(series.getProductId(), series);
+            }
+          }
+
+          ComicBook book = data.getParcelableExtra(BaseActivity.ARG_COMIC_BOOK);
+          if (book != null && book.isValid()) {
+            ComicPublisher comicPublisher = mPublishers.get(book.PublisherId);
+            ComicSeries comicSeries = mComicSeries.get(book.getProductId());
+            if (comicPublisher != null && comicSeries != null) {
+              replaceFragment(ComicBookFragment.newInstance(book, comicPublisher, comicSeries, true));
+            } else {
+              LogUtils.warn(TAG, "Publisher and/or Series data is unexpected.");
+            }
+          }
+
+          if (message != null && message.length() > 0) {
+            showDismissableSnackbar(message);
+          }
+        }
+        break;
+      case BaseActivity.REQUEST_SYNC:
+        message = data.getStringExtra(BaseActivity.ARG_MESSAGE);
+        if (resultCode != RESULT_OK) {
+          if (message != null && message.length() > 0) {
+            showDismissableSnackbar(message);
+          } else {
+            LogUtils.error(TAG, "Activity result failed for an unknown reason.");
+          }
+        } else {
+          boolean reload = data.getBooleanExtra(BaseActivity.ARG_RELOAD, false);
+          if (reload) {
+            mComicBooks = ComicBook.readLocalLibrary(getFilesDir());
+            replaceFragment(ComicBookListFragment.newInstance(mComicBooks, mPublishers, mComicSeries));
+          }
+
+          if (message != null && message.length() > 0) {
+            showDismissableSnackbar(message);
           }
         }
 
-        if (message != null && message.length() > 0) {
-          showDismissableSnackbar(message);
-        }
-      }
-    } else {
-      LogUtils.warn(TAG, String.format(Locale.US, "Unexpected activity result: %d", requestCode));
+        break;
+      default:
+        LogUtils.warn(TAG, String.format(Locale.US, "Unexpected activity result: %d", requestCode));
+        break;
     }
   }
 
@@ -252,7 +279,7 @@ public class MainActivity extends BaseActivity implements
   }
 
   /*
-      Fragment Override(s)
+      Fragment Callback(s)
    */
   @Override
   public void onComicBookActionComplete(String message) {
@@ -334,6 +361,11 @@ public class MainActivity extends BaseActivity implements
       if (item != null) {
         item.setEnabled(true);
       }
+
+      item = mMainToolbar.getMenu().findItem(R.id.action_sync);
+      if (item != null) {
+        item.setEnabled(true);
+      }
     }
 
     if (size == 0) {
@@ -355,7 +387,7 @@ public class MainActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++onComicListSynchronize()");
     mProgressBar.setIndeterminate(true);
-    // TODO: save the local library to firebase storage
+    syncComicBooks();
   }
 
   @Override
@@ -545,4 +577,11 @@ public class MainActivity extends BaseActivity implements
     mSnackbar.setAction(R.string.dismiss, v -> mSnackbar.dismiss());
     mSnackbar.show();
   }
+
+  private void syncComicBooks() {
+
+    LogUtils.debug(TAG, "++syncComicBooks()");
+    Intent intent = new Intent(this, SyncActivity.class);
+    intent.putExtra(BaseActivity.ARG_USER, mUser);
+    startActivityForResult(intent, BaseActivity.REQUEST_SYNC);  }
 }

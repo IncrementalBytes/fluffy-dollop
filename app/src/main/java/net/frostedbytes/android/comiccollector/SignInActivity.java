@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import com.google.android.material.snackbar.Snackbar;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 
 import com.crashlytics.android.Crashlytics;
@@ -25,7 +24,7 @@ import net.frostedbytes.android.comiccollector.common.LogUtils;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class SignInActivity extends BaseActivity implements OnClickListener {
+public class SignInActivity extends BaseActivity {
 
   private static final String TAG = BASE_TAG + "SignInActivity";
 
@@ -51,12 +50,21 @@ public class SignInActivity extends BaseActivity implements OnClickListener {
     setContentView(R.layout.activity_sign_in);
 
     SignInButton signInWithGoogleButton = findViewById(R.id.sign_in_button_google);
-    signInWithGoogleButton.setOnClickListener(this);
+    if (signInWithGoogleButton != null) {
+      signInWithGoogleButton.setOnClickListener(v -> {
+
+        if (v.getId() == R.id.sign_in_button_google) {
+          signInWithGoogle();
+        }
+      });
+    }
 
     mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
     mProgressBar = findViewById(R.id.sign_in_progress);
-    mProgressBar.setVisibility(View.INVISIBLE);
+    if (mProgressBar != null) {
+      mProgressBar.setVisibility(View.INVISIBLE);
+    }
 
     mAuth = FirebaseAuth.getInstance();
     mAccount = GoogleSignIn.getLastSignedInAccount(this);
@@ -99,14 +107,6 @@ public class SignInActivity extends BaseActivity implements OnClickListener {
   /*
       View Override(s)
    */
-  @Override
-  public void onClick(View view) {
-
-    LogUtils.debug(TAG, "++onClick()");
-    if (view.getId() == R.id.sign_in_button_google) {
-      signInWithGoogle();
-    }
-  }
 
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -167,8 +167,11 @@ public class SignInActivity extends BaseActivity implements OnClickListener {
   private void firebaseAuthenticateWithGoogle(GoogleSignInAccount acct) {
 
     LogUtils.debug(TAG, "++firebaseAuthWithGoogle(%s)", acct.getId());
-    mProgressBar.setVisibility(View.VISIBLE);
-    mProgressBar.setIndeterminate(true);
+    if (mProgressBar != null) {
+      mProgressBar.setVisibility(View.VISIBLE);
+      mProgressBar.setIndeterminate(true);
+    }
+
     AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
     mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
 
@@ -183,7 +186,9 @@ public class SignInActivity extends BaseActivity implements OnClickListener {
         showErrorInSnackBar(message);
       }
 
-      mProgressBar.setIndeterminate(false);
+      if (mProgressBar != null) {
+        mProgressBar.setIndeterminate(false);
+      }
     });
   }
 

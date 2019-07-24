@@ -166,9 +166,9 @@ public class ComicBookFragment extends Fragment {
         removeButton.setOnClickListener(v -> {
 
           if (getActivity() != null) {
-            String message = String.format(Locale.US, getString(R.string.remove_book_message), mComicBook.Title);
+            String message = String.format(Locale.US, getString(R.string.remove_specific_book_message), mComicBook.Title);
             if (mComicBook.Title.isEmpty()) {
-              message = "Remove comic book from your library?";
+              message = getString(R.string.remove_book_message);
             }
 
             AlertDialog removeBookDialog = new AlertDialog.Builder(getActivity())

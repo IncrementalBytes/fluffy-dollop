@@ -7,6 +7,7 @@ import net.frostedbytes.android.comiccollector.fragments.ComicBookFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicBookListFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicSeriesFragment;
 import net.frostedbytes.android.comiccollector.fragments.ManualSearchFragment;
+import net.frostedbytes.android.comiccollector.fragments.SyncFragment;
 import net.frostedbytes.android.comiccollector.fragments.SystemMessageFragment;
 import net.frostedbytes.android.comiccollector.fragments.TutorialFragment;
 import net.frostedbytes.android.comiccollector.fragments.UserPreferenceFragment;
@@ -18,27 +19,30 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String ARG_COMIC_PUBLISHER = "publisher";
     public static final String ARG_COMIC_PUBLISHERS = "publishers";
     public static final String ARG_COMIC_SERIES = "comic_series";
+    public static final String ARG_CREATION_TIME = "creation_time";
     public static final String ARG_EMAIL = "email";
     public static final String ARG_FIREBASE_USER_ID = "firebase_user_id";
     public static final String ARG_MESSAGE = "message";
     public static final String ARG_NEW_COMIC_BOOK = "new_comic_book";
+    public static final String ARG_RELOAD = "reload";
+    public static final String ARG_REMOTE_PATH = "remote";
     public static final String ARG_USER = "user";
-    public static final String ARG_USER_ID = "user_id";
     public static final String ARG_USER_NAME = "user_name";
 
     public static final String DEFAULT_COMIC_PUBLISHER_ID = "000000";
-    public static final String DEFAULT_COMIC_SERIES_FILE = "localComicSeries.v02.txt";
     public static final String DEFAULT_COMIC_SERIES_ID = "000000";
     public static final String DEFAULT_ISSUE_CODE = "00000";
-    public static final String DEFAULT_LIBRARY_FILE = "localLibrary.txt";
+    public static final String DEFAULT_LIBRARY_FILE = "localLibrary.json";
     public static final String DEFAULT_PRODUCT_CODE = "000000000000";
     public static final String DEFAULT_PUBLISHED_DATE = "00/0000";
     public static final String DEFAULT_USER_ID = "0000000000000000000000000000";
 
-    public static final int REQUEST_IMAGE_CAPTURE = 4701;
-    public static final int REQUEST_COMIC_ADD = 4702;
-    public static final int REQUEST_CAMERA_PERMISSIONS = 4703;
-    public static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS = 4704;
+    public static final int REQUEST_IMAGE_CAPTURE = 4201;
+    public static final int REQUEST_COMIC_ADD = 4202;
+    public static final int REQUEST_SYNC = 4203;
+
+    public static final int REQUEST_CAMERA_PERMISSIONS = 4701;
+    public static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS = 4702;
 
     public static final String BASE_TAG = "ComicCollector::";
     public static final String TAG = BASE_TAG + "BaseActivity";
@@ -65,6 +69,8 @@ public class BaseActivity  extends AppCompatActivity {
             setTitle(getString(R.string.app_name));
         } else if (fragmentClassName.equals(ManualSearchFragment.class.getName())) {
             setTitle(getString(R.string.title_gathering_data));
+        } else if (fragmentClassName.equals(SyncFragment.class.getName())) {
+            setTitle(getString(R.string.title_sync));
         }
     }
 }

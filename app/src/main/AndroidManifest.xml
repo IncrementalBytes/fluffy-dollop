@@ -35,6 +35,9 @@
     <activity
       android:name="net.frostedbytes.android.comiccollector.AddActivity"
       android:label="Add Comic"/>
+    <activity
+      android:name="net.frostedbytes.android.comiccollector.SyncActivity"
+      android:label="Synchronize"/>
 
     <meta-data
       android:name="com.google.firebase.ml.vision.DEPENDENCIES"

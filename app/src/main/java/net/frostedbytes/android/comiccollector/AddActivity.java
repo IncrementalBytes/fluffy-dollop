@@ -51,7 +51,6 @@ import java.util.Locale;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.common.RetrieveComicSeriesDataTask;
-import net.frostedbytes.android.comiccollector.fragments.ComicBookListFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicSeriesFragment;
 import net.frostedbytes.android.comiccollector.fragments.ManualSearchFragment;
 import net.frostedbytes.android.comiccollector.fragments.SystemMessageFragment;
@@ -90,7 +89,7 @@ public class AddActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++onBackPressed()");
     if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
-      finish();
+      setResultAndFinish("");
     } else {
       super.onBackPressed();
     }
@@ -105,8 +104,15 @@ public class AddActivity extends BaseActivity implements
 
     mAddToolbar = findViewById(R.id.add_toolbar);
     setSupportActionBar(mAddToolbar);
-
     mProgressBar = findViewById(R.id.add_progress);
+
+    getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+      Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.add_fragment_container);
+      if (fragment != null) {
+        updateTitle(fragment);
+      }
+    });
+
     mUser = (User) getIntent().getSerializableExtra(BaseActivity.ARG_USER);
     mPublishers = getIntent().getParcelableArrayListExtra(BaseActivity.ARG_COMIC_PUBLISHERS);
     mComicSeries = getIntent().getParcelableArrayListExtra(BaseActivity.ARG_COMIC_SERIES);
@@ -432,7 +438,7 @@ public class AddActivity extends BaseActivity implements
     FragmentManager fragmentManager = getSupportFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
     fragmentTransaction.replace(R.id.add_fragment_container, fragment);
-    if (fragment.getClass().getName().equals(ComicBookListFragment.class.getName())) {
+    if (fragment.getClass().getName().equals(ManualSearchFragment.class.getName())) {
       fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
