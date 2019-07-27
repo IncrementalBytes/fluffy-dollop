@@ -43,8 +43,9 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
       Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
       for (ComicSeries series : mComicSeries) {
         booksWritten.addAll(series.ComicBooks);
-        outputStream.write(gson.toJson(series.ComicBooks, collectionType).getBytes());
       }
+
+      outputStream.write(gson.toJson(booksWritten, collectionType).getBytes());
     } catch (Exception e) {
       LogUtils.warn(TAG, "Exception when writing local library.");
       Crashlytics.logException(e);

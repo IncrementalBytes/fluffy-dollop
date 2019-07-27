@@ -29,14 +29,11 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.perf.FirebasePerformance;
-import com.google.firebase.perf.metrics.Trace;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Locale;
@@ -121,7 +118,9 @@ public class MainActivity extends BaseActivity implements
     mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
     if (User.isValid(mUser)) {
       mProgressBar.setIndeterminate(true);
-      readServerComicPublishers();
+
+      // do one-time firestore retrieve of publisher data
+      initialComicPublisherRead();
     } else {
       replaceFragment(SystemMessageFragment.newInstance(getString(R.string.err_unknown_user)));
     }
@@ -221,7 +220,6 @@ public class MainActivity extends BaseActivity implements
     String message = null;
     ComicSeries series = null;
     ComicBook book = null;
-    boolean reload = false;
     if (data != null) {
       if (data.hasExtra(BaseActivity.ARG_MESSAGE)) {
         message = data.getStringExtra(BaseActivity.ARG_MESSAGE);
@@ -234,21 +232,11 @@ public class MainActivity extends BaseActivity implements
       if (data.hasExtra(BaseActivity.ARG_COMIC_BOOK)) {
         book = data.getParcelableExtra(BaseActivity.ARG_COMIC_BOOK);
       }
-
-      if (data.hasExtra(BaseActivity.ARG_RELOAD)) {
-        reload = data.getBooleanExtra(BaseActivity.ARG_RELOAD, false);
-      }
     }
 
-    if (resultCode != RESULT_OK) {
-      if (message != null && message.length() > 0) {
-        showDismissableSnackbar(message);
-      } else {
-        LogUtils.error(TAG, "Activity result failed for an unknown reason.");
-      }
-    } else {
-      switch (requestCode) {
-        case BaseActivity.REQUEST_COMIC_ADD:
+    switch (requestCode) {
+      case BaseActivity.REQUEST_COMIC_ADD:
+        if (resultCode == RESULT_ADD_SUCCESS) {
           if (series != null && !mComicSeries.containsKey(series.getProductId())) {
             mComicSeries.put(series.getProductId(), series);
           }
@@ -262,19 +250,40 @@ public class MainActivity extends BaseActivity implements
               LogUtils.warn(TAG, "Publisher and/or Series data is unexpected.");
             }
           }
-
-          break;
-        case BaseActivity.REQUEST_SYNC:
-          if (reload) {
-            readLocalLibrary(getFilesDir());
-            replaceFragment(ComicSeriesListFragment.newInstance(mPublishers, mComicSeries));
+        } else {
+          if (message != null && message.length() > 0) {
+            showDismissableSnackbar(message);
+          } else {
+            LogUtils.error(TAG, "Activity failed, but no message was sent.");
+            showDismissableSnackbar(getString(R.string.message_unknown_activity_result));
           }
 
-          break;
-        default:
-          LogUtils.warn(TAG, String.format(Locale.US, "Unexpected activity result: %d", requestCode));
-          break;
-      }
+          replaceFragment(ComicSeriesListFragment.newInstance(mPublishers, mComicSeries));
+        }
+        break;
+      case BaseActivity.REQUEST_SYNC:
+        switch (resultCode) {
+          case BaseActivity.RESULT_SYNC_FAILED:
+            if (message != null && message.length() > 0) {
+              showDismissableSnackbar(message);
+            } else {
+              LogUtils.error(TAG, "AddActivity failed, but no message was sent.");
+              showDismissableSnackbar(getString(R.string.message_unknown_activity_result));
+            }
+            break;
+          case BaseActivity.RESULT_IMPORT_SUCCESS:
+            readLocalLibrary(getFilesDir());
+            replaceFragment(ComicSeriesListFragment.newInstance(mPublishers, mComicSeries));
+            break;
+          case BaseActivity.RESULT_EXPORT_SUCCESS:
+            showDismissableSnackbar(getString(R.string.message_export_success));
+            break;
+        }
+
+        break;
+      default:
+        LogUtils.warn(TAG, String.format(Locale.US, "Unexpected activity result: %d", requestCode));
+        break;
     }
   }
 
@@ -303,19 +312,25 @@ public class MainActivity extends BaseActivity implements
       showDismissableSnackbar(getString(R.string.err_add_comic_book));
     } else {
       LogUtils.debug(TAG, "++onComicBookAddedToLibrary(%s)", comicBook.toString());
-      if (mComicSeries.containsKey(comicBook.getProductId())) {
+      ComicSeries targetSeries = mComicSeries.get(comicBook.getProductId());
+      if (targetSeries != null) {
         ArrayList<ComicBook> newBookList = new ArrayList<>();
-        for (ComicBook book : mComicSeries.get(comicBook.getProductId()).ComicBooks) {
+        for (ComicBook book : targetSeries.ComicBooks) {
           if (!book.getFullId().equals(comicBook.getFullId())) {
             newBookList.add(book);
           }
         }
 
         newBookList.add(comicBook);
-        mComicSeries.get(comicBook.getProductId()).ComicBooks = new ArrayList<>(newBookList);
+        targetSeries.ComicBooks = new ArrayList<>(newBookList);
         new WriteToLocalLibraryTask(this, new ArrayList<>(mComicSeries.values())).execute();
       } else {
-        LogUtils.warn(TAG, "Did not find %s in collection of ComicSeries.", comicBook.getProductId());
+        String message = String.format(
+          Locale.US,
+          "Comic not added, did not find %s in collection of ComicSeries.",
+          comicBook.getProductId());
+        LogUtils.warn(TAG, message);
+        showDismissableSnackbar(message);
         replaceFragment(ComicSeriesListFragment.newInstance(mPublishers, mComicSeries));
       }
     }
@@ -338,18 +353,24 @@ public class MainActivity extends BaseActivity implements
       showDismissableSnackbar(getString(R.string.err_remove_comic_book));
     } else {
       LogUtils.debug(TAG, "++onComicBookRemoved(%s)", comicBook.toString());
-      if (mComicSeries.containsKey(comicBook.getProductId())) {
+      ComicSeries targetSeries = mComicSeries.get(comicBook.getProductId());
+      if (targetSeries != null) {
         ArrayList<ComicBook> newBookList = new ArrayList<>();
-        for (ComicBook book : mComicSeries.get(comicBook.getProductId()).ComicBooks) {
+        for (ComicBook book : targetSeries.ComicBooks) {
           if (!book.getFullId().equals(comicBook.getFullId())) {
             newBookList.add(book);
           }
         }
 
-        mComicSeries.get(comicBook.getProductId()).ComicBooks = new ArrayList<>(newBookList);
+        targetSeries.ComicBooks = new ArrayList<>(newBookList);
         new WriteToLocalLibraryTask(this, new ArrayList<>(mComicSeries.values())).execute();
       } else {
-        LogUtils.warn(TAG, "Did not find %s in collection of ComicSeries.", comicBook.getProductId());
+        String message = String.format(
+          Locale.US,
+          "Comic not removed, did not find %s in collection of ComicSeries.",
+          comicBook.getProductId());
+        LogUtils.warn(TAG, message);
+        showDismissableSnackbar(message);
         replaceFragment(ComicSeriesListFragment.newInstance(mPublishers, mComicSeries));
       }
     }
@@ -510,8 +531,8 @@ public class MainActivity extends BaseActivity implements
     LogUtils.debug(TAG, "++addComicBook()");
     Intent intent = new Intent(this, AddActivity.class);
     intent.putExtra(BaseActivity.ARG_USER, mUser);
-    intent.putParcelableArrayListExtra(BaseActivity.ARG_COMIC_PUBLISHERS, new ArrayList<>(mPublishers.values()));
-    intent.putParcelableArrayListExtra(BaseActivity.ARG_COMIC_SERIES, new ArrayList<>(mComicSeries.values()));
+    intent.putExtra(BaseActivity.ARG_COMIC_PUBLISHERS, mPublishers);
+    intent.putExtra(BaseActivity.ARG_COMIC_SERIES, mComicSeries);
     startActivityForResult(intent, BaseActivity.REQUEST_COMIC_ADD);
   }
 
@@ -544,6 +565,144 @@ public class MainActivity extends BaseActivity implements
     }
   }
 
+
+  private void handlePublisherDocumentChange(DocumentChange dc) {
+
+    ComicPublisher publisher = dc.getDocument().toObject(ComicPublisher.class);
+    publisher.Id = dc.getDocument().getId();
+    switch (dc.getType()) {
+      case ADDED:
+        LogUtils.debug(TAG, "New publisher: %s", publisher.toString());
+        mPublishers.put(publisher.Id, publisher);
+        break;
+      case MODIFIED:
+        LogUtils.debug(TAG, "Modified publisher: %s", publisher.toString());
+        mPublishers.put(publisher.Id, publisher);
+        break;
+      case REMOVED:
+        LogUtils.debug(TAG, "Removed publisher: %s", publisher.toString());
+        mPublishers.remove(publisher.Id);
+        break;
+    }
+  }
+
+  private void handleSeriesDocumentChange(DocumentChange dc) {
+
+    ComicSeries series = dc.getDocument().toObject(ComicSeries.class);
+    series.parseProductCode(dc.getDocument().getId());
+    switch (dc.getType()) {
+      case ADDED:
+        LogUtils.debug(TAG, "New series: %s", series.toString());
+        if (!series.PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) ||
+          !series.Id.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID)) {
+          mComicSeries.put(series.getProductId(), series);
+        } else {
+          LogUtils.error(TAG, "New series publisher is unknown: %s", series.getProductId());
+        }
+
+        break;
+      case MODIFIED:
+        LogUtils.debug(TAG, "Modified series: %s", series.toString());
+        mComicSeries.put(series.getProductId(), series);
+        break;
+      case REMOVED:
+        LogUtils.debug(TAG, "Removed series: %s", series.toString());
+        mComicSeries.remove(series.getProductId());
+        break;
+    }
+  }
+
+  private void initialComicPublisherRead() {
+
+    LogUtils.debug(TAG, "++initialComicPublisherRead()");
+    mPublishers = new HashMap<>();
+    mFirestore.collection(ComicPublisher.ROOT).get().addOnCompleteListener(task -> {
+
+        if (task.isSuccessful()) {
+          if (task.getResult() != null) {
+            for (DocumentChange dc : task.getResult().getDocumentChanges()) {
+              handlePublisherDocumentChange(dc);
+            }
+
+            initialComicSeriesRead();
+          } else {
+            replaceFragment(SystemMessageFragment.newInstance(getString(R.string.err_publisher_data_empty)));
+          }
+        } else {
+          replaceFragment(SystemMessageFragment.newInstance(getString(R.string.err_publisher_task_failed)));
+        }
+      });
+  }
+
+  private void initialComicSeriesRead() {
+
+    LogUtils.debug(TAG, "++initialComicSeriesRead()");
+    mComicSeries = new HashMap<>();
+    mFirestore.collection(ComicSeries.ROOT).get().addOnCompleteListener(task -> {
+
+      if (task.isSuccessful()) {
+        if (task.getResult() != null) {
+          for (DocumentChange dc : task.getResult().getDocumentChanges()) {
+            handleSeriesDocumentChange(dc);
+          }
+
+          // series data is loaded, proceed to loading comic library data
+          checkForWritePermission();
+
+          // now setup listeners
+          listenToServerComicPublishers();
+          listenToServerComicSeries();
+        } else {
+          replaceFragment(SystemMessageFragment.newInstance(getString(R.string.err_series_data_empty)));
+        }
+      } else {
+        replaceFragment(SystemMessageFragment.newInstance(getString(R.string.err_series_task_failed)));
+      }
+    });
+  }
+
+  private void listenToServerComicPublishers() {
+
+    LogUtils.debug(TAG, "++listenToServerComicPublishers()");
+    mComicPublishersRegistration = mFirestore.collection(ComicPublisher.ROOT).addSnapshotListener((snapshots, ffe) -> {
+
+      if (ffe != null) {
+        LogUtils.warn(TAG, "Comic Publishers listen error: %s", ffe.getMessage());
+        return;
+      }
+
+      if (snapshots == null) {
+        LogUtils.error(TAG, "Comic Publisher snapshot was null.");
+        return;
+      }
+
+      for (DocumentChange dc : snapshots.getDocumentChanges()) {
+        handlePublisherDocumentChange(dc);
+      }
+    });
+  }
+
+  private void listenToServerComicSeries() {
+
+    LogUtils.debug(TAG, "++listenToServerComicSeries()");
+    mComicSeriesRegistration = mFirestore.collection(ComicSeries.ROOT).addSnapshotListener((snapshots, ffe) -> {
+
+      if (ffe != null) {
+        LogUtils.warn(TAG, "Comic Series listen error: %s", ffe.getMessage());
+        return;
+      }
+
+      if (snapshots == null) {
+        LogUtils.error(TAG, "Comic Series snapshot was null.");
+        return;
+      }
+
+      for (DocumentChange dc : snapshots.getDocumentChanges()) {
+        handleSeriesDocumentChange(dc);
+      }
+    });
+  }
+
   /**
    * Looks for local copy of library in the user's application data.
    * @param fileDir Path to local library.
@@ -565,8 +724,11 @@ public class MainActivity extends BaseActivity implements
         List<ComicBook> comics = gson.fromJson(reader, collectionType);
         for (ComicBook comic : comics) {
           if (comic.isValid()) {
-            if (mComicSeries.containsKey(comic.getProductId())) {
-              mComicSeries.get(comic.getProductId()).ComicBooks.add(comic);
+            ComicSeries series = mComicSeries.get(comic.getProductId());
+            if (series != null) {
+              series.ComicBooks.add(comic);
+            } else {
+              LogUtils.warn(TAG, "Skipping %s; series %s not found.", comic.toString(), comic.getProductId());
             }
           }
         }
@@ -577,98 +739,6 @@ public class MainActivity extends BaseActivity implements
     } else {
       LogUtils.debug(TAG, "%s does not exist yet.", resourcePath);
     }
-  }
-
-  private void readServerComicPublishers() {
-
-    LogUtils.debug(TAG, "++readServerComicPublishers()");
-    mPublishers = new HashMap<>();
-    Trace comicPublisherTrace = FirebasePerformance.getInstance().newTrace("get_comic_publishers");
-    comicPublisherTrace.start();
-    mComicPublishersRegistration = mFirestore.collection(ComicPublisher.ROOT).addSnapshotListener((snapshots, ffe) -> {
-
-      if (ffe != null) {
-        LogUtils.warn(TAG, "Comic Publishers listen error: %s", ffe.getMessage());
-        return;
-      }
-
-      if (snapshots == null) {
-        LogUtils.error(TAG, "Comic Publisher snapshot was null.");
-        return;
-      }
-
-      for (DocumentChange dc : snapshots.getDocumentChanges()) {
-        ComicPublisher publisher = dc.getDocument().toObject(ComicPublisher.class);
-        publisher.Id = dc.getDocument().getId();
-        comicPublisherTrace.incrementMetric("comic_publisher_read", 1);
-        switch (dc.getType()) {
-          case ADDED:
-            LogUtils.debug(TAG, "New publisher: %s", publisher.toString());
-            mPublishers.put(publisher.Id, publisher);
-            break;
-          case MODIFIED:
-            LogUtils.debug(TAG, "Modified publisher: %s", publisher.toString());
-            mPublishers.put(publisher.Id, publisher);
-            break;
-          case REMOVED:
-            LogUtils.debug(TAG, "Removed publisher: %s", publisher.toString());
-            mPublishers.remove(publisher.Id);
-            break;
-        }
-      }
-
-      comicPublisherTrace.stop();
-      readServerComicSeries();
-    });
-  }
-
-  private void readServerComicSeries() {
-
-    LogUtils.debug(TAG, "++readServerComicSeries()");
-    mComicSeries = new HashMap<>();
-    Trace comicSeriesTrace = FirebasePerformance.getInstance().newTrace("get_comic_series");
-    comicSeriesTrace.start();
-    mComicSeriesRegistration = mFirestore.collection(ComicSeries.ROOT).addSnapshotListener((snapshots, ffe) -> {
-
-      if (ffe != null) {
-        LogUtils.warn(TAG, "Comic Series listen error: %s", ffe.getMessage());
-        return;
-      }
-
-      if (snapshots == null) {
-        LogUtils.error(TAG, "Comic Series snapshot was null.");
-        return;
-      }
-
-      for (DocumentChange dc : snapshots.getDocumentChanges()) {
-        ComicSeries series = dc.getDocument().toObject(ComicSeries.class);
-        series.parseProductCode(dc.getDocument().getId());
-        switch (dc.getType()) {
-          case ADDED:
-            LogUtils.debug(TAG, "New series: %s", series.toString());
-            if (!series.PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) ||
-              !series.Id.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID)) {
-              mComicSeries.put(series.getProductId(), series);
-              comicSeriesTrace.incrementMetric("comic_series_read", 1);
-            } else {
-              comicSeriesTrace.incrementMetric("comic_series_bad_format", 1);
-            }
-
-            break;
-          case MODIFIED:
-            LogUtils.debug(TAG, "Modified series: %s", series.toString());
-            mComicSeries.put(series.getProductId(), series);
-            break;
-          case REMOVED:
-            LogUtils.debug(TAG, "Removed series: %s", series.toString());
-            mComicSeries.remove(series.getProductId());
-            break;
-        }
-      }
-
-      // series data is loaded, proceed to loading comic library data
-      checkForWritePermission();
-    });
   }
 
   private void replaceFragment(Fragment fragment) {

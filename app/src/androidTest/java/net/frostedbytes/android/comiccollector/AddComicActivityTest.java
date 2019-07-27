@@ -32,6 +32,11 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class AddComicActivityTest {
 
+  // TODO: addNewComic
+  // TODO: addDuplicateComic
+  // TODO: addUnknownPublisher
+  // TODO: addUnknownSeries
+
   @Rule
   public ActivityTestRule<SignInActivity> mActivityTestRule = new ActivityTestRule<>(SignInActivity.class);
 
@@ -219,16 +224,6 @@ public class AddComicActivityTest {
           0),
         isDisplayed()));
     textView2.check(matches(withText("X-Men The Seeds of Tomorrow")));
-
-    ViewInteraction textView3 = onView(
-      allOf(withId(R.id.comic_item_text_publisher), withText("MARVEL COMICS"),
-        childAtPosition(
-          childAtPosition(
-            allOf(withId(R.id.comic_list_view), withContentDescription("List of comics.")),
-            0),
-          1),
-        isDisplayed()));
-    textView3.check(matches(withText("MARVEL COMICS")));
   }
 
   private static Matcher<View> childAtPosition(

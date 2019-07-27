@@ -3,18 +3,7 @@ package net.frostedbytes.android.comiccollector.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.crashlytics.android.Crashlytics;
-
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.reflect.TypeToken;
-import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 
 import java.util.Locale;

@@ -36,7 +36,7 @@
     android:autofillHints="@string/search"
     android:gravity="end"
     android:hint="@string/hint_search_product"
-    android:inputType="number"
+    android:inputType="number|textNoSuggestions"
     android:textColor="@color/secondaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@id/manual_search_text_no_barcode"/>
@@ -71,7 +71,7 @@
     android:autofillHints="@string/hint_search_issue"
     android:gravity="end"
     android:hint="@string/hint_search_issue"
-    android:inputType="number"
+    android:inputType="number|textNoSuggestions"
     android:textColor="@color/secondaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/manual_search_image_product"/>

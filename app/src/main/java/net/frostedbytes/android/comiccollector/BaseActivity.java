@@ -16,7 +16,6 @@ import net.frostedbytes.android.comiccollector.fragments.UserPreferenceFragment;
 public class BaseActivity  extends AppCompatActivity {
 
     public static final String ARG_COMIC_BOOK = "comic_book";
-    public static final String ARG_COMIC_BOOK_LIST = "comic_book_list";
     public static final String ARG_COMIC_PUBLISHER = "publisher";
     public static final String ARG_COMIC_PUBLISHERS = "publishers";
     public static final String ARG_COMIC_SERIES = "comic_series";
@@ -24,7 +23,6 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String ARG_FIREBASE_USER_ID = "firebase_user_id";
     public static final String ARG_MESSAGE = "message";
     public static final String ARG_NEW_COMIC_BOOK = "new_comic_book";
-    public static final String ARG_RELOAD = "reload";
     public static final String ARG_USER = "user";
     public static final String ARG_USER_NAME = "user_name";
 
@@ -42,6 +40,13 @@ public class BaseActivity  extends AppCompatActivity {
 
     public static final int REQUEST_CAMERA_PERMISSIONS = 4701;
     public static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS = 4702;
+
+    public static final int RESULT_EXPORT_SUCCESS = 4800;
+    public static final int RESULT_IMPORT_SUCCESS = 4801;
+    public static final int RESULT_SYNC_FAILED = 4802;
+
+    public static final int RESULT_ADD_SUCCESS = 4900;
+    public static final int RESULT_ADD_FAILED = 4901;
 
     public static final String BASE_TAG = "ComicCollector::";
     public static final String TAG = BASE_TAG + "BaseActivity";

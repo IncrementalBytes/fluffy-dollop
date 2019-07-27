@@ -85,8 +85,7 @@ public class ComicSeriesFragment extends Fragment {
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     View view = inflater.inflate(R.layout.fragment_comic_series, container, false);
 
-    if ((mComicSeries != null && mComicSeries.isValid()) &&
-      (mComicPublisher != null)) {
+    if ((mComicSeries != null && mComicSeries.isValid()) && (mComicPublisher != null)) {
       EditText seriesIdEdit = view.findViewById(R.id.comic_series_edit_code);
       EditText mPublisherNameEdit = view.findViewById(R.id.comic_series_edit_publisher);
       mSeriesNameEdit = view.findViewById(R.id.comic_series_edit_name);

@@ -71,6 +71,25 @@ public class ComicSeries implements Parcelable {
     Volume = 0;
   }
 
+  public ComicSeries(
+    long addedDate,
+    ArrayList<ComicBook> comicBooks,
+    String id,
+    boolean isFlagged,
+    long modifiedDate,
+    String seriesName,
+    String publisherId,
+    int volume) {
+
+    AddedDate = addedDate;
+    ComicBooks = comicBooks;
+    Id = id;
+    IsFlagged = isFlagged;
+    ModifiedDate = modifiedDate;
+    SeriesName = seriesName;
+    PublisherId = publisherId;
+    Volume = volume;
+  }
   protected ComicSeries(Parcel in) {
 
     AddedDate = in.readLong();
@@ -116,7 +135,7 @@ public class ComicSeries implements Parcelable {
   public void writeToParcel(Parcel dest, int flags) {
 
     dest.writeLong(AddedDate);
-    dest.writeTypedList(ComicBooks);
+    dest.writeList(ComicBooks);
     dest.writeString(Id);
     dest.writeInt(IsFlagged ? 1 : 0);
     dest.writeLong(ModifiedDate);
