@@ -471,7 +471,7 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onSeriesListPopulated(int size) {
 
-    LogUtils.debug(TAG, "++onSeriesListPopulated()");
+    LogUtils.debug(TAG, "++onSeriesListPopulated(%d)", size);
     mProgressBar.setIndeterminate(false);
     if (mMainToolbar != null && mMainToolbar.getMenu() != null) {
       MenuItem item = mMainToolbar.getMenu().findItem(R.id.action_add);
@@ -726,6 +726,7 @@ public class MainActivity extends BaseActivity implements
           if (comic.isValid()) {
             ComicSeries series = mComicSeries.get(comic.getProductId());
             if (series != null) {
+              comic.parseIssueCode(comic.IssueCode);
               series.ComicBooks.add(comic);
             } else {
               LogUtils.warn(TAG, "Skipping %s; series %s not found.", comic.toString(), comic.getProductId());

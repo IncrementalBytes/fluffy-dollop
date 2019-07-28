@@ -16,7 +16,7 @@ public class ComicBook implements Parcelable {
   /**
    * Cover version of comic.
    */
-  public int CoverVersion;
+  public transient int CoverVersion;
 
   /**
    * Unique code for issue (paired with SeriesId); populates IssueNumber, CoverVersion, and PrintRun.
@@ -27,7 +27,7 @@ public class ComicBook implements Parcelable {
   /**
    * Specific issue number.
    */
-  public int IssueNumber;
+  public transient int IssueNumber;
 
   /**
    * Whether or not comic is owned by the user, otherwise it's on their wishlist.
@@ -38,7 +38,8 @@ public class ComicBook implements Parcelable {
   /**
    * Print run number.
    */
-  public int PrintRun;
+
+  public transient int PrintRun;
 
   /**
    * Date comic was published.
@@ -204,7 +205,7 @@ public class ComicBook implements Parcelable {
       return false;
     }
 
-    return IssueNumber >= 0 && PrintRun >= 0 && CoverVersion >= 0;
+    return true;
   }
 
   /**

@@ -121,6 +121,7 @@ public class AddActivity extends BaseActivity implements
       mComicSeries = (HashMap<String, ComicSeries>)getIntent().getSerializableExtra(BaseActivity.ARG_COMIC_SERIES);
     }
 
+    mProgressBar.setIndeterminate(true);
     if (User.isValid(mUser)) {
       if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
         checkForCameraPermission();
@@ -241,6 +242,7 @@ public class AddActivity extends BaseActivity implements
 
     if (comicSeries != null && comicSeries.isValid()) {
       LogUtils.debug(TAG, "++onComicSeriesActionComplete(%s)", comicSeries.toString());
+      mProgressBar.setIndeterminate(true);
       comicSeries.AddedDate = Calendar.getInstance().getTimeInMillis();
       comicSeries.IsFlagged = true;
 
@@ -298,6 +300,7 @@ public class AddActivity extends BaseActivity implements
   public void onTutorialContinue() {
 
     LogUtils.debug(TAG, "++onTutorialContinue()");
+    mProgressBar.setIndeterminate(true);
     showPictureIntent();
   }
 
@@ -318,6 +321,7 @@ public class AddActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++retrieveComicSeriesComplete(%s)", comicSeries.toString());
     ComicPublisher comicPublisher = mPublishers.get(comicSeries.PublisherId);
+    mProgressBar.setIndeterminate(false);
     if (comicPublisher != null) {
       replaceFragment(ComicSeriesFragment.newInstance(comicSeries, comicPublisher));
     } else {
@@ -385,6 +389,7 @@ public class AddActivity extends BaseActivity implements
       mSnackbar.dismiss();
     }
 
+    mProgressBar.setIndeterminate(false);
     replaceFragment(ManualSearchFragment.newInstance(comic));
   }
 
@@ -409,9 +414,10 @@ public class AddActivity extends BaseActivity implements
 
     mProgressBar.setIndeterminate(false);
     if (foundBook != null) { // book found, show for edit
-      setResultAndFinish(RESULT_OK, null, foundBook, "");
+      setResultAndFinish(RESULT_OK, series, foundBook, "");
     } else { // look up series info
       ComicPublisher publisher = mPublishers.get(comicBook.PublisherId);
+      mProgressBar.setIndeterminate(true);
       if (publisher != null) {
         if (series == null) { // search for more info via REST API before asking user for information
           mCurrentComicBook = comicBook;
@@ -481,6 +487,7 @@ public class AddActivity extends BaseActivity implements
   private void setResultAndFinish(int resultCode, ComicSeries comicSeries, ComicBook comicBook, String message) {
 
     LogUtils.debug(TAG, "++setResultAndFinish(%d, ComicSeries, ComicBook, %s)", resultCode, message);
+    mProgressBar.setIndeterminate(false);
     Intent resultIntent = new Intent();
     resultIntent.putExtra(BaseActivity.ARG_COMIC_SERIES, comicSeries);
     resultIntent.putExtra(BaseActivity.ARG_COMIC_BOOK, comicBook);
@@ -525,6 +532,7 @@ public class AddActivity extends BaseActivity implements
     }
 
     if (mUser.ShowBarcodeHint) {
+      mProgressBar.setIndeterminate(false);
       replaceFragment(TutorialFragment.newInstance(mUser));
     } else {
       showPictureIntent();

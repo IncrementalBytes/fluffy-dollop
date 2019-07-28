@@ -24,8 +24,8 @@
 
   <string name="debug_path">/storage/self/primary/DCIM/Camera</string>
   <!--<string name="debug_file_name">20190511_060443.jpg</string>-->
-  <string name="debug_file_name">20190718_171143.jpg</string>
-  <!--<string name="debug_file_name">20190726_074254.jpg</string>-->
+  <!--<string name="debug_file_name">20190718_171143.jpg</string>-->
+  <string name="debug_file_name">20190726_074254.jpg</string>
   <!--<string name="debug_file_name">20190726_074305.jpg</string>-->
   <!--<string name="debug_file_name">20190419_131840.jpg</string>-->
   <string name="cancel">Cancel</string>
