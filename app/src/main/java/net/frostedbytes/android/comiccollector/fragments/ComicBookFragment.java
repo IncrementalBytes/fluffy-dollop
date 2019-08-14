@@ -156,7 +156,7 @@ public class ComicBookFragment extends Fragment {
         updatedBook.Title = mTitleEdit.getText().toString();
         updatedBook.PublishedDate = mPublishedDateEdit.getText().toString();
         updatedBook.OwnedState = mOwnedToggle.isChecked();
-        updatedBook.ReadState = mReadToggle.isChecked();
+        updatedBook.ReadState  = mReadToggle.isChecked();
         mCallback.onComicBookAddedToLibrary(updatedBook);
       });
 

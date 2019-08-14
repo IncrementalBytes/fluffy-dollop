@@ -18,17 +18,6 @@
     android:title="@string/menu_add"
     app:showAsAction="collapseActionView|withText"/>
   <item
-    android:id="@+id/action_sync"
-    android:enabled="false"
-    android:icon="@drawable/ic_sync_dark"
-    android:title="@string/menu_sync"
-    app:showAsAction="collapseActionView|withText"/>
-  <item
-    android:id="@+id/action_settings"
-    android:icon="@drawable/ic_settings_dark"
-    android:title="@string/menu_settings"
-    app:showAsAction="collapseActionView|withText"/>
-  <item
     android:id="@+id/action_logout"
     android:icon="@drawable/ic_logout_dark"
     android:title="@string/menu_logout"

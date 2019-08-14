@@ -11,23 +11,24 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:text="@string/bar_code_not_found"
-    android:textColor="?attr/colorError"
+    android:text="@string/err_bar_code_not_found"
+    android:textColor="@color/warningTextColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"/>
   <TextView
     android:id="@+id/manual_search_text_product"
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceMedium"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/series_upc"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:textColor="@color/secondaryTextColor"
     android:textSize="24sp"
-    android:textStyle="bold"
-    app:layout_constraintTop_toTopOf="@id/manual_search_edit_product"
+    app:layout_constraintBottom_toBottomOf="@id/manual_search_edit_product"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintBottom_toBottomOf="@id/manual_search_edit_product"/>
+    app:layout_constraintTop_toTopOf="@id/manual_search_edit_product"/>
   <EditText
     android:id="@+id/manual_search_edit_product"
     android:layout_width="0dp"
@@ -37,7 +38,7 @@
     android:gravity="end"
     android:hint="@string/hint_search_product"
     android:inputType="number|textNoSuggestions"
-    android:textColor="@color/secondaryLightColor"
+    android:textColor="@color/primaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@id/manual_search_text_no_barcode"/>
   <ImageView
@@ -53,16 +54,17 @@
 
   <TextView
     android:id="@+id/manual_search_text_issue"
+    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceMedium"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/issue_upc"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:textColor="@color/secondaryTextColor"
     android:textSize="24sp"
-    android:textStyle="bold"
-    app:layout_constraintTop_toTopOf="@id/manual_search_edit_issue"
+    app:layout_constraintBottom_toBottomOf="@id/manual_search_edit_issue"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintBottom_toBottomOf="@id/manual_search_edit_issue"/>
+    app:layout_constraintTop_toTopOf="@id/manual_search_edit_issue"/>
   <EditText
     android:id="@+id/manual_search_edit_issue"
     android:layout_width="wrap_content"
@@ -72,7 +74,7 @@
     android:gravity="end"
     android:hint="@string/hint_search_issue"
     android:inputType="number|textNoSuggestions"
-    android:textColor="@color/secondaryLightColor"
+    android:textColor="@color/primaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/manual_search_image_product"/>
   <ImageView
@@ -91,6 +93,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
+    android:background="@color/primaryColor"
     android:text="@string/continue_button"
     app:layout_constraintEnd_toStartOf="@+id/manual_search_button_cancel"
     app:layout_constraintTop_toBottomOf="@+id/manual_search_image_issue"/>
@@ -99,6 +102,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
+    android:background="@color/primaryColor"
     android:text="@string/cancel_button"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/manual_search_image_issue"/>

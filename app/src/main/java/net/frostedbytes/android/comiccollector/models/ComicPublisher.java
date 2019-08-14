@@ -46,6 +46,15 @@ public class ComicPublisher implements Parcelable {
     Name = "";
   }
 
+  public ComicPublisher(ComicPublisher existing) {
+
+    AddedDate = existing.AddedDate;
+    Id = existing.Id;
+    IsFlagged = existing.IsFlagged;
+    ModifiedDate = existing.ModifiedDate;
+    Name = existing.Name;
+  }
+
   protected ComicPublisher(Parcel in) {
 
     AddedDate = in.readLong();

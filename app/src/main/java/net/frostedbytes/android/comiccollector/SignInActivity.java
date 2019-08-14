@@ -2,6 +2,7 @@ package net.frostedbytes.android.comiccollector;
 
 import android.content.Intent;
 import android.os.Bundle;
+import com.crashlytics.android.core.CrashlyticsCore;
 import com.google.android.material.snackbar.Snackbar;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -19,6 +20,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import io.fabric.sdk.android.Fabric;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 
 import java.util.Calendar;
@@ -47,6 +49,11 @@ public class SignInActivity extends BaseActivity {
     super.onCreate(savedInstanceState);
 
     LogUtils.debug(TAG, "++onCreate(Bundle)");
+    CrashlyticsCore crashlyticsCore = new CrashlyticsCore.Builder()
+      .disabled(BuildConfig.DEBUG)
+      .build();
+    Fabric.with(this, new Crashlytics.Builder().core(crashlyticsCore).build());
+
     setContentView(R.layout.activity_sign_in);
 
     SignInButton signInWithGoogleButton = findViewById(R.id.sign_in_button_google);

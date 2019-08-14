@@ -71,25 +71,18 @@ public class ComicSeries implements Parcelable {
     Volume = 0;
   }
 
-  public ComicSeries(
-    long addedDate,
-    ArrayList<ComicBook> comicBooks,
-    String id,
-    boolean isFlagged,
-    long modifiedDate,
-    String seriesName,
-    String publisherId,
-    int volume) {
+  public ComicSeries(ComicSeries existing) {
 
-    AddedDate = addedDate;
-    ComicBooks = comicBooks;
-    Id = id;
-    IsFlagged = isFlagged;
-    ModifiedDate = modifiedDate;
-    SeriesName = seriesName;
-    PublisherId = publisherId;
-    Volume = volume;
+    AddedDate = existing.AddedDate;
+    ComicBooks = new ArrayList<>(existing.ComicBooks);
+    Id = existing.Id;
+    IsFlagged = existing.IsFlagged;
+    ModifiedDate = existing.ModifiedDate;
+    SeriesName = existing.SeriesName;
+    PublisherId = existing.PublisherId;
+    Volume = existing.Volume;
   }
+
   protected ComicSeries(Parcel in) {
 
     AddedDate = in.readLong();

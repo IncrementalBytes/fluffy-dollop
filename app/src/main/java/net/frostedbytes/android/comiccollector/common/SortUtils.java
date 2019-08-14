@@ -15,15 +15,11 @@ public class SortUtils {
     }
   }
 
-  public static class ByPublicationDateAndIssueNumber implements Comparator<ComicBook> {
+  public static class ByIssueNumber implements Comparator<ComicBook> {
 
     public int compare(ComicBook a, ComicBook b) {
 
-      if (a.PublishedDate.equals(b.PublishedDate)) {
-        return Long.compare(b.IssueNumber, a.IssueNumber);
-      } else {
-        return b.PublishedDate.compareTo(a.PublishedDate);
-      }
+      return Long.compare(a.IssueNumber, b.IssueNumber);
     }
   }
 }

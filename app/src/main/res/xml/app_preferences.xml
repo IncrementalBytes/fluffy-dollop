@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+  android:background="@color/background_item">
   <SwitchPreference
     android:defaultValue="false"
     android:key="preference_is_geek"
-    android:title="Enable geek interface"
-    android:summary="Show image captured by camera for scanning."/>
+    android:summary="Show image captured by camera for scanning."
+    android:title="Enable geek interface"/>
   <SwitchPreference
     android:defaultValue="false"
     android:key="preference_show_tutorial"
-    android:title="Show tutorial"
-    android:summary="Show tutorial about taking picture of comic book bar code."/>
+    android:summary="Show tutorial about taking picture of comic book bar code."
+    android:title="Show tutorial"/>
 </PreferenceScreen>

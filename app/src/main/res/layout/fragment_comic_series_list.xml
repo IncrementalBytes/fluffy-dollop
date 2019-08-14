@@ -17,30 +17,16 @@
     tools:listitem="@layout/series_item"/>
 
   <com.google.android.material.floatingactionbutton.FloatingActionButton
-    android:id="@+id/series_fab_sync"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:layout_marginEnd="8dp"
-    android:clickable="true"
-    android:elevation="5dp"
-    android:focusable="true"
-    android:visibility="visible"
-    app:backgroundTint="@color/primaryLightColor"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toStartOf="@id/series_fab_add"
-    app:srcCompat="@drawable/ic_sync_dark"/>
-
-  <com.google.android.material.floatingactionbutton.FloatingActionButton
     android:id="@+id/series_fab_add"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
     android:layout_marginEnd="8dp"
     android:clickable="true"
+    android:contentDescription="@string/desc_add_comic"
     android:elevation="5dp"
     android:focusable="true"
-    app:backgroundTint="@color/primaryLightColor"
+    app:backgroundTint="@color/primaryColor"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:srcCompat="@drawable/ic_add_dark"/>

@@ -14,6 +14,8 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
@@ -28,7 +30,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -66,7 +67,6 @@ public class AddActivity extends BaseActivity implements
 
   private static final String TAG = BASE_TAG + "AddActivity";
 
-  private ProgressBar mProgressBar;
   private Snackbar mSnackbar;
 
   private HashMap<String, ComicSeries> mComicSeries;
@@ -81,17 +81,6 @@ public class AddActivity extends BaseActivity implements
       AppCompatActivity Override(s)
    */
   @Override
-  public void onBackPressed() {
-
-    LogUtils.debug(TAG, "++onBackPressed()");
-    if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
-      setResultAndFinish(RESULT_CANCELED, null, null, "");
-    } else {
-      super.onBackPressed();
-    }
-  }
-
-  @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
@@ -100,12 +89,17 @@ public class AddActivity extends BaseActivity implements
 
     Toolbar mAddToolbar = findViewById(R.id.add_toolbar);
     setSupportActionBar(mAddToolbar);
-    mProgressBar = findViewById(R.id.add_progress);
-
     getSupportFragmentManager().addOnBackStackChangedListener(() -> {
       Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.add_fragment_container);
       if (fragment != null) {
-        updateTitle(fragment);
+        String fragmentClassName = fragment.getClass().getName();
+        if (fragmentClassName.equals(ComicSeriesFragment.class.getName())) {
+          setTitle(getString(R.string.title_comic_series));
+        } else if (fragmentClassName.equals(ManualSearchFragment.class.getName())) {
+          setTitle(getString(R.string.title_gathering_data));
+        } else if (fragmentClassName.equals(TutorialFragment.class.getName())) {
+          setTitle(getString(R.string.title_tutorial));
+        }
       }
     });
 
@@ -121,7 +115,6 @@ public class AddActivity extends BaseActivity implements
       mComicSeries = (HashMap<String, ComicSeries>)getIntent().getSerializableExtra(BaseActivity.ARG_COMIC_SERIES);
     }
 
-    mProgressBar.setIndeterminate(true);
     if (User.isValid(mUser)) {
       if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
         checkForCameraPermission();
@@ -138,10 +131,21 @@ public class AddActivity extends BaseActivity implements
   }
 
   @Override
+  public void onBackPressed() {
+
+    LogUtils.debug(TAG, "++onBackPressed()");
+    if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
+      setResultAndFinish(RESULT_CANCELED, null, null, "");
+    } else {
+      super.onBackPressed();
+    }
+  }
+
+  @Override
   public boolean onCreateOptionsMenu(Menu menu) {
 
     LogUtils.debug(TAG, "++onCreateOptionsMenu(Menu)");
-    getMenuInflater().inflate(R.menu.menu_add, menu);
+    getMenuInflater().inflate(R.menu.add, menu);
     return true;
   }
 
@@ -186,7 +190,8 @@ public class AddActivity extends BaseActivity implements
         setResultAndFinish(RESULT_CANCELED,null, null, "");
       } else {
         if (BuildConfig.DEBUG) { // use static file in storage
-          File f = new File(getString(R.string.debug_path), getString(R.string.debug_file_name));
+          File f = new File(getString(R.string.debug_path), data.getStringExtra(BaseActivity.ARG_DEBUG_FILE_NAME));
+          LogUtils.debug(TAG, "Using %s", f.getAbsolutePath());
           try {
             mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
           } catch (FileNotFoundException e) {
@@ -242,7 +247,6 @@ public class AddActivity extends BaseActivity implements
 
     if (comicSeries != null && comicSeries.isValid()) {
       LogUtils.debug(TAG, "++onComicSeriesActionComplete(%s)", comicSeries.toString());
-      mProgressBar.setIndeterminate(true);
       comicSeries.AddedDate = Calendar.getInstance().getTimeInMillis();
       comicSeries.IsFlagged = true;
 
@@ -274,10 +278,8 @@ public class AddActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++onManualSearchActionComplete(%s)", comicBook.toString());
     if (comicBook.isValid()) {
-      mProgressBar.setIndeterminate(true);
       queryInUserComicBooks(comicBook);
     } else {
-      mProgressBar.setIndeterminate(false);
       LogUtils.warn(TAG, getString(R.string.err_manual_search));
       mSnackbar = Snackbar.make(
         findViewById(R.id.add_fragment_container),
@@ -300,7 +302,6 @@ public class AddActivity extends BaseActivity implements
   public void onTutorialContinue() {
 
     LogUtils.debug(TAG, "++onTutorialContinue()");
-    mProgressBar.setIndeterminate(true);
     showPictureIntent();
   }
 
@@ -321,7 +322,6 @@ public class AddActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++retrieveComicSeriesComplete(%s)", comicSeries.toString());
     ComicPublisher comicPublisher = mPublishers.get(comicSeries.PublisherId);
-    mProgressBar.setIndeterminate(false);
     if (comicPublisher != null) {
       replaceFragment(ComicSeriesFragment.newInstance(comicSeries, comicPublisher));
     } else {
@@ -389,7 +389,6 @@ public class AddActivity extends BaseActivity implements
       mSnackbar.dismiss();
     }
 
-    mProgressBar.setIndeterminate(false);
     replaceFragment(ManualSearchFragment.newInstance(comic));
   }
 
@@ -412,12 +411,10 @@ public class AddActivity extends BaseActivity implements
       }
     }
 
-    mProgressBar.setIndeterminate(false);
     if (foundBook != null) { // book found, show for edit
-      setResultAndFinish(RESULT_OK, series, foundBook, "");
+      setResultAndFinish(BaseActivity.RESULT_ADD_SUCCESS, series, foundBook, "");
     } else { // look up series info
       ComicPublisher publisher = mPublishers.get(comicBook.PublisherId);
-      mProgressBar.setIndeterminate(true);
       if (publisher != null) {
         if (series == null) { // search for more info via REST API before asking user for information
           mCurrentComicBook = comicBook;
@@ -445,10 +442,6 @@ public class AddActivity extends BaseActivity implements
     FragmentManager fragmentManager = getSupportFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
     fragmentTransaction.replace(R.id.add_fragment_container, fragment);
-    if (fragment.getClass().getName().equals(ManualSearchFragment.class.getName())) {
-      fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-    }
-
     fragmentTransaction.addToBackStack(fragment.getClass().getName());
     LogUtils.debug(TAG, "Back stack count: %d", fragmentManager.getBackStackEntryCount());
     fragmentTransaction.commitAllowingStateLoss();
@@ -458,7 +451,6 @@ public class AddActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++scanImageForProductCode()");
     if (mImageBitmap != null) {
-      mProgressBar.setIndeterminate(true);
       if (mUser.IsGeek) {
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         View promptView = layoutInflater.inflate(R.layout.dialog_debug_image, null);
@@ -470,7 +462,6 @@ public class AddActivity extends BaseActivity implements
         alertDialogBuilder.setCancelable(false)
           .setPositiveButton(R.string.ok, (dialog, id) -> useFirebaseBarcodeScanning())
           .setNegativeButton(R.string.cancel, (dialog, id) -> {
-            mProgressBar.setIndeterminate(false);
             dialog.cancel();
           });
 
@@ -487,7 +478,6 @@ public class AddActivity extends BaseActivity implements
   private void setResultAndFinish(int resultCode, ComicSeries comicSeries, ComicBook comicBook, String message) {
 
     LogUtils.debug(TAG, "++setResultAndFinish(%d, ComicSeries, ComicBook, %s)", resultCode, message);
-    mProgressBar.setIndeterminate(false);
     Intent resultIntent = new Intent();
     resultIntent.putExtra(BaseActivity.ARG_COMIC_SERIES, comicSeries);
     resultIntent.putExtra(BaseActivity.ARG_COMIC_BOOK, comicBook);
@@ -499,28 +489,49 @@ public class AddActivity extends BaseActivity implements
   private void showPictureIntent() {
 
     LogUtils.debug(TAG, "++showPictureIntent()");
-    replaceFragment(SystemMessageFragment.newInstance(""));
+    replaceFragment(SystemMessageFragment.newInstance());
     deleteImageFile();
-    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-      try {
-        mCurrentImageFile = createImageFile();
-      } catch (IOException e) {
-        Crashlytics.logException(e);
-      }
+    if (BuildConfig.DEBUG) {
+      LayoutInflater layoutInflater = LayoutInflater.from(this);
+      View promptView = layoutInflater.inflate(R.layout.dialog_debug_camera, null);
 
-      if (mCurrentImageFile != null) {
-        Uri photoURI = FileProvider.getUriForFile(
-          this,
-          "net.frostedbytes.android.comiccollector.fileprovider",
-          mCurrentImageFile);
-        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-        startActivityForResult(takePictureIntent, BaseActivity.REQUEST_IMAGE_CAPTURE);
-      } else {
-        setResultAndFinish(BaseActivity.RESULT_ADD_FAILED, null, null, getString(R.string.err_photo_file_not_found));
-      }
+      Spinner spinner = promptView.findViewById(R.id.debug_spinner_file);
+      AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+      alertDialogBuilder.setView(promptView);
+      alertDialogBuilder.setCancelable(false)
+        .setPositiveButton(R.string.ok, (dialog, id) -> {
+          Intent debugIntent = new Intent();
+          debugIntent.putExtra(BaseActivity.ARG_DEBUG_FILE_NAME, spinner.getSelectedItem().toString());
+          onActivityResult(BaseActivity.REQUEST_IMAGE_CAPTURE, RESULT_OK, debugIntent);
+        })
+        .setNegativeButton(R.string.cancel, (dialog, id) -> {
+          dialog.cancel();
+        });
+
+      AlertDialog alert = alertDialogBuilder.create();
+      alert.show();
     } else {
-      setResultAndFinish(BaseActivity.RESULT_ADD_FAILED,null, null, getString(R.string.err_camera_intent_failed));
+      Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+      if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        try {
+          mCurrentImageFile = createImageFile();
+        } catch (IOException e) {
+          Crashlytics.logException(e);
+        }
+
+        if (mCurrentImageFile != null) {
+          Uri photoURI = FileProvider.getUriForFile(
+            this,
+            "net.frostedbytes.android.comiccollector.fileprovider",
+            mCurrentImageFile);
+          takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+          startActivityForResult(takePictureIntent, BaseActivity.REQUEST_IMAGE_CAPTURE);
+        } else {
+          setResultAndFinish(BaseActivity.RESULT_ADD_FAILED, null, null, getString(R.string.err_photo_file_not_found));
+        }
+      } else {
+        setResultAndFinish(BaseActivity.RESULT_ADD_FAILED, null, null, getString(R.string.err_camera_intent_failed));
+      }
     }
   }
 
@@ -532,7 +543,6 @@ public class AddActivity extends BaseActivity implements
     }
 
     if (mUser.ShowBarcodeHint) {
-      mProgressBar.setIndeterminate(false);
       replaceFragment(TutorialFragment.newInstance(mUser));
     } else {
       showPictureIntent();
@@ -553,11 +563,12 @@ public class AddActivity extends BaseActivity implements
       .addOnCompleteListener(task -> {
 
         if (task.isSuccessful() && task.getResult() != null) {
-          ComicBook comic = new ComicBook();
+          ComicBook comic = null;
           for (FirebaseVisionBarcode barcode : task.getResult()) {
             if (barcode.getValueType() == FirebaseVisionBarcode.TYPE_PRODUCT) {
               String barcodeValue = barcode.getDisplayValue();
               LogUtils.debug(TAG, "Found a bar code: %s", barcodeValue);
+              comic = new ComicBook();
               if (barcodeValue != null && !barcodeValue.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID)) {
                 comic.parseProductCode(barcodeValue);
               }
@@ -570,45 +581,55 @@ public class AddActivity extends BaseActivity implements
             }
           }
 
-          ComicPublisher publisher = mPublishers.get(comic.PublisherId);
-          if (publisher == null) {
-            LogUtils.warn(TAG, "PublisherId is unknown: %s", comic.PublisherId);
+          if (comic != null) {
+            ComicPublisher publisher = mPublishers.get(comic.PublisherId);
+            if (publisher == null) {
+              LogUtils.warn(TAG, "PublisherId is unknown: %s", comic.PublisherId);
+              setResultAndFinish(
+                BaseActivity.RESULT_ADD_FAILED,
+                null,
+                null,
+                getString(R.string.err_unknown_publisher));
+              // TODO populate this data to firestore
+            } else {
+              LogUtils.debug(TAG, "Publisher: %s (%s)", publisher.Name, comic.PublisherId);
+              if (!comic.SeriesId.isEmpty() && !comic.SeriesId.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID)) {
+                getIssueIdFromUser(comic);
+              } else if (mRotationAttempts < 3) {
+                mRotationAttempts++;
+                Matrix matrix = new Matrix();
+                matrix.postRotate(90);
+                mImageBitmap = Bitmap.createBitmap(
+                  mImageBitmap,
+                  0,
+                  0,
+                  mImageBitmap.getWidth(),
+                  mImageBitmap.getHeight(),
+                  matrix,
+                  true);
+                scanImageForProductCode();
+              } else {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(90);
+                mImageBitmap = Bitmap.createBitmap(
+                  mImageBitmap,
+                  0,
+                  0,
+                  mImageBitmap.getWidth(),
+                  mImageBitmap.getHeight(),
+                  matrix,
+                  true);
+                mRotationAttempts = 0;
+                LogUtils.warn(TAG, "Rotated image completely and could not find a bar code.");
+                replaceFragment(ManualSearchFragment.newInstance(new ComicBook()));
+              }
+            }
+          } else {
             setResultAndFinish(
               BaseActivity.RESULT_ADD_FAILED,
               null,
               null,
-              getString(R.string.err_unknown_publisher));
-          } else {
-            LogUtils.debug(TAG, "Publisher: %s (%s)", publisher.Name, comic.PublisherId);
-            if (!comic.SeriesId.isEmpty() && !comic.SeriesId.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID)) {
-              getIssueIdFromUser(comic);
-            } else if (mRotationAttempts < 3) {
-              mRotationAttempts++;
-              Matrix matrix = new Matrix();
-              matrix.postRotate(90);
-              mImageBitmap = Bitmap.createBitmap(
-                mImageBitmap,
-                0,
-                0,
-                mImageBitmap.getWidth(),
-                mImageBitmap.getHeight(),
-                matrix,
-                true);
-              scanImageForProductCode();
-            } else {
-              Matrix matrix = new Matrix();
-              matrix.postRotate(90);
-              mImageBitmap = Bitmap.createBitmap(
-                mImageBitmap,
-                0,
-                0,
-                mImageBitmap.getWidth(),
-                mImageBitmap.getHeight(),
-                matrix,
-                true);
-              mRotationAttempts = 0;
-              replaceFragment(ManualSearchFragment.newInstance(new ComicBook()));
-            }
+              getString(R.string.err_bar_code_not_found));
           }
         } else {
           setResultAndFinish(

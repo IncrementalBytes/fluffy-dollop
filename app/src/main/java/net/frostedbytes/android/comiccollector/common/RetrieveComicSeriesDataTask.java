@@ -105,7 +105,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
     LogUtils.debug(TAG, "++onPostExecute(%s)", comicSeries.toString());
     AddActivity activity = mActivityWeakReference.get();
     if (activity == null) {
-      LogUtils.error(TAG, "MainActivity is null or detached.");
+      LogUtils.error(TAG, "AddActivity is null or detached.");
       return;
     }
 

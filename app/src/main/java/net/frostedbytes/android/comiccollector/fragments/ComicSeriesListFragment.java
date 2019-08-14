@@ -35,8 +35,6 @@ public class ComicSeriesListFragment extends Fragment {
     void onSeriesListItemSelected(ComicSeries comicSeries);
 
     void onSeriesListPopulated(int size);
-
-    void onSeriesListSynchronize();
   }
 
   private OnComicSeriesListListener mCallback;
@@ -89,13 +87,11 @@ public class ComicSeriesListFragment extends Fragment {
     final View view = inflater.inflate(R.layout.fragment_comic_series_list, container, false);
 
     FloatingActionButton addButton = view.findViewById(R.id.series_fab_add);
-    FloatingActionButton syncButton = view.findViewById(R.id.series_fab_sync);
     mRecyclerView = view.findViewById(R.id.series_list_view);
 
     final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager(manager);
     addButton.setOnClickListener(pickView -> mCallback.onSeriesListAddBook());
-    syncButton.setOnClickListener(pickView -> mCallback.onSeriesListSynchronize());
 
     updateUI();
     return view;

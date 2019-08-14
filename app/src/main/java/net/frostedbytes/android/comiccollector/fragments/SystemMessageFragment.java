@@ -4,6 +4,7 @@ import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -20,8 +21,15 @@ public class SystemMessageFragment extends Fragment {
 
   private String mMessage;
 
+  public static SystemMessageFragment newInstance() {
+
+    LogUtils.debug(TAG, "++newInstance()");
+    return new SystemMessageFragment();
+  }
+
   public static SystemMessageFragment newInstance(String message) {
 
+    LogUtils.debug(TAG, "++newInstance(%s)", message);
     SystemMessageFragment fragment = new SystemMessageFragment();
     Bundle args = new Bundle();
     args.putString(BaseActivity.ARG_MESSAGE, message);
@@ -48,7 +56,17 @@ public class SystemMessageFragment extends Fragment {
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     final View view = inflater.inflate(R.layout.fragment_system_message, container, false);
     TextView messageText = view.findViewById(R.id.system_text_message);
-    messageText.setText(mMessage);
+    ProgressBar progressBar = view.findViewById(R.id.system_progress);
+    if (mMessage != null && mMessage.length() > 0) {
+      messageText.setVisibility(View.VISIBLE);
+      messageText.setText(mMessage);
+      progressBar.setVisibility(View.INVISIBLE);
+    } else {
+      messageText.setVisibility(View.INVISIBLE);
+      progressBar.setVisibility(View.VISIBLE);
+      progressBar.setIndeterminate(true);
+    }
+
     return view;
   }
 }

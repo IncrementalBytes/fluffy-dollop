@@ -21,9 +21,12 @@ public class SyncFragment extends Fragment {
   private static final String TAG = BASE_TAG + "SyncFragment";
 
   public interface OnSyncListener {
-    void onExport();
-    void onImport();
+
+    void onSyncExport();
+
     void onSyncFail();
+
+    void onSyncImport();
   }
 
   private OnSyncListener mCallback;
@@ -57,7 +60,7 @@ public class SyncFragment extends Fragment {
 
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mUser = (User)arguments.getSerializable(BaseActivity.ARG_USER);
+      mUser = (User) arguments.getSerializable(BaseActivity.ARG_USER);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
     }
@@ -73,8 +76,8 @@ public class SyncFragment extends Fragment {
     CardView importCard = view.findViewById(R.id.sync_card_import);
 
     if (mUser != null && User.isValid(mUser)) {
-      exportCard.setOnClickListener(v -> mCallback.onExport());
-      importCard.setOnClickListener(v -> mCallback.onImport());
+      exportCard.setOnClickListener(v -> mCallback.onSyncExport());
+      importCard.setOnClickListener(v -> mCallback.onSyncImport());
     } else {
       mCallback.onSyncFail();
     }

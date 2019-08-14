@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.HashMap;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
@@ -38,22 +39,33 @@ public class ComicBookListFragment extends Fragment {
     void onComicListItemSelected(ComicBook comicBook);
 
     void onComicListPopulated(int size);
-
-    void onComicListSynchronize();
   }
 
   private OnComicBookListListener mCallback;
 
   private RecyclerView mRecyclerView;
 
-  private ComicSeries mComicSeries;
+  private ArrayList<ComicBook> mComicBooks;
+  private HashMap<String, ComicSeries> mComicSeries;
 
-  public static ComicBookListFragment newInstance(ComicSeries series) {
+  public static ComicBookListFragment newInstance(ComicSeries comicSeries) {
 
-    LogUtils.debug(TAG, "++newInstance()");
+    LogUtils.debug(TAG, "++newInstance(%s)", comicSeries.toString());
+    HashMap<String, ComicSeries> series = new HashMap<>();
+    series.put(comicSeries.getProductId(), comicSeries);
     ComicBookListFragment fragment = new ComicBookListFragment();
     Bundle args = new Bundle();
-    args.putParcelable(BaseActivity.ARG_COMIC_SERIES, series);
+    args.putSerializable(BaseActivity.ARG_COMIC_SERIES, series);
+    fragment.setArguments(args);
+    return fragment;
+  }
+
+  public static ComicBookListFragment newInstance(HashMap<String, ComicSeries> comicSeries) {
+
+    LogUtils.debug(TAG, "++newInstance(%d)", comicSeries.size());
+    ComicBookListFragment fragment = new ComicBookListFragment();
+    Bundle args = new Bundle();
+    args.putSerializable(BaseActivity.ARG_COMIC_SERIES, comicSeries);
     fragment.setArguments(args);
     return fragment;
   }
@@ -75,7 +87,7 @@ public class ComicBookListFragment extends Fragment {
 
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicSeries = arguments.getParcelable(BaseActivity.ARG_COMIC_SERIES);
+      mComicSeries = (HashMap<String, ComicSeries>)arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
     }
@@ -88,13 +100,16 @@ public class ComicBookListFragment extends Fragment {
     final View view = inflater.inflate(R.layout.fragment_comic_book_list, container, false);
 
     FloatingActionButton addButton = view.findViewById(R.id.comic_fab_add);
-    FloatingActionButton syncButton = view.findViewById(R.id.comic_fab_sync);
     mRecyclerView = view.findViewById(R.id.comic_list_view);
 
     final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager(manager);
     addButton.setOnClickListener(pickView -> mCallback.onComicListAddBook());
-    syncButton.setOnClickListener(pickView -> mCallback.onComicListSynchronize());
+
+    mComicBooks = new ArrayList<>();
+    for (ComicSeries series : mComicSeries.values()) {
+      mComicBooks.addAll(series.ComicBooks);
+    }
 
     updateUI();
     return view;
@@ -113,13 +128,12 @@ public class ComicBookListFragment extends Fragment {
    */
   private void updateUI() {
 
-    if (mComicSeries.ComicBooks == null || mComicSeries.ComicBooks.size() == 0) {
+    if (mComicBooks == null || mComicBooks.size() == 0) {
       mCallback.onComicListPopulated(0);
     } else {
       LogUtils.debug(TAG, "++updateUI()");
-      ArrayList<ComicBook> comicBooks = new ArrayList<>(mComicSeries.ComicBooks);
-      comicBooks.sort(new SortUtils.ByPublicationDateAndIssueNumber());
-      ComicBookAdapter comicAdapter = new ComicBookAdapter(comicBooks);
+      mComicBooks.sort(new SortUtils.ByIssueNumber());
+      ComicBookAdapter comicAdapter = new ComicBookAdapter(mComicBooks);
       mRecyclerView.setAdapter(comicAdapter);
       mCallback.onComicListPopulated(comicAdapter.getItemCount());
     }
@@ -199,12 +213,17 @@ public class ComicBookListFragment extends Fragment {
       }
 
       if (mComicSeries != null) {
+        ComicSeries series = mComicSeries.get(mComicBook.getProductId());
+        if (series != null) {
           mSeriesNameTextView.setText(
             String.format(
               Locale.US,
               "%s%s",
-              mComicSeries.SeriesName,
-              mComicSeries.IsFlagged ? " (pending)" : ""));
+              series.SeriesName,
+              series.IsFlagged ? " (pending)" : ""));
+        } else {
+          mSeriesNameTextView.setText("N/A");
+        }
       } else {
         mSeriesNameTextView.setText("N/A");
       }

@@ -21,18 +21,11 @@
   <string name="err_image_not_loaded">Image not loaded.</string>
   <string name="err_bar_code_task">Bar code detection task failed.</string>
   <string name="err_no_camera_detected">Camera was not detected.</string>
-
-  <string name="debug_path">/storage/self/primary/DCIM/Camera</string>
-  <!--<string name="debug_file_name">20190511_060443.jpg</string>-->
-  <!--<string name="debug_file_name">20190718_171143.jpg</string>-->
-  <string name="debug_file_name">20190726_074254.jpg</string>
-  <!--<string name="debug_file_name">20190726_074305.jpg</string>-->
-  <!--<string name="debug_file_name">20190419_131840.jpg</string>-->
   <string name="cancel">Cancel</string>
   <string name="title">Title:</string>
   <string name="product_code">Product Code:</string>
   <string name="owned">Owned</string>
-  <string name="remove_from_library">Remove from Library?</string>
+  <string name="remove_from_library">Remove</string>
   <string name="err_add_comic_book">Could not add comic book to library, please try again later.</string>
   <string name="err_remove_comic_book">Could not remove comic book from library, please try again later.</string>
   <string name="add">Add</string>
@@ -76,11 +69,12 @@
   <string name="toggle_owned">Owned</string>
   <string name="toggle_not_read">Not Read</string>
   <string name="toggle_read">Read</string>
-  <string name="bar_code_not_found">Barcode not found in image, try entering product code.</string>
+  <string name="err_bar_code_not_found">Barcode not found in image.</string>
   <string name="err_unknown_publisher">The Product Code is unknown and has been logged for review. Please try again later.</string>
   <string name="title_gathering_data">Gathering Data</string>
   <string name="permission_storage">Permission needed for storing data locally to reduce network usage.</string>
   <string name="permission_camera">Permission needed for capturing barcode images for processing.</string>
+  <string name="permission_denied_explanation">Permissions needed for full app functionality.</string>
   <string name="add_comic_book_canceled">Adding comic book canceled by user.</string>
   <string name="unknown_request_code">Unknown request code.</string>
   <string name="menu_cancel">Cancel</string>
@@ -107,4 +101,26 @@
   <string name="err_publisher_task_failed">Publisher data retrieval task failed, please try again later.</string>
   <string name="err_series_task_failed">Series data retrieval task failed, please try again later.</string>
   <string name="err_series_data_empty">Could not retrieve series data at this time, please try again later.</string>
+  <string name="desc_synchronize">Synchronize Library</string>
+  <string name="desc_add_comic">Add Comic to Library</string>
+  <string name="err_sync_user_unknown">Setting up synchronization failed; user unknown.</string>
+  <string name="status_sync_import_success">Importing of data successful!</string>
+  <string name="err_sync_import_failed">Error importing library data, please try again later.</string>
+  <string name="header_comic_serices">Series</string>
+  <string name="header_comic_books">Books</string>
+  <string name="menu_series">Series</string>
+  <string name="menu_books">Books</string>
+  <string name="err_import_unknown">Import failed with unknown error, please try again later.</string>
+  <string name="err_sync_unknown_user">Setting up synchronization failed; user unknown.</string>
+  <string name="err_comic_add_fail">Could not add new item at this time, please try again later.</string>
+
+  <string name="debug_path">/storage/self/primary/DCIM/Camera</string>
+  <string name="debug_prompt">Select image file to use:</string>
+  <string-array name="debug_scenario_array">
+    <item>scenario_barcode_not_found.jpg</item>
+    <item>scenario_existing_comic.jpg</item>
+    <item>scenario_new_comic.jpg</item>
+    <item>scenario_unknown_publisher.jpg</item>
+    <item>scenario_unknown_series.jpg</item>
+  </string-array>
 </resources>
