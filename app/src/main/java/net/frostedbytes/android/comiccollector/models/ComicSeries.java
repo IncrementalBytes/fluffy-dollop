@@ -83,6 +83,7 @@ public class ComicSeries implements Parcelable {
     Volume = existing.Volume;
   }
 
+  @SuppressWarnings("unchecked")
   protected ComicSeries(Parcel in) {
 
     AddedDate = in.readLong();
@@ -175,7 +176,6 @@ public class ComicSeries implements Parcelable {
   @Exclude
   public boolean isValid() {
 
-    LogUtils.debug(TAG, "++isValid()");
     if (PublisherId == null ||
       PublisherId.length() != BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length() ||
       PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID)) {

@@ -5,8 +5,11 @@ import android.os.Parcelable;
 import com.google.firebase.firestore.Exclude;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.BaseActivity;
+import net.frostedbytes.android.comiccollector.common.LogUtils;
 
 public class ComicPublisher implements Parcelable {
+
+  private static final String TAG = BaseActivity.BASE_TAG + "ComicPublisher";
 
   @Exclude
   public static final String ROOT = "ComicPublishers";
@@ -108,4 +111,21 @@ public class ComicPublisher implements Parcelable {
       return new ComicPublisher[size];
     }
   };
+
+  /**
+   * Validates the properties of the comic series.
+   * @return TRUE if all properties are within expected parameters, otherwise FALSE.
+   */
+  @Exclude
+  public boolean isValid() {
+
+    if (Id == null ||
+      Id.length() != BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length() ||
+      Id.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID)) {
+      LogUtils.debug(TAG, "Publisher data is unexpected: %s", Id);
+      return false;
+    }
+
+    return true;
+  }
 }

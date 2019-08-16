@@ -73,6 +73,7 @@ public class ComicBookListFragment extends Fragment {
   /*
     Fragment Override(s)
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
@@ -87,7 +88,7 @@ public class ComicBookListFragment extends Fragment {
 
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicSeries = (HashMap<String, ComicSeries>)arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
+      mComicSeries = (HashMap<String, ComicSeries>) arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
     }

@@ -14,7 +14,6 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import com.google.android.material.snackbar.Snackbar;
@@ -80,6 +79,7 @@ public class AddActivity extends BaseActivity implements
   /*
       AppCompatActivity Override(s)
    */
+  @SuppressWarnings("unchecked")
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -461,9 +461,7 @@ public class AddActivity extends BaseActivity implements
         alertDialogBuilder.setView(promptView);
         alertDialogBuilder.setCancelable(false)
           .setPositiveButton(R.string.ok, (dialog, id) -> useFirebaseBarcodeScanning())
-          .setNegativeButton(R.string.cancel, (dialog, id) -> {
-            dialog.cancel();
-          });
+          .setNegativeButton(R.string.cancel, (dialog, id) -> dialog.cancel());
 
         AlertDialog alert = alertDialogBuilder.create();
         alert.show();
@@ -504,9 +502,7 @@ public class AddActivity extends BaseActivity implements
           debugIntent.putExtra(BaseActivity.ARG_DEBUG_FILE_NAME, spinner.getSelectedItem().toString());
           onActivityResult(BaseActivity.REQUEST_IMAGE_CAPTURE, RESULT_OK, debugIntent);
         })
-        .setNegativeButton(R.string.cancel, (dialog, id) -> {
-          dialog.cancel();
-        });
+        .setNegativeButton(R.string.cancel, (dialog, id) -> dialog.cancel());
 
       AlertDialog alert = alertDialogBuilder.create();
       alert.show();
@@ -590,6 +586,7 @@ public class AddActivity extends BaseActivity implements
                 null,
                 null,
                 getString(R.string.err_unknown_publisher));
+
               // TODO populate this data to firestore
             } else {
               LogUtils.debug(TAG, "Publisher: %s (%s)", publisher.Name, comic.PublisherId);

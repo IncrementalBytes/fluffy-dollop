@@ -183,7 +183,6 @@ public class ComicBook implements Parcelable {
    */
   public boolean isValid() {
 
-    LogUtils.debug(TAG, "++isValid()");
     if (PublisherId == null ||
       PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) ||
       PublisherId.length() != BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length()) {

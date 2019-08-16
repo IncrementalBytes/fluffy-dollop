@@ -293,8 +293,7 @@ public class MainActivity extends BaseActivity implements
       }
     }
 
-    if (requestCode == BaseActivity.REQUEST_COMIC_ADD) {
-      // pick up any change to tutorial
+    if (requestCode == BaseActivity.REQUEST_COMIC_ADD) { // pick up any change to tutorial
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
       if (preferences.contains(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE)) {
         mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
@@ -666,17 +665,27 @@ public class MainActivity extends BaseActivity implements
     switch (dc.getType()) {
       case ADDED:
       case MODIFIED:
-        if (!publisher.Id.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID)) {
-          LogUtils.debug(
-            TAG,
-            "%s publisher: %s",
-            dc.getType() == DocumentChange.Type.ADDED ? "Added" : "Modified",
-            publisher.toString());
+        if (publisher.isValid()) {
           if (mPublishers.containsKey(publisher.Id)) {
-            ComicPublisher oldPublisher = new ComicPublisher(mPublishers.get(publisher.Id));
-            mPublishers.replace(publisher.Id, oldPublisher, publisher);
+            ComicPublisher targetPublisher = mPublishers.get(publisher.Id);
+            if (targetPublisher != null) {
+              ComicPublisher oldPublisher = new ComicPublisher(targetPublisher);
+              mPublishers.replace(publisher.Id, oldPublisher, publisher);
+              LogUtils.debug(
+                TAG,
+                "%s publisher: %s",
+                dc.getType() == DocumentChange.Type.ADDED ? "Added" : "Modified",
+                publisher.toString());
+            } else {
+              LogUtils.warn(TAG, "Failed to retrieve Comic Publisher from collection: %s", publisher.toString());
+            }
           } else {
             mPublishers.put(publisher.Id, publisher);
+            LogUtils.debug(
+              TAG,
+              "%s publisher: %s",
+              dc.getType() == DocumentChange.Type.ADDED ? "Added" : "Modified",
+              publisher.toString());
           }
         } else {
           LogUtils.warn(TAG, "Comic Publisher is unknown.");
@@ -697,18 +706,27 @@ public class MainActivity extends BaseActivity implements
     switch (dc.getType()) {
       case ADDED:
       case MODIFIED:
-        if (!series.PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) ||
-          !series.Id.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID)) {
-          LogUtils.debug(
-            TAG,
-            "%s series: %s",
-            dc.getType() == DocumentChange.Type.ADDED ? "Added" : "Modified",
-            series.toString());
+        if (series.isValid()) {
           if (mComicSeries.containsKey(series.getProductId())) {
-            ComicSeries oldSeries = new ComicSeries(mComicSeries.get(series.getProductId()));
-            mComicSeries.replace(series.getProductId(), oldSeries, series);
+            ComicSeries targetSeries = mComicSeries.get(series.getProductId());
+            if (targetSeries != null) {
+              ComicSeries oldSeries = new ComicSeries(targetSeries);
+              mComicSeries.replace(series.getProductId(), oldSeries, series);
+              LogUtils.debug(
+                TAG,
+                "%s series: %s",
+                dc.getType() == DocumentChange.Type.ADDED ? "Added" : "Modified",
+                series.toString());
+            } else {
+              LogUtils.warn(TAG, "Failed to retrieve Comic Series from collection: %s", series.toString());
+            }
           } else {
             mComicSeries.put(series.getProductId(), series);
+            LogUtils.debug(
+              TAG,
+              "%s series: %s",
+              dc.getType() == DocumentChange.Type.ADDED ? "Added" : "Modified",
+              series.toString());
           }
         } else {
           LogUtils.warn(TAG, "Comic Series is unknown: %s", series.toString());
@@ -726,7 +744,7 @@ public class MainActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++initialComicPublisherRead()");
     mPublishers = new HashMap<>();
-    mFirestore.collection(ComicPublisher.ROOT).get().addOnCompleteListener(task -> {
+    mFirestore.collection(ComicPublisher.ROOT).whereEqualTo("IsFlagged", false).get().addOnCompleteListener(task -> {
 
         if (task.isSuccessful()) {
           if (task.getResult() != null) {
