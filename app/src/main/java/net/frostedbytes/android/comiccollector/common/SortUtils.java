@@ -22,4 +22,12 @@ public class SortUtils {
       return Long.compare(a.IssueNumber, b.IssueNumber);
     }
   }
+
+  public static class ByYearAscending implements Comparator<Integer> {
+
+    public int compare(Integer a, Integer b) {
+
+      return Integer.compare(a, b);
+    }
+  }
 }

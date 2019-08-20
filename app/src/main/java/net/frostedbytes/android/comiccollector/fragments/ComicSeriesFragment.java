@@ -69,7 +69,13 @@ public class ComicSeriesFragment extends Fragment {
       throw new ClassCastException(
           String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
     }
+  }
 
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
       mComicPublisher = arguments.getParcelable(BaseActivity.ARG_COMIC_PUBLISHER);
@@ -83,8 +89,22 @@ public class ComicSeriesFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-    View view = inflater.inflate(R.layout.fragment_comic_series, container, false);
+    return inflater.inflate(R.layout.fragment_comic_series, container, false);
+  }
 
+  @Override
+  public void onDetach() {
+    super.onDetach();
+
+    LogUtils.debug(TAG, "++onDetach()");
+    mCallback = null;
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+
+    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
     if ((mComicSeries != null && mComicSeries.isValid()) && (mComicPublisher != null)) {
       EditText seriesIdEdit = view.findViewById(R.id.comic_series_edit_code);
       EditText mPublisherNameEdit = view.findViewById(R.id.comic_series_edit_publisher);
@@ -144,10 +164,11 @@ public class ComicSeriesFragment extends Fragment {
     } else {
       mCallback.onComicSeriesActionComplete(null);
     }
-
-    return view;
   }
 
+  /*
+    Private Method(s)
+   */
   private void validateAll() {
 
     if (!mSeriesNameEdit.getText().toString().isEmpty()) {

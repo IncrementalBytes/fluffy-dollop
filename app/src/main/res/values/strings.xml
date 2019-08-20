@@ -116,6 +116,7 @@
 
   <string name="debug_path">/storage/self/primary/DCIM/Camera</string>
   <string name="debug_prompt">Select image file to use:</string>
+  <string name="hint_snapshot">Snapshot of barcode</string>
   <string-array name="debug_scenario_array">
     <item>scenario_barcode_not_found.jpg</item>
     <item>scenario_existing_comic.jpg</item>

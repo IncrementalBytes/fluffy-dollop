@@ -57,7 +57,13 @@ public class SyncFragment extends Fragment {
       throw new ClassCastException(
         String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
     }
+  }
 
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
       mUser = (User) arguments.getSerializable(BaseActivity.ARG_USER);
@@ -70,8 +76,22 @@ public class SyncFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-    final View view = inflater.inflate(R.layout.fragment_sync, container, false);
+    return inflater.inflate(R.layout.fragment_sync, container, false);
+  }
 
+  @Override
+  public void onDetach() {
+    super.onDetach();
+
+    LogUtils.debug(TAG, "++onDetach()");
+    mCallback = null;
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+
+    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
     CardView exportCard = view.findViewById(R.id.sync_card_export);
     CardView importCard = view.findViewById(R.id.sync_card_import);
 
@@ -81,7 +101,5 @@ public class SyncFragment extends Fragment {
     } else {
       mCallback.onSyncFail();
     }
-
-    return view;
   }
 }

@@ -90,7 +90,13 @@ public class ComicBookFragment extends Fragment {
       throw new ClassCastException(
         String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
     }
+  }
 
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
       mComicBook = arguments.getParcelable(BaseActivity.ARG_COMIC_BOOK);
@@ -106,8 +112,21 @@ public class ComicBookFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-    final View view = inflater.inflate(R.layout.fragment_comic_book, container, false);
+    return inflater.inflate(R.layout.fragment_comic_book, container, false);
+  }
 
+  @Override
+  public void onDetach() {
+    super.onDetach();
+    LogUtils.debug(TAG, "++onDetach()");
+    mCallback = null;
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+
+    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
     mTitleEdit = view.findViewById(R.id.comic_book_edit_title);
     TextView mSeriesText = view.findViewById(R.id.comic_book_text_series_value);
     TextView mPublisherText = view.findViewById(R.id.comic_book_text_publisher_value);
@@ -187,7 +206,5 @@ public class ComicBookFragment extends Fragment {
     }
 
     mCallback.onComicBookInit(true);
-
-    return view;
   }
 }

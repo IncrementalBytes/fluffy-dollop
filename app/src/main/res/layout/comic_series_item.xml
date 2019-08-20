@@ -36,25 +36,25 @@
     app:layout_constraintTop_toTopOf="@id/series_item_text_series"/>
 
   <TextView
-    android:id="@+id/series_item_text_volume"
+    android:id="@+id/series_item_text_published"
     android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:text="@string/volume"
+    android:text="@string/published_date"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/series_item_text_series"/>
   <TextView
-    android:id="@+id/series_item_text_volume_value"
+    android:id="@+id/series_item_text_published_value"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
     android:textColor="@color/primaryDarkColor"
-    app:layout_constraintBottom_toBottomOf="@id/series_item_text_volume"
-    app:layout_constraintStart_toEndOf="@id/series_item_text_volume"
-    app:layout_constraintTop_toTopOf="@id/series_item_text_volume"/>
+    app:layout_constraintBottom_toBottomOf="@id/series_item_text_published"
+    app:layout_constraintStart_toEndOf="@id/series_item_text_published"
+    app:layout_constraintTop_toTopOf="@id/series_item_text_published"/>
 
   <TextView
     android:id="@+id/series_item_text_issue"

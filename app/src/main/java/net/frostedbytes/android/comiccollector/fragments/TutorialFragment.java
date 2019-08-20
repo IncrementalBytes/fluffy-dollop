@@ -56,7 +56,13 @@ public class TutorialFragment extends Fragment {
       throw new ClassCastException(
         String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
     }
+  }
 
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
       mUser = (User)arguments.getSerializable(BaseActivity.ARG_USER);
@@ -69,13 +75,26 @@ public class TutorialFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-    final View view = inflater.inflate(R.layout.fragment_tutorial, container, false);
+    return inflater.inflate(R.layout.fragment_tutorial, container, false);
+  }
 
+  @Override
+  public void onDetach() {
+    super.onDetach();
+
+    LogUtils.debug(TAG, "++onDetach()");
+    mCallback = null;
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+
+    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
     Switch showHintSwitch = view.findViewById(R.id.tutorial_switch_hide);
     showHintSwitch.setChecked(mUser.ShowBarcodeHint);
     showHintSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> mCallback.onTutorialShowHint(isChecked));
     Button continueButton = view.findViewById(R.id.tutorial_button_continue);
     continueButton.setOnClickListener(v -> mCallback.onTutorialContinue());
-    return view;
   }
 }

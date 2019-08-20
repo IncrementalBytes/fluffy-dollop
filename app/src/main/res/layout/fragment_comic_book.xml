@@ -22,9 +22,10 @@
     app:layout_constraintTop_toTopOf="@id/comic_book_edit_title"/>
   <EditText
     android:id="@+id/comic_book_edit_title"
-    android:layout_width="wrap_content"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:layout_marginStart="8dp"
     android:autofillHints="text"
     android:gravity="center_vertical|end"
     android:inputType="text|textNoSuggestions"
@@ -32,6 +33,7 @@
     android:textAlignment="gravity"
     android:textColor="@color/primaryColor"
     app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toEndOf="@+id/comic_book_text_title"
     app:layout_constraintTop_toTopOf="parent"/>
 
   <TextView
@@ -53,6 +55,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:autofillHints="date"
+    android:ems="4"
     android:gravity="center_vertical|end"
     android:inputType="date|textNoSuggestions"
     android:textAlignment="gravity"

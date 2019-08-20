@@ -73,7 +73,6 @@ public class ComicBookListFragment extends Fragment {
   /*
     Fragment Override(s)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
@@ -85,7 +84,14 @@ public class ComicBookListFragment extends Fragment {
       throw new ClassCastException(
         String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
     }
+  }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
       mComicSeries = (HashMap<String, ComicSeries>) arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
@@ -98,8 +104,31 @@ public class ComicBookListFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-    final View view = inflater.inflate(R.layout.fragment_comic_book_list, container, false);
+    return inflater.inflate(R.layout.fragment_comic_book_list, container, false);
+  }
 
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+
+    LogUtils.debug(TAG, "++onDestroy()");
+    mComicSeries = null;
+  }
+
+  @Override
+  public void onDetach() {
+    super.onDetach();
+
+    LogUtils.debug(TAG, "++onDetach()");
+    mCallback = null;
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+
+    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
     FloatingActionButton addButton = view.findViewById(R.id.comic_fab_add);
     mRecyclerView = view.findViewById(R.id.comic_list_view);
 
@@ -108,20 +137,13 @@ public class ComicBookListFragment extends Fragment {
     addButton.setOnClickListener(pickView -> mCallback.onComicListAddBook());
 
     mComicBooks = new ArrayList<>();
-    for (ComicSeries series : mComicSeries.values()) {
-      mComicBooks.addAll(series.ComicBooks);
+    if (mComicSeries != null) {
+      for (ComicSeries series : mComicSeries.values()) {
+        mComicBooks.addAll(series.ComicBooks);
+      }
     }
 
     updateUI();
-    return view;
-  }
-
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
-
-    LogUtils.debug(TAG, "++onDestroy()");
-    mComicSeries = null;
   }
 
   /*

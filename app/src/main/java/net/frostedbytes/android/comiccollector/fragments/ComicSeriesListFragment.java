@@ -21,6 +21,7 @@ import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.SortUtils;
+import net.frostedbytes.android.comiccollector.models.ComicBook;
 import net.frostedbytes.android.comiccollector.models.ComicPublisher;
 import net.frostedbytes.android.comiccollector.models.ComicSeries;
 
@@ -58,7 +59,6 @@ public class ComicSeriesListFragment extends Fragment {
   /*
     Fragment Override(s)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
@@ -70,7 +70,14 @@ public class ComicSeriesListFragment extends Fragment {
       throw new ClassCastException(
         String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
     }
+  }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
       mComicPublishers = (HashMap<String, ComicPublisher>) arguments.getSerializable(BaseActivity.ARG_COMIC_PUBLISHERS);
@@ -84,17 +91,7 @@ public class ComicSeriesListFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-    final View view = inflater.inflate(R.layout.fragment_comic_series_list, container, false);
-
-    FloatingActionButton addButton = view.findViewById(R.id.series_fab_add);
-    mRecyclerView = view.findViewById(R.id.series_list_view);
-
-    final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-    mRecyclerView.setLayoutManager(manager);
-    addButton.setOnClickListener(pickView -> mCallback.onSeriesListAddBook());
-
-    updateUI();
-    return view;
+    return inflater.inflate(R.layout.fragment_comic_series_list, container, false);
   }
 
   @Override
@@ -104,6 +101,29 @@ public class ComicSeriesListFragment extends Fragment {
     LogUtils.debug(TAG, "++onDestroy()");
     mComicSeries = null;
     mComicPublishers = null;
+  }
+
+  @Override
+  public void onDetach() {
+    super.onDetach();
+
+    LogUtils.debug(TAG, "++onDetach()");
+    mCallback = null;
+  }
+
+  @Override
+  public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+
+    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
+    FloatingActionButton addButton = view.findViewById(R.id.series_fab_add);
+    mRecyclerView = view.findViewById(R.id.series_list_view);
+
+    final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+    mRecyclerView.setLayoutManager(manager);
+    addButton.setOnClickListener(pickView -> mCallback.onSeriesListAddBook());
+
+    updateUI();
   }
 
   /*
@@ -170,17 +190,17 @@ public class ComicSeriesListFragment extends Fragment {
     private final TextView mIssueTextView;
     private final TextView mPublisherTextView;
     private final TextView mSeriesNameTextView;
-    private final TextView mVolumeTextView;
+    private final TextView mPublishedTextView;
 
     private ComicSeries mSeries;
 
     SeriesHolder(LayoutInflater inflater, ViewGroup parent) {
-      super(inflater.inflate(R.layout.series_item, parent, false));
+      super(inflater.inflate(R.layout.comic_series_item, parent, false));
 
       mIssueTextView = itemView.findViewById(R.id.series_item_text_issue_value);
       mPublisherTextView = itemView.findViewById(R.id.series_item_text_publisher);
       mSeriesNameTextView = itemView.findViewById(R.id.series_item_text_series);
-      mVolumeTextView = itemView.findViewById(R.id.series_item_text_volume_value);
+      mPublishedTextView = itemView.findViewById(R.id.series_item_text_published_value);
 
       itemView.setOnClickListener(this);
     }
@@ -203,14 +223,29 @@ public class ComicSeriesListFragment extends Fragment {
         ComicSeries series = mComicSeries.get(mSeries.getProductId());
         if (series != null) {
           mSeriesNameTextView.setText(String.format(Locale.US, "%s%s", series.SeriesName, series.IsFlagged ? " (pending)" : ""));
-          mVolumeTextView.setText(String.valueOf(series.Volume));
+          ArrayList<Integer> years = new ArrayList<>();
+          if (series.ComicBooks != null) {
+            for (ComicBook comicBook : series.ComicBooks) {
+              int year = Integer.parseInt(comicBook.PublishedDate.substring(3));
+              if (!years.contains(year)) {
+                years.add(year);
+              }
+            }
+          }
+
+          if (years.size() > 1) {
+            years.sort(new SortUtils.ByYearAscending());
+            mPublishedTextView.setText(String.format(Locale.US, "%d-%d", years.get(0), years.get(years.size() -1)));
+          } else {
+            mPublishedTextView.setText(String.format(Locale.US, "%d", years.get(0)));
+          }
         } else {
           mSeriesNameTextView.setText("N/A");
-          mVolumeTextView.setText("N/A");
+          mPublishedTextView.setText("N/A");
         }
       } else {
         mSeriesNameTextView.setText("N/A");
-        mVolumeTextView.setText("N/A");
+        mPublishedTextView.setText("N/A");
       }
 
       mIssueTextView.setText(String.valueOf(mSeries.ComicBooks.size()));

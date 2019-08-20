@@ -13,6 +13,7 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String ARG_FIREBASE_USER_ID = "firebase_user_id";
     public static final String ARG_MESSAGE = "message";
     public static final String ARG_NEW_COMIC_BOOK = "new_comic_book";
+    public static final String ARG_SNAPSHOT = "snapshot";
     public static final String ARG_USER = "user";
     public static final String ARG_USER_NAME = "user_name";
 

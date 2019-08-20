@@ -52,7 +52,7 @@ public class SignInActivity extends BaseActivity {
     CrashlyticsCore crashlyticsCore = new CrashlyticsCore.Builder()
       .disabled(BuildConfig.DEBUG)
       .build();
-    Fabric.with(this, new Crashlytics.Builder().core(crashlyticsCore).build());
+    Fabric.with(this, crashlyticsCore);
 
     setContentView(R.layout.activity_sign_in);
 
