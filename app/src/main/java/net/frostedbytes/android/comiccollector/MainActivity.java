@@ -361,32 +361,37 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onComicBookAddedToLibrary(ComicBook comicBook) {
 
+    LogUtils.debug(
+      TAG,
+      "++onComicBookAddedToLibrary(%s)",
+      comicBook != null ? comicBook.toString() : "null");
     if (comicBook == null) {
-      LogUtils.debug(TAG, "++onComicBookAddedToLibrary(null)");
       showDismissableSnackbar(getString(R.string.err_add_comic_book));
-    } else {
-      LogUtils.debug(TAG, "++onComicBookAddedToLibrary(%s)", comicBook.toString());
-      ComicSeries targetSeries = mComicSeries.get(comicBook.getProductId());
-      if (targetSeries != null) {
-        ArrayList<ComicBook> newBookList = new ArrayList<>();
-        for (ComicBook book : targetSeries.ComicBooks) {
-          if (!book.getFullId().equals(comicBook.getFullId())) {
-            newBookList.add(book);
+    } else if (mComicSeries.containsKey(comicBook.getProductId())) {
+      for (Entry<String, ComicSeries> seriesEntry : mComicSeries.entrySet()) {
+        if (seriesEntry.getKey().equals(comicBook.getProductId())) { // rebuild comic list for this entry set
+          ArrayList<ComicBook> comicBooks = new ArrayList<>();
+          for (ComicBook book : seriesEntry.getValue().ComicBooks) {
+            if (book.getFullId().equals(comicBook.getFullId())) {
+              comicBooks.add(comicBook);
+            } else {
+              comicBooks.add(book);
+            }
           }
-        }
 
-        newBookList.add(comicBook);
-        targetSeries.ComicBooks = new ArrayList<>(newBookList);
-        new WriteToLocalLibraryTask(this, new ArrayList<>(mComicSeries.values())).execute();
-      } else {
-        String message = String.format(
-          Locale.US,
-          "Comic not added, did not find %s in collection of ComicSeries.",
-          comicBook.getProductId());
-        LogUtils.warn(TAG, message);
-        showDismissableSnackbar(message);
-        mNavigationView.setSelectedItemId(R.id.navigation_series);
+          seriesEntry.getValue().ComicBooks = new ArrayList<>(comicBooks);
+        }
       }
+
+      new WriteToLocalLibraryTask(this, new ArrayList<>(mComicSeries.values())).execute();
+    } else {
+      String message = String.format(
+        Locale.US,
+        "Comic not added, did not find %s in collection of ComicSeries.",
+        comicBook.getProductId());
+      LogUtils.warn(TAG, message);
+      showDismissableSnackbar(message);
+      mNavigationView.setSelectedItemId(R.id.navigation_series);
     }
   }
 
@@ -400,31 +405,35 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onComicBookRemoved(ComicBook comicBook) {
 
+    LogUtils.debug(
+      TAG,
+      "++onComicBookRemoved(%s)",
+      comicBook != null ? comicBook.toString() : "null");
     if (comicBook == null) {
-      LogUtils.debug(TAG, "++onComicBookRemoved(null)");
       showDismissableSnackbar(getString(R.string.err_remove_comic_book));
-    } else {
-      LogUtils.debug(TAG, "++onComicBookRemoved(%s)", comicBook.toString());
-      ComicSeries targetSeries = mComicSeries.get(comicBook.getProductId());
-      if (targetSeries != null) {
-        ArrayList<ComicBook> newBookList = new ArrayList<>();
-        for (ComicBook book : targetSeries.ComicBooks) {
-          if (!book.getFullId().equals(comicBook.getFullId())) {
-            newBookList.add(book);
+    } else if (mComicSeries.containsKey(comicBook.getProductId())) {
+      for (Entry<String, ComicSeries> seriesEntry : mComicSeries.entrySet()) {
+        if (seriesEntry.getKey().equals(comicBook.getProductId())) { // rebuild comic list for this entry set
+          ArrayList<ComicBook> comicBooks = new ArrayList<>();
+          for (ComicBook book : seriesEntry.getValue().ComicBooks) {
+            if (!book.getFullId().equals(comicBook.getFullId())) {
+              comicBooks.add(book);
+            }
           }
-        }
 
-        targetSeries.ComicBooks = new ArrayList<>(newBookList);
-        new WriteToLocalLibraryTask(this, new ArrayList<>(mComicSeries.values())).execute();
-      } else {
-        String message = String.format(
-          Locale.US,
-          "Comic not removed, did not find %s in collection of ComicSeries.",
-          comicBook.getProductId());
-        LogUtils.warn(TAG, message);
-        showDismissableSnackbar(message);
-        mNavigationView.setSelectedItemId(R.id.navigation_series);
+          seriesEntry.getValue().ComicBooks = new ArrayList<>(comicBooks);
+        }
       }
+
+      new WriteToLocalLibraryTask(this, new ArrayList<>(mComicSeries.values())).execute();
+    } else {
+      String message = String.format(
+        Locale.US,
+        "Comic not removed, did not find %s in collection of ComicSeries.",
+        comicBook.getProductId());
+      LogUtils.warn(TAG, message);
+      showDismissableSnackbar(message);
+      mNavigationView.setSelectedItemId(R.id.navigation_series);
     }
   }
 

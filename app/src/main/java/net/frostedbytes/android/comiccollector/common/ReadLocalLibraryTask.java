@@ -44,7 +44,9 @@ public class ReadLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<ComicB
         for (ComicBook comic : comics) {
           comic.parseIssueCode(comic.IssueCode);
           if (comic.isValid()) {
-            comicBooks.add(comic);
+            if (!comicBooks.contains(comic)) {
+              comicBooks.add(comic);
+            }
           }
         }
       } catch (Exception e) {
