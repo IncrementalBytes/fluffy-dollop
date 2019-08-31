@@ -117,6 +117,11 @@
   <string name="debug_path">/storage/self/primary/DCIM/Camera</string>
   <string name="debug_prompt">Select image file to use:</string>
   <string name="hint_snapshot">Snapshot of barcode</string>
+  <string name="hint_clockwise">Rotate image clockwise</string>
+  <string name="hint_rotate">Rotate image.</string>
+  <string name="not_available">N/A</string>
+  <string name="err_unknown_series">Unknown Comic Series was returned by the service.</string>
+  <string name="hint_date_format">MM/YYYY</string>
   <string-array name="debug_scenario_array">
     <item>scenario_barcode_not_found.jpg</item>
     <item>scenario_existing_comic.jpg</item>

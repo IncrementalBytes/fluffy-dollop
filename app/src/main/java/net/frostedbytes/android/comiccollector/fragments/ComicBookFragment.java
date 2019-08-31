@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,20 +14,15 @@ import android.widget.ToggleButton;
 
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
-import net.frostedbytes.android.comiccollector.common.DateUtils;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
-import net.frostedbytes.android.comiccollector.models.ComicBook;
-import net.frostedbytes.android.comiccollector.models.ComicPublisher;
-import net.frostedbytes.android.comiccollector.models.ComicSeries;
+import net.frostedbytes.android.comiccollector.db.entity.ComicBook;
 
-import java.util.Calendar;
 import java.util.Locale;
-
-import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
+import net.frostedbytes.android.comiccollector.db.views.ComicBookDetails;
 
 public class ComicBookFragment extends Fragment {
 
-  private static final String TAG = BASE_TAG + "ComicBookFragment";
+  private static final String TAG = BaseActivity.BASE_TAG + "ComicBookFragment";
 
   public interface OnComicBookListener {
 
@@ -43,35 +37,26 @@ public class ComicBookFragment extends Fragment {
 
   private OnComicBookListener mCallback;
 
+  private TextView mSeriesText;
+  private TextView mPublisherText;
+  private EditText mPublishedDateEdit;
+  private TextView mVolumeText;
+  private TextView mIssueText;
+  private TextView mProductCodeText;
   private ToggleButton mOwnedToggle;
   private ToggleButton mReadToggle;
   private EditText mTitleEdit;
+  private Button mSaveButton;
+  private Button mRemoveButton;
 
-  private ComicBook mComicBook;
-  private ComicPublisher mComicPublisher;
-  private ComicSeries mComicSeries;
-  private boolean mIsNew;
+  private ComicBookDetails mComicBook;
 
-  public static ComicBookFragment newInstance(ComicBook comicBook, ComicPublisher comicPublisher, ComicSeries comicSeries) {
+  public static ComicBookFragment newInstance(ComicBookDetails comicBook) {
 
-    return newInstance(comicBook, comicPublisher, comicSeries, false);
-  }
-
-  public static ComicBookFragment newInstance(ComicBook comicBook, ComicPublisher comicPublisher, ComicSeries comicSeries, boolean isNew) {
-
-    LogUtils.debug(
-      TAG,
-      "++newInstance(%s, %s, %s, %s)",
-      comicBook.toString(),
-      comicPublisher.toString(),
-      comicSeries.toString(),
-      String.valueOf(isNew));
+    LogUtils.debug(TAG, "++newInstance(%s)", comicBook.toString());
     ComicBookFragment fragment = new ComicBookFragment();
     Bundle args = new Bundle();
-    args.putParcelable(BaseActivity.ARG_COMIC_BOOK, comicBook);
-    args.putParcelable(BaseActivity.ARG_COMIC_PUBLISHER, comicPublisher);
-    args.putParcelable(BaseActivity.ARG_COMIC_SERIES, comicSeries);
-    args.putBoolean(BaseActivity.ARG_NEW_COMIC_BOOK, isNew);
+    args.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicBook);
     fragment.setArguments(args);
     return fragment;
   }
@@ -99,10 +84,7 @@ public class ComicBookFragment extends Fragment {
     LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicBook = arguments.getParcelable(BaseActivity.ARG_COMIC_BOOK);
-      mComicPublisher = arguments.getParcelable(BaseActivity.ARG_COMIC_PUBLISHER);
-      mComicSeries = arguments.getParcelable(BaseActivity.ARG_COMIC_SERIES);
-      mIsNew = arguments.getBoolean(BaseActivity.ARG_NEW_COMIC_BOOK);
+      mComicBook = (ComicBookDetails)arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
     }
@@ -119,6 +101,7 @@ public class ComicBookFragment extends Fragment {
   public void onDetach() {
     super.onDetach();
     LogUtils.debug(TAG, "++onDetach()");
+
     mCallback = null;
   }
 
@@ -128,83 +111,69 @@ public class ComicBookFragment extends Fragment {
 
     LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
     mTitleEdit = view.findViewById(R.id.comic_book_edit_title);
-    TextView mSeriesText = view.findViewById(R.id.comic_book_text_series_value);
-    TextView mPublisherText = view.findViewById(R.id.comic_book_text_publisher_value);
-    EditText mPublishedDateEdit = view.findViewById(R.id.comic_book_edit_published_date);
-    TextView mVolumeText = view.findViewById(R.id.comic_book_text_volume_value);
-    TextView mIssueText = view.findViewById(R.id.comic_book_text_issue_value);
-    TextView mProductCodeText = view.findViewById(R.id.comic_book_text_product_code_value);
+    mSeriesText = view.findViewById(R.id.comic_book_text_series_value);
+    mPublisherText = view.findViewById(R.id.comic_book_text_publisher_value);
+    mPublishedDateEdit = view.findViewById(R.id.comic_book_edit_published_date);
+    mVolumeText = view.findViewById(R.id.comic_book_text_volume_value);
+    mIssueText = view.findViewById(R.id.comic_book_text_issue_value);
+    mProductCodeText = view.findViewById(R.id.comic_book_text_product_code_value);
     mOwnedToggle = view.findViewById(R.id.comic_book_toggle_owned);
     mReadToggle = view.findViewById(R.id.comic_book_toggle_read);
-    Button saveButton = view.findViewById(R.id.comic_book_button_save);
-    Button removeButton = view.findViewById(R.id.comic_book_button_remove);
+    mSaveButton = view.findViewById(R.id.comic_book_button_save);
+    mRemoveButton = view.findViewById(R.id.comic_book_button_remove);
+    updateUI(mComicBook);
+  }
 
-    if (mComicBook == null || !mComicBook.isValid()) {
+  /*
+    Private Method(s)
+   */
+  private void updateUI(ComicBookDetails comicBook) {
+
+    LogUtils.debug(TAG, "++updateUI()");
+    if (comicBook == null) {
       mCallback.onComicBookInit(false);
     } else {
-      mTitleEdit.setText(mComicBook.Title);
-      if (mComicBook.PublishedDate.equals(BaseActivity.DEFAULT_PUBLISHED_DATE) ||
-        mComicBook.PublishedDate.length() != BaseActivity.DEFAULT_PUBLISHED_DATE.length()) {
-        mPublishedDateEdit.setText(DateUtils.formatDateForDisplay(Calendar.getInstance().getTimeInMillis()));
-      } else {
-        mPublishedDateEdit.setText(mComicBook.PublishedDate);
+      mTitleEdit.setText(comicBook.Title);
+      if (!comicBook.Published.equals(BaseActivity.DEFAULT_PUBLISHED_DATE) &&
+        comicBook.Published.length() == BaseActivity.DEFAULT_PUBLISHED_DATE.length()) {
+        mPublishedDateEdit.setText(comicBook.Published);
       }
 
-      if (mComicPublisher == null) {
+      if (comicBook.PublisherName.length() > 0) {
+        mPublisherText.setText(comicBook.PublisherName);
+      } else {
         mPublisherText.setText(getString(R.string.placeholder));
-      } else {
-        mPublisherText.setText(mComicPublisher.Name);
       }
 
-      if (mComicSeries == null) {
+      if (comicBook.SeriesTitle.length() > 0) {
+        mSeriesText.setText(comicBook.SeriesTitle);
+      } else {
         mSeriesText.setText(getString(R.string.placeholder));
-        mVolumeText.setText(getString(R.string.placeholder));
-      } else {
-        mSeriesText.setText(mComicSeries.SeriesName);
-        mVolumeText.setText(String.valueOf(mComicSeries.Volume));
       }
 
-      mIssueText.setText(String.valueOf(mComicBook.IssueNumber));
-      mProductCodeText.setText(mComicBook.getProductId());
-      mOwnedToggle.setChecked(mComicBook.OwnedState);
-      mReadToggle.setChecked(mComicBook.ReadState);
+      mVolumeText.setText(String.valueOf(comicBook.Volume));
+      mIssueText.setText(String.valueOf(comicBook.IssueNumber));
+      mProductCodeText.setText(comicBook.ProductCode);
+      mOwnedToggle.setChecked(comicBook.IsOwned);
+      mReadToggle.setChecked(comicBook.IsRead);
 
-      saveButton.setOnClickListener(v -> {
+      mSaveButton.setOnClickListener(v -> {
 
-        ComicBook updatedBook = new ComicBook(mComicBook);
+        ComicBook updatedBook = new ComicBook();
+        updatedBook.parseProductCode(mComicBook.Id);
+        updatedBook.IsOwned = mOwnedToggle.isChecked();
+        updatedBook.IsRead = mReadToggle.isChecked();
         updatedBook.Title = mTitleEdit.getText().toString();
         updatedBook.PublishedDate = mPublishedDateEdit.getText().toString();
-        updatedBook.OwnedState = mOwnedToggle.isChecked();
-        updatedBook.ReadState  = mReadToggle.isChecked();
-        mCallback.onComicBookAddedToLibrary(updatedBook);
+
+        if (updatedBook.isValid()) {
+          mCallback.onComicBookAddedToLibrary(updatedBook);
+        } else {
+          // -??? mCallback.onComicBookActionComplete();
+        }
       });
 
-      if (mIsNew) {
-        removeButton.setVisibility(View.INVISIBLE);
-      } else {
-        removeButton.setOnClickListener(v -> {
-
-          if (getActivity() != null) {
-            String message = String.format(Locale.US, getString(R.string.remove_specific_book_message), mComicBook.Title);
-            if (mComicBook.Title.isEmpty()) {
-              message = getString(R.string.remove_book_message);
-            }
-
-            AlertDialog removeBookDialog = new AlertDialog.Builder(getActivity())
-              .setMessage(message)
-              .setPositiveButton(android.R.string.yes, (dialog, which) -> mCallback.onComicBookRemoved(mComicBook))
-              .setNegativeButton(android.R.string.no, null)
-              .create();
-            removeBookDialog.show();
-          } else {
-            String message = "Unable to get activity; cannot remove book.";
-            LogUtils.debug(TAG, message);
-            mCallback.onComicBookActionComplete(message);
-          }
-        });
-      }
+      mRemoveButton.setVisibility(View.INVISIBLE);
     }
-
-    mCallback.onComicBookInit(true);
   }
 }

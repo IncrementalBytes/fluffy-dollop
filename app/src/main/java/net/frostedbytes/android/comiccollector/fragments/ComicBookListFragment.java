@@ -3,6 +3,7 @@ package net.frostedbytes.android.comiccollector.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProviders;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.fragment.app.Fragment;
 import androidx.core.content.res.ResourcesCompat;
@@ -14,17 +15,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.HashMap;
+import java.util.List;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
-import net.frostedbytes.android.comiccollector.common.SortUtils;
-import net.frostedbytes.android.comiccollector.models.ComicBook;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import net.frostedbytes.android.comiccollector.models.ComicSeries;
+import net.frostedbytes.android.comiccollector.db.views.ComicBookDetails;
+import net.frostedbytes.android.comiccollector.viewmodel.CollectorViewModel;
 
 import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
@@ -36,7 +34,7 @@ public class ComicBookListFragment extends Fragment {
 
     void onComicListAddBook();
 
-    void onComicListItemSelected(ComicBook comicBook);
+    void onComicListItemSelected(ComicBookDetails comicBook);
 
     void onComicListPopulated(int size);
   }
@@ -45,31 +43,23 @@ public class ComicBookListFragment extends Fragment {
 
   private RecyclerView mRecyclerView;
 
-  private ArrayList<ComicBook> mComicBooks;
-  private HashMap<String, ComicSeries> mComicSeries;
+  private String mProductCode;
 
-  public static ComicBookListFragment newInstance(ComicSeries comicSeries) {
+  public static ComicBookListFragment newInstance() {
 
-    LogUtils.debug(TAG, "++newInstance(%s)", comicSeries.toString());
-    HashMap<String, ComicSeries> series = new HashMap<>();
-    series.put(comicSeries.getProductId(), comicSeries);
+    LogUtils.debug(TAG, "++newInstance()");
+    return new ComicBookListFragment();
+  }
+
+  public static ComicBookListFragment newInstance(String productCode) {
+
+    LogUtils.debug(TAG, "++newInstance(%s)", productCode);
     ComicBookListFragment fragment = new ComicBookListFragment();
     Bundle args = new Bundle();
-    args.putSerializable(BaseActivity.ARG_COMIC_SERIES, series);
+    args.putString(BaseActivity.ARG_PRODUCT_CODE, productCode);
     fragment.setArguments(args);
     return fragment;
   }
-
-  public static ComicBookListFragment newInstance(HashMap<String, ComicSeries> comicSeries) {
-
-    LogUtils.debug(TAG, "++newInstance(%d)", comicSeries.size());
-    ComicBookListFragment fragment = new ComicBookListFragment();
-    Bundle args = new Bundle();
-    args.putSerializable(BaseActivity.ARG_COMIC_SERIES, comicSeries);
-    fragment.setArguments(args);
-    return fragment;
-  }
-
   /*
     Fragment Override(s)
    */
@@ -86,7 +76,6 @@ public class ComicBookListFragment extends Fragment {
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -94,7 +83,7 @@ public class ComicBookListFragment extends Fragment {
     LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicSeries = (HashMap<String, ComicSeries>) arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
+      mProductCode = arguments.getString(BaseActivity.ARG_PRODUCT_CODE);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
     }
@@ -104,6 +93,23 @@ public class ComicBookListFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
+    CollectorViewModel collectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
+    if (mProductCode != null && mProductCode.length() > 0) {
+      collectorViewModel.getComicBooksByProductCode(mProductCode).observe(this, bookList -> {
+
+        LogUtils.debug(TAG, "Book data has changed.");
+        ComicBookAdapter comicAdapter = new ComicBookAdapter(bookList);
+        mRecyclerView.setAdapter(comicAdapter);
+      });
+    } else {
+      collectorViewModel.getComicBooks().observe(this, bookList -> {
+
+        LogUtils.debug(TAG, "Book data has changed.");
+        ComicBookAdapter comicAdapter = new ComicBookAdapter(bookList);
+        mRecyclerView.setAdapter(comicAdapter);
+      });
+    }
+
     return inflater.inflate(R.layout.fragment_comic_book_list, container, false);
   }
 
@@ -113,7 +119,6 @@ public class ComicBookListFragment extends Fragment {
     super.onDestroy();
 
     LogUtils.debug(TAG, "++onDestroy()");
-    mComicSeries = null;
   }
 
   @Override
@@ -135,31 +140,6 @@ public class ComicBookListFragment extends Fragment {
     final LinearLayoutManager manager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager(manager);
     addButton.setOnClickListener(pickView -> mCallback.onComicListAddBook());
-
-    mComicBooks = new ArrayList<>();
-    if (mComicSeries != null) {
-      for (ComicSeries series : mComicSeries.values()) {
-        mComicBooks.addAll(series.ComicBooks);
-      }
-    }
-
-    updateUI();
-  }
-
-  /*
-    Private Method(s)
-   */
-  private void updateUI() {
-
-    if (mComicBooks == null || mComicBooks.size() == 0) {
-      mCallback.onComicListPopulated(0);
-    } else {
-      LogUtils.debug(TAG, "++updateUI()");
-      mComicBooks.sort(new SortUtils.ByIssueNumber());
-      ComicBookAdapter comicAdapter = new ComicBookAdapter(mComicBooks);
-      mRecyclerView.setAdapter(comicAdapter);
-      mCallback.onComicListPopulated(comicAdapter.getItemCount());
-    }
   }
 
   /**
@@ -167,9 +147,9 @@ public class ComicBookListFragment extends Fragment {
    */
   private class ComicBookAdapter extends RecyclerView.Adapter<ComicHolder> {
 
-    private final List<ComicBook> mComicBooks;
+    private final List<ComicBookDetails> mComicBooks;
 
-    ComicBookAdapter(List<ComicBook> comicBooks) {
+    ComicBookAdapter(List<ComicBookDetails> comicBooks) {
 
       mComicBooks = comicBooks;
     }
@@ -185,7 +165,7 @@ public class ComicBookListFragment extends Fragment {
     @Override
     public void onBindViewHolder(@NonNull ComicHolder holder, int position) {
 
-      ComicBook comicBook = mComicBooks.get(position);
+      ComicBookDetails comicBook = mComicBooks.get(position);
       holder.bind(comicBook);
     }
 
@@ -206,7 +186,7 @@ public class ComicBookListFragment extends Fragment {
     private final TextView mSeriesNameTextView;
     private final TextView mTitleTextView;
 
-    private ComicBook mComicBook;
+    private ComicBookDetails mComicBook;
 
     ComicHolder(LayoutInflater inflater, ViewGroup parent) {
       super(inflater.inflate(R.layout.comic_book_item, parent, false));
@@ -220,37 +200,22 @@ public class ComicBookListFragment extends Fragment {
       itemView.setOnClickListener(this);
     }
 
-    void bind(ComicBook comicBook) {
+    void bind(ComicBookDetails comicBook) {
 
       mComicBook = comicBook;
-      if (mComicBook.OwnedState) {
+      if (mComicBook.IsOwned) {
         mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_checked_dark, null));
       } else {
         mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_unchecked_dark, null));
       }
 
-      if (mComicBook.ReadState) {
+      if (mComicBook.IsRead) {
         mReadImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_checked_dark, null));
       } else {
         mReadImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_unchecked_dark, null));
       }
 
-      if (mComicSeries != null) {
-        ComicSeries series = mComicSeries.get(mComicBook.getProductId());
-        if (series != null) {
-          mSeriesNameTextView.setText(
-            String.format(
-              Locale.US,
-              "%s%s",
-              series.SeriesName,
-              series.IsFlagged ? " (pending)" : ""));
-        } else {
-          mSeriesNameTextView.setText("N/A");
-        }
-      } else {
-        mSeriesNameTextView.setText("N/A");
-      }
-
+      mSeriesNameTextView.setText(mComicBook.SeriesTitle);
       mTitleTextView.setText(mComicBook.Title);
       mIssueTextView.setText(String.valueOf(mComicBook.IssueNumber));
     }

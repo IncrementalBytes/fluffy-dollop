@@ -22,7 +22,8 @@ import java.util.Locale;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
-import net.frostedbytes.android.comiccollector.models.ComicBook;
+import net.frostedbytes.android.comiccollector.db.entity.ComicBook;
+import net.frostedbytes.android.comiccollector.db.views.ComicSeriesDetails;
 
 public class ManualSearchFragment extends Fragment {
 
@@ -31,8 +32,6 @@ public class ManualSearchFragment extends Fragment {
   public interface OnManualSearchListener {
 
     void onManualSearchActionComplete(ComicBook comicBook);
-
-    void onManualSearchCancel();
   }
 
   private OnManualSearchListener mCallback;
@@ -42,14 +41,15 @@ public class ManualSearchFragment extends Fragment {
   private EditText mProductCodeEdit;
 
   private ComicBook mComicBook;
+  private ComicSeriesDetails mComicSeries;
   private Bitmap mImageBitmap;
 
-  public static ManualSearchFragment newInstance(ComicBook comicBook, Bitmap barcodeImage) {
+  public static ManualSearchFragment newInstance(ComicSeriesDetails comicSeries, Bitmap barcodeImage) {
 
-    LogUtils.debug(TAG, "++newInstance(%s)", comicBook.toString());
+    LogUtils.debug(TAG, "++newInstance(%s, Bitmap)", comicSeries.toString());
     ManualSearchFragment fragment = new ManualSearchFragment();
     Bundle args = new Bundle();
-    args.putParcelable(BaseActivity.ARG_COMIC_BOOK, comicBook);
+    args.putSerializable(BaseActivity.ARG_COMIC_SERIES, comicSeries);
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     barcodeImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
     byte[] byteArray = stream.toByteArray();
@@ -81,7 +81,7 @@ public class ManualSearchFragment extends Fragment {
     LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicBook = arguments.getParcelable(BaseActivity.ARG_COMIC_BOOK);
+      mComicSeries = (ComicSeriesDetails)arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
       byte[] byteArray = arguments.getByteArray(BaseActivity.ARG_SNAPSHOT);
       if (byteArray != null) {
         mImageBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
@@ -113,20 +113,20 @@ public class ManualSearchFragment extends Fragment {
     LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
 
     // 2 Scenarios:
-    //   1) ComicBook has an ID (Publisher & Series), we just need the issue
-    //   2) ComicBook is empty/null, we need Publisher, Series, & Issue
+    //   1) Product Code (Publisher & Series) is known, we need the IssueCode
+    //   2) We need Product Code (Publisher & Series), & IssueCode
 
     mContinueButton = view.findViewById(R.id.manual_search_button_continue);
     mContinueButton.setEnabled(false);
     mContinueButton.setOnClickListener(v -> {
-
-      mComicBook.parseProductCode(mProductCodeEdit.getText().toString().trim());
-      mComicBook.parseIssueCode(mIssueCodeEdit.getText().toString().trim());
-      if (mComicBook == null || !mComicBook.isValid()) {
-        mCallback.onManualSearchCancel();
-      } else {
-        mCallback.onManualSearchActionComplete(mComicBook);
-      }
+      mComicBook = new ComicBook();
+      mComicBook.parseProductCode(
+        String.format(
+          Locale.US,
+          "%s-%s",
+          mProductCodeEdit.getText().toString(),
+          mIssueCodeEdit.getText().toString()));
+      mCallback.onManualSearchActionComplete(mComicBook);
     });
 
     if (mImageBitmap != null) {
@@ -137,7 +137,7 @@ public class ManualSearchFragment extends Fragment {
     mProductCodeEdit = view.findViewById(R.id.manual_search_edit_product);
     mIssueCodeEdit = view.findViewById(R.id.manual_search_edit_issue);
     TextView messageText = view.findViewById(R.id.manual_search_text_no_barcode);
-    if (mComicBook == null || !isValid()) {
+    if (mComicSeries == null || mComicSeries.Id.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
       mProductCodeEdit.addTextChangedListener(new TextWatcher() {
 
         @Override
@@ -155,7 +155,7 @@ public class ManualSearchFragment extends Fragment {
       });
     } else {
       messageText.setVisibility(View.INVISIBLE);
-      mProductCodeEdit.setText(mComicBook.getProductId());
+      mProductCodeEdit.setText(mComicSeries.Id);
       mProductCodeEdit.setEnabled(false);
     }
 
@@ -179,25 +179,6 @@ public class ManualSearchFragment extends Fragment {
   /*
     Private Method(s)
   */
-  private boolean isValid() {
-
-    LogUtils.debug(TAG, "++isValid()");
-    if (mComicBook.PublisherId == null ||
-      mComicBook.PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) ||
-      mComicBook.PublisherId.length() != BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length()) {
-      LogUtils.debug(TAG, "Publisher data is unexpected: %s", mComicBook.PublisherId);
-      return false;
-    }
-
-    if (mComicBook.SeriesId == null ||
-      mComicBook.SeriesId.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID) ||
-      mComicBook.SeriesId.length() != BaseActivity.DEFAULT_COMIC_SERIES_ID.length()) {
-      LogUtils.debug(TAG, "Series data is unexpected: %s", mComicBook.SeriesId);
-      return false;
-    }
-    return true;
-  }
-
   private void validateAll() {
 
     if (mProductCodeEdit.getText().toString().length() == BaseActivity.DEFAULT_PRODUCT_CODE.length() &&

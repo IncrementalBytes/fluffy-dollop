@@ -12,7 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.AddActivity;
-import net.frostedbytes.android.comiccollector.models.ComicSeries;
+import net.frostedbytes.android.comiccollector.db.entity.ComicSeries;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,23 +22,19 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
   private static final String TAG = BASE_TAG + "RetrieveComicSeriesDataTask";
 
   private WeakReference<AddActivity> mActivityWeakReference;
-  private ComicSeries mQueryForSeries;
+  private String mQueryForSeries;
 
-  public RetrieveComicSeriesDataTask(AddActivity context, ComicSeries queryForSeries) {
+  public RetrieveComicSeriesDataTask(AddActivity context, String productCode) {
 
     mActivityWeakReference = new WeakReference<>(context);
-    mQueryForSeries = queryForSeries;
+    mQueryForSeries = productCode;
   }
 
   protected ComicSeries doInBackground(Void... params) {
 
     ComicSeries comicSeries = new ComicSeries();
-    comicSeries.PublisherId = mQueryForSeries.PublisherId;
-    comicSeries.Id = mQueryForSeries.Id;
-    String urlString = String.format(
-      Locale.US,
-      "https://api.upcitemdb.com/prod/trial/lookup?upc=%s",
-      mQueryForSeries.getProductId());
+    comicSeries.parseProductCode(mQueryForSeries);
+    String urlString = String.format(Locale.US, "https://api.upcitemdb.com/prod/trial/lookup?upc=%s", mQueryForSeries);
 
     LogUtils.debug(TAG, "Query: %s", urlString);
     HttpURLConnection connection = null;
@@ -85,7 +81,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
         try { // errors parsing items should not prevent further parsing
           JSONObject item = (JSONObject) items.get(index);
           if (item.has("title")) {
-            comicSeries.SeriesName = item.getString("title");
+            comicSeries.Title = item.getString("title");
           }
         } catch (JSONException e) {
           LogUtils.debug(TAG, "Failed to parse JSON object.");

@@ -60,9 +60,9 @@ public class WriteToLocalLibraryTask extends AsyncTask<Void, Void, ArrayList<Com
     MainActivity activity = mFragmentWeakReference.get();
     if (activity == null) {
       LogUtils.error(TAG, "Activity is null.");
-      return;
+//      return;
     }
 
-    activity.writeLibraryComplete(comicBooks);
+//    activity.writeLibraryComplete(comicBooks);
   }
 }
