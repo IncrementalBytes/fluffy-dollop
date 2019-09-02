@@ -11,13 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import androidx.lifecycle.ViewModelProviders;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.db.views.ComicSeriesDetails;
-import net.frostedbytes.android.comiccollector.viewmodel.CollectorViewModel;
 
 import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
@@ -39,14 +37,14 @@ public class ComicSeriesFragment extends Fragment {
   private EditText mSeriesVolumeEdit;
   private Button mCancelButton;
 
-  private String mProductCode;
+  private ComicSeriesDetails mComicSeries;
 
-  public static ComicSeriesFragment newInstance(String productCode) {
+  public static ComicSeriesFragment newInstance(ComicSeriesDetails comicSeries) {
 
-    LogUtils.debug(TAG, "++newInstance()");
+    LogUtils.debug(TAG, "++newInstance(%s)", comicSeries.toString());
     ComicSeriesFragment fragment = new ComicSeriesFragment();
     Bundle args = new Bundle();
-    args.putString(BaseActivity.ARG_PRODUCT_CODE, productCode);
+    args.putSerializable(BaseActivity.ARG_COMIC_SERIES, comicSeries);
     fragment.setArguments(args);
     return fragment;
   }
@@ -74,7 +72,7 @@ public class ComicSeriesFragment extends Fragment {
     LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mProductCode = arguments.getString(BaseActivity.ARG_PRODUCT_CODE);
+      mComicSeries = (ComicSeriesDetails)arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
     }
@@ -84,9 +82,6 @@ public class ComicSeriesFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-    CollectorViewModel mCollectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
-    mCollectorViewModel.getComicSeriesByProductCode(mProductCode).observe(this, this::updateUI);
-
     return inflater.inflate(R.layout.fragment_comic_series, container, false);
   }
 
@@ -109,20 +104,21 @@ public class ComicSeriesFragment extends Fragment {
     mSeriesVolumeEdit = view.findViewById(R.id.comic_series_edit_volume);
     mCancelButton = view.findViewById(R.id.comic_series_button_cancel);
     mContinueButton = view.findViewById(R.id.comic_series_button_continue);
+    updateUI();
   }
 
   /*
     Private Method(s)
    */
-  private void updateUI(ComicSeriesDetails comicSeries) {
+  private void updateUI() {
 
-    LogUtils.debug(TAG, "++updateUI(%s)", comicSeries.toString());
-    mSeriesIdEdit.setText(comicSeries.Id);
+    LogUtils.debug(TAG, "++updateUI()");
+    mSeriesIdEdit.setText(mComicSeries.Id);
     mSeriesIdEdit.setEnabled(false);
-    mPublisherNameEdit.setText(getString(R.string.not_available));
+    mPublisherNameEdit.setText(mComicSeries.PublisherName);
     mPublisherNameEdit.setEnabled(false);
 
-    mSeriesNameEdit.setText(comicSeries.Title);
+    mSeriesNameEdit.setText(mComicSeries.Title);
     mSeriesNameEdit.addTextChangedListener(new TextWatcher() {
       @Override
       public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -158,12 +154,12 @@ public class ComicSeriesFragment extends Fragment {
     mContinueButton.setEnabled(false);
     mContinueButton.setOnClickListener(v -> {
 
-      comicSeries.Title = mSeriesNameEdit.getText().toString().trim();
+      mComicSeries.Title = mSeriesNameEdit.getText().toString().trim();
       if (!mSeriesVolumeEdit.getText().toString().isEmpty()) {
-        comicSeries.Volume = Integer.parseInt(mSeriesVolumeEdit.getText().toString());
+        mComicSeries.Volume = Integer.parseInt(mSeriesVolumeEdit.getText().toString());
       }
 
-      mCallback.onComicSeriesActionComplete(comicSeries);
+      mCallback.onComicSeriesActionComplete(mComicSeries);
     });
   }
 

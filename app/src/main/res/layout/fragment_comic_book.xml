@@ -13,7 +13,6 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:ellipsize="start"
-    android:labelFor="@id/comic_book_edit_title"
     android:text="@string/title"
     android:textColor="@color/secondaryTextColor"
     android:textSize="18sp"
@@ -28,6 +27,7 @@
     android:layout_marginStart="8dp"
     android:autofillHints="text"
     android:gravity="center_vertical|end"
+    android:hint="@string/hint_title_of_issue"
     android:inputType="text|textNoSuggestions"
     android:maxLines="1"
     android:textAlignment="gravity"
@@ -238,15 +238,5 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/comic_book_toggle_owned"/>
-
-  <Button
-    android:id="@+id/comic_book_button_remove"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:background="@color/primaryColor"
-    android:text="@string/remove_from_library"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -33,6 +33,11 @@ public class CollectorRepository {
     mComicSeriesExtended = mComicSeriesDao.getAll();
   }
 
+  public void deleteComicBookById(String comicBookId) {
+
+    new deleteComicBookByIdAsyncTask(mComicBookDao).execute(comicBookId);
+  }
+
   public LiveData<ComicBookDetails> getComicBookById(String comicBookId, String issueCode) {
 
     return mComicBookDao.get(comicBookId, issueCode);
@@ -46,6 +51,11 @@ public class CollectorRepository {
   public LiveData<List<ComicBookDetails>> getComicBooksByProductCode(String productCode) {
 
     return mComicBookDao.getByProductCode(productCode);
+  }
+
+  public LiveData<ComicPublisher> getComicPublisherById(String publisherId) {
+
+    return mComicPublisherDao.get(publisherId);
   }
 
   public LiveData<List<ComicSeriesDetails>> getComicSeries() {
@@ -71,6 +81,23 @@ public class CollectorRepository {
   public void insert(ComicSeries series) {
 
     new insertComicSeriesAsyncTask(mComicSeriesDao).execute(series);
+  }
+
+  private static class deleteComicBookByIdAsyncTask extends AsyncTask<String, Void, Void> {
+
+    private ComicBookDao mAsyncTaskDao;
+
+    deleteComicBookByIdAsyncTask(ComicBookDao dao) {
+
+      mAsyncTaskDao = dao;
+    }
+
+    @Override
+    protected Void doInBackground(final String... params) {
+
+      mAsyncTaskDao.deleteById(params[0]);
+      return null;
+    }
   }
 
   private static class insertComicBookAsyncTask extends AsyncTask<ComicBook, Void, Void> {

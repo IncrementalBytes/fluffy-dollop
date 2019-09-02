@@ -54,6 +54,6 @@
     android:layout_margin="@dimen/default_view_margin"
     android:backgroundTint="@color/primaryColor"
     android:text="@string/continue_button"
-    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/tutorial_switch_hide"
     app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

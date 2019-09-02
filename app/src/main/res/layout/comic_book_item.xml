@@ -12,26 +12,38 @@
   <TextView
     android:id="@+id/comic_item_text_title"
     android:textStyle="bold"
-    android:layout_width="match_parent"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:ellipsize="end"
     android:text="@string/placeholder"
     android:textSize="18sp"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"/>
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintEnd_toStartOf="@id/comic_item_image_delete"/>
 
   <TextView
     android:id="@+id/comic_item_text_series"
     android:textStyle="bold"
-    android:layout_width="match_parent"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
     android:textColor="@color/primaryColor"
     android:textSize="14sp"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_title"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_title"
+    app:layout_constraintEnd_toStartOf="@id/comic_item_image_delete"/>
+
+  <ImageButton
+    android:id="@+id/comic_item_image_delete"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:layout_constraintTop_toTopOf="@id/comic_item_text_title"
+    app:layout_constraintBottom_toBottomOf="@id/comic_item_text_series"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:contentDescription="@string/hint_remove_comic"
+    android:src="@drawable/ic_delete_light"/>
 
   <TextView
     android:id="@+id/comic_item_text_own"

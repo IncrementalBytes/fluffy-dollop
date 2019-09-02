@@ -12,8 +12,8 @@ import net.frostedbytes.android.comiccollector.db.views.ComicBookDetails;
 @Dao
 public interface ComicBookDao {
 
-  @Query("DELETE FROM comic_book_table WHERE id == :comicBookId")
-  void delete(String comicBookId);
+  @Query("DELETE from comic_book_table WHERE Id == :comicBookId")
+  void deleteById(String comicBookId);
 
   @Query("SELECT * from ComicBookDetails WHERE Id == :comicBookId")
   LiveData<ComicBookDetails> get(String comicBookId);

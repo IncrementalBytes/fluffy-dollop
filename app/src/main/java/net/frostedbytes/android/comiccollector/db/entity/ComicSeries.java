@@ -28,6 +28,9 @@ public class ComicSeries {
   public String Id;
 
   @Ignore
+  public boolean IsFlagged;
+
+  @Ignore
   public List<String> OwnedIssues;
 
   @Ignore
@@ -43,6 +46,12 @@ public class ComicSeries {
   @SerializedName("series_id")
   public String SeriesId;
 
+  @Ignore
+  public long SubmissionDate;
+
+  @Ignore
+  public String SubmittedBy;
+
   @NonNull
   @ColumnInfo(name = "title")
   @SerializedName("title")
@@ -55,10 +64,13 @@ public class ComicSeries {
   public ComicSeries() {
 
     Id = BaseActivity.DEFAULT_PRODUCT_CODE;
+    IsFlagged = false;
     OwnedIssues = new ArrayList<>();
     Published = "";
     PublisherId = BaseActivity.DEFAULT_COMIC_PUBLISHER_ID;
     SeriesId = BaseActivity.DEFAULT_COMIC_SERIES_ID;
+    SubmissionDate = 0;
+    SubmittedBy = "";
     Title = "";
     Volume = 0;
   }
@@ -66,10 +78,13 @@ public class ComicSeries {
   public ComicSeries(@NonNull String id, @NonNull String publisherId, @NonNull String seriesId, @NonNull String title, int volume) {
 
     Id = id;
+    IsFlagged = false;
     OwnedIssues = new ArrayList<>();
     Published = "";
     PublisherId = publisherId;
     SeriesId = seriesId;
+    SubmissionDate = 0;
+    SubmittedBy = "";
     Title = title;
     Volume = volume;
   }
@@ -113,11 +128,13 @@ public class ComicSeries {
       productCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length() &&
       !productCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
       try {
+        Id = productCode;
         PublisherId = productCode.substring(0, BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length());
         SeriesId = productCode.substring(BaseActivity.DEFAULT_COMIC_SERIES_ID.length());
       } catch (Exception e) {
-        PublisherId = "";
-        SeriesId = "";
+        Id = BaseActivity.DEFAULT_PRODUCT_CODE;
+        PublisherId = BaseActivity.DEFAULT_COMIC_PUBLISHER_ID;
+        SeriesId = BaseActivity.DEFAULT_COMIC_SERIES_ID;
       }
     }
   }

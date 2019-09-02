@@ -5,6 +5,7 @@ import androidx.room.Ignore;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @DatabaseView(
   "SELECT Series.id AS Id, " +
@@ -31,5 +32,20 @@ public class ComicSeriesDetails implements Serializable {
 
     OwnedIssues = new ArrayList<>();
     Published = new ArrayList<>();
+  }
+
+  /*
+    Object Override(s)
+   */
+  @Override
+  public String toString() {
+
+    return String.format(
+      Locale.US,
+      "ComicSeries { Name=%s, Publisher=%s, ProductCode=%s, Volume=%d }",
+      Title,
+      PublisherName,
+      Id,
+      Volume);
   }
 }

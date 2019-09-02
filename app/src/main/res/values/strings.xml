@@ -25,7 +25,6 @@
   <string name="title">Title:</string>
   <string name="product_code">Product Code:</string>
   <string name="owned">Owned</string>
-  <string name="remove_from_library">Remove</string>
   <string name="err_add_comic_book">Could not add comic book to library, please try again later.</string>
   <string name="err_remove_comic_book">Could not remove comic book from library, please try again later.</string>
   <string name="add">Add</string>
@@ -70,12 +69,9 @@
   <string name="toggle_not_read">Not Read</string>
   <string name="toggle_read">Read</string>
   <string name="err_bar_code_not_found">Barcode not found in image.</string>
-  <string name="err_unknown_publisher">The Product Code is unknown and has been logged for review. Please try again later.</string>
   <string name="title_gathering_data">Gathering Data</string>
   <string name="permission_storage">Permission needed for storing data locally to reduce network usage.</string>
   <string name="permission_camera">Permission needed for capturing barcode images for processing.</string>
-  <string name="permission_denied_explanation">Permissions needed for full app functionality.</string>
-  <string name="add_comic_book_canceled">Adding comic book canceled by user.</string>
   <string name="unknown_request_code">Unknown request code.</string>
   <string name="menu_cancel">Cancel</string>
   <string name="save_comic_book">Save</string>
@@ -122,11 +118,13 @@
   <string name="not_available">N/A</string>
   <string name="err_unknown_series">Unknown Comic Series was returned by the service.</string>
   <string name="hint_date_format">MM/YYYY</string>
+  <string name="hint_title_of_issue">(Optional) Title of issue.</string>
+  <string name="hint_remove_comic">Remove comic from library.</string>
+  <string name="err_comic_book_details">Could not display comic book details at this time.</string>
   <string-array name="debug_scenario_array">
     <item>scenario_barcode_not_found.jpg</item>
     <item>scenario_existing_comic.jpg</item>
     <item>scenario_new_comic.jpg</item>
-    <item>scenario_unknown_publisher.jpg</item>
     <item>scenario_unknown_series.jpg</item>
   </string-array>
 </resources>

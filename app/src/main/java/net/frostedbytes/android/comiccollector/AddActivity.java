@@ -42,12 +42,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import net.frostedbytes.android.comiccollector.common.ComicCollectorException;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.common.RetrieveComicSeriesDataTask;
-import net.frostedbytes.android.comiccollector.db.CollectorRoomDatabase;
 import net.frostedbytes.android.comiccollector.db.entity.ComicBook;
 import net.frostedbytes.android.comiccollector.db.entity.ComicSeries;
 import net.frostedbytes.android.comiccollector.db.views.ComicBookDetails;
@@ -230,28 +231,34 @@ public class AddActivity extends BaseActivity implements
     Fragment Callback(s)
    */
   @Override
-  public void onComicSeriesActionComplete(ComicSeriesDetails comicSeries) {
+  public void onComicSeriesActionComplete(ComicSeriesDetails seriesDetails) {
 
-    if (comicSeries != null) {
-      LogUtils.debug(TAG, "++onComicSeriesActionComplete(%s)", comicSeries.toString());
+    if (seriesDetails != null) {
+      LogUtils.debug(TAG, "++onComicSeriesActionComplete(%s)", seriesDetails.toString());
 
-      // update the database
-      // TODO: revisit
-      CollectorRoomDatabase.getDatabase(this).seriesDao().insert(
-        comicSeries.Id,
-        comicSeries.Id.substring(0, BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length()),
-        comicSeries.Id.substring(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length()),
-        comicSeries.Title,
-        comicSeries.Volume);
+      ComicSeries comicSeries = new ComicSeries();
+      comicSeries.parseProductCode(seriesDetails.Id);
+      comicSeries.Title = seriesDetails.Title;
+      comicSeries.Volume = seriesDetails.Volume;
+      comicSeries.IsFlagged = true;
+      comicSeries.SubmissionDate = Calendar.getInstance().getTimeInMillis();
+      comicSeries.SubmittedBy = mUser.Id;
+      mCollectorViewModel.insert(comicSeries);
 
       // add entry for global review in firestore
       String queryPath = PathUtils.combine(ComicSeries.ROOT, comicSeries.Id);
       FirebaseFirestore.getInstance().document(queryPath).set(comicSeries, SetOptions.merge()).addOnCompleteListener(task -> {
 
         if (task.isSuccessful()) {
-          getIssueIdFromUser(comicSeries);
-        } else {
-          setFailAndFinish(R.string.err_add_comic_series);
+          getIssueIdFromUser(seriesDetails);
+        } else { // not fatal but we need to know this information for review
+          Crashlytics.logException(
+            new ComicCollectorException(
+              String.format(
+                Locale.US,
+                "%s could not write pending series: %s",
+                mUser.Id,
+                comicSeries.toString())));
         }
       });
     } else {
@@ -268,14 +275,25 @@ public class AddActivity extends BaseActivity implements
       mProgress.setIndeterminate(true);
     }
 
-    mCollectorViewModel.getComicSeriesByProductCode(comicBook.ProductCode).observe(this, comicSeriesDetails -> {
+    // look for this specific comic book
+    mCollectorViewModel.getComicBookById(comicBook.ProductCode, comicBook.IssueCode).observe(this, comicBookDetails -> {
 
-      // add series details to comic book
-      ComicBookDetails details = new ComicBookDetails(comicBook);
-      details.PublisherName = comicSeriesDetails.PublisherName;
-      details.SeriesTitle = comicSeriesDetails.Title;
-      details.Volume = comicSeriesDetails.Volume;
-      setSuccessAndFinish(details);
+      if (comicBookDetails != null) {
+        setSuccessAndFinish(comicBookDetails);
+      } else {
+        mCollectorViewModel.getComicSeriesByProductCode(comicBook.ProductCode).observe(this, comicSeriesDetails -> {
+
+          if (comicSeriesDetails != null) { // add series details to comic book
+            ComicBookDetails details = new ComicBookDetails(comicBook);
+            details.PublisherName = comicSeriesDetails.PublisherName;
+            details.SeriesTitle = comicSeriesDetails.Title;
+            details.Volume = comicSeriesDetails.Volume;
+            setSuccessAndFinish(details);
+          } else {
+            setFailAndFinish(R.string.err_add_comic_series);
+          }
+        });
+      }
     });
   }
 
@@ -307,14 +325,24 @@ public class AddActivity extends BaseActivity implements
         mProgress.setIndeterminate(false);
       }
 
-      // TODO: revisit
-      CollectorRoomDatabase.getDatabase(this).seriesDao().insert(
-        comicSeries.Id,
-        comicSeries.Id.substring(0, BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length()),
-        comicSeries.Id.substring(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length()),
-        comicSeries.Title,
-        comicSeries.Volume);
-      replaceFragment(ComicSeriesFragment.newInstance(comicSeries.Id));
+      mCollectorViewModel.getComicPublisherById(comicSeries.PublisherId).observe(this, comicPublisher -> {
+
+        if (comicPublisher.isValid()) {
+          ComicSeriesDetails seriesDetails = new ComicSeriesDetails();
+          seriesDetails.Id = comicSeries.Id;
+          seriesDetails.PublisherName = comicPublisher.Name;
+          seriesDetails.Title = comicSeries.Title;
+          replaceFragment(ComicSeriesFragment.newInstance(seriesDetails));
+        } else {
+          Crashlytics.logException(
+            new ComicCollectorException(
+              String.format(
+                Locale.US,
+                "%s requested an unknown comic publisher: %s",
+                mUser.Id,
+                comicSeries.toString())));
+        }
+      });
     } else {
       setFailAndFinish(R.string.err_unknown_series);
     }
@@ -574,8 +602,7 @@ public class AddActivity extends BaseActivity implements
                 true);
               mRotationAttempts = 0;
               LogUtils.warn(TAG, "Rotated image completely and could not find a bar code.");
-              // TODO: barcode in image, but not
-              //replaceFragment(ManualSearchFragment.newInstance(comic.getProductId(), mImageBitmap));
+              replaceFragment(ManualSearchFragment.newInstance(new ComicSeriesDetails(), mImageBitmap));
             }
           }
         } else {

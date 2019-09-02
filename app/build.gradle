@@ -82,19 +82,19 @@ dependencies {
 
     // Firebase
     implementation 'com.google.firebase:firebase-auth:19.0.0'
-    implementation 'com.google.firebase:firebase-core:17.1.0'
+    implementation 'com.google.firebase:firebase-core:17.2.0'
     implementation 'com.google.firebase:firebase-firestore:21.0.0'
     implementation 'com.google.firebase:firebase-ml-vision:23.0.0'
     implementation 'com.google.firebase:firebase-storage:19.0.0'
 
     // Room
-    implementation "androidx.room:room-runtime:2.2.0-alpha02"
-    annotationProcessor "androidx.room:room-compiler:2.2.0-alpha02"
-    androidTestImplementation "androidx.room:room-testing:2.2.0-alpha02"
+    implementation "androidx.room:room-runtime:2.2.0-beta01"
+    annotationProcessor "androidx.room:room-compiler:2.2.0-beta01"
+    androidTestImplementation "androidx.room:room-testing:2.2.0-beta01"
 
     // Lifecycle
     implementation "androidx.lifecycle:lifecycle-extensions:2.0.0"
-    annotationProcessor "androidx.lifecycle:lifecycle-compiler:2.0.0"
+    annotationProcessor "androidx.lifecycle:lifecycle-common-java8:2.0.0"
 
     // Other
     implementation 'com.googlecode.json-simple:json-simple:1.1'

@@ -73,16 +73,15 @@ public class ComicSeriesListFragment extends Fragment {
     collectorViewModel.getComicBooks().observe(this, comicList -> {
 
       if (comicList.size() > 0) {
-        LogUtils.debug(TAG, "Comic list data has changed.");
         for (ComicBookDetails comicBookDetail : comicList) {
-          ComicSeriesDetails tempSeries = mComicSeries.get(comicBookDetail.SeriesId);
+          ComicSeriesDetails tempSeries = mComicSeries.get(comicBookDetail.ProductCode);
           if (tempSeries == null) {
             tempSeries = new ComicSeriesDetails();
-            tempSeries.Id = comicBookDetail.SeriesId;
-            tempSeries.Title = comicBookDetail.SeriesTitle;
-            tempSeries.PublisherName = comicBookDetail.PublisherName;
+            tempSeries.Id = comicBookDetail.ProductCode;
             tempSeries.OwnedIssues.add(comicBookDetail.IssueNumber);
-            mComicSeries.put(tempSeries.Id, tempSeries);
+            tempSeries.PublisherName = comicBookDetail.PublisherName;
+            tempSeries.Title = comicBookDetail.SeriesTitle;
+            tempSeries.Volume = comicBookDetail.Volume;
           }
 
           if (!tempSeries.OwnedIssues.contains(comicBookDetail.IssueNumber)) {
@@ -95,6 +94,12 @@ public class ComicSeriesListFragment extends Fragment {
           }
 
           tempSeries.Published.add(Integer.parseInt(comicBookDetail.Published.substring(3)));
+
+          if (mComicSeries.containsKey(comicBookDetail.ProductCode)) {
+            mComicSeries.replace(comicBookDetail.ProductCode, tempSeries);
+          } else {
+            mComicSeries.put(comicBookDetail.ProductCode, tempSeries);
+          }
         }
 
         LogUtils.debug(TAG, "Found %d comic series from %d comic books.", mComicSeries.size(), comicList.size());

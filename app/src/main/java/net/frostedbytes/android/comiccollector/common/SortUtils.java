@@ -1,23 +1,23 @@
 package net.frostedbytes.android.comiccollector.common;
 
-import net.frostedbytes.android.comiccollector.models.ComicBook;
+import net.frostedbytes.android.comiccollector.db.views.ComicBookDetails;
+import net.frostedbytes.android.comiccollector.db.views.ComicSeriesDetails;
 
 import java.util.Comparator;
-import net.frostedbytes.android.comiccollector.models.ComicSeries;
 
 public class SortUtils {
 
-  public static class ByNumberOfIssues implements Comparator<ComicSeries> {
+  public static class ByNumberOfIssues implements Comparator<ComicSeriesDetails> {
 
-    public int compare(ComicSeries a, ComicSeries b) {
+    public int compare(ComicSeriesDetails a, ComicSeriesDetails b) {
 
-      return Long.compare(b.ComicBooks.size(), a.ComicBooks.size());
+      return Long.compare(b.OwnedIssues.size(), a.OwnedIssues.size());
     }
   }
 
-  public static class ByIssueNumber implements Comparator<ComicBook> {
+  public static class ByIssueNumber implements Comparator<ComicBookDetails> {
 
-    public int compare(ComicBook a, ComicBook b) {
+    public int compare(ComicBookDetails a, ComicBookDetails b) {
 
       return Long.compare(a.IssueNumber, b.IssueNumber);
     }

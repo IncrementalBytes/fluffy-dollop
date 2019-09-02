@@ -28,11 +28,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import java.io.File;
 import java.util.List;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
-import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.db.entity.ComicBook;
 import net.frostedbytes.android.comiccollector.db.views.ComicBookDetails;
 import net.frostedbytes.android.comiccollector.db.views.ComicSeriesDetails;
@@ -58,9 +56,11 @@ public class MainActivity extends BaseActivity implements
   private ProgressBar mProgress;
   private Snackbar mSnackbar;
 
+  private CollectorViewModel mCollectorViewModel;
+
   private StorageReference mStorage;
 
-  private String mTargetSeriesId;
+  private String mTargetProductCode;
   private User mUser;
 
   /*
@@ -108,9 +108,9 @@ public class MainActivity extends BaseActivity implements
           replaceFragment(ComicSeriesListFragment.newInstance());
           return true;
         case R.id.navigation_books:
-          if (mTargetSeriesId != null && !mTargetSeriesId.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
-            replaceFragment(ComicBookListFragment.newInstance(mTargetSeriesId));
-            mTargetSeriesId = BaseActivity.DEFAULT_PRODUCT_CODE;
+          if (mTargetProductCode != null && !mTargetProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
+            replaceFragment(ComicBookListFragment.newInstance(mTargetProductCode));
+            mTargetProductCode = BaseActivity.DEFAULT_PRODUCT_CODE;
           } else {
             replaceFragment(ComicBookListFragment.newInstance());
           }
@@ -135,21 +135,22 @@ public class MainActivity extends BaseActivity implements
     mUser.IsGeek = preferences.getBoolean(UserPreferenceFragment.IS_GEEK_PREFERENCE, false);
     mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
     if (User.isValid(mUser)) { // get most recent publisher and series data
-      String remotePublishersPath = PathUtils.combine(BaseActivity.REMOTE_PATH, BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
-      File localFile = new File(getCacheDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
-      FirebaseStorage.getInstance().getReference().child(remotePublishersPath).getFile(localFile).addOnCompleteListener(task -> {
-
-        if (task.isSuccessful()) {
-          LogUtils.debug(TAG, "Retrieved %s from Firestore.", BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
-        } else {
-          LogUtils.error(TAG, "Could not retrieve remote data.");
-          if (task.getException() != null) {
-            LogUtils.debug(TAG, "%s", task.getException().getMessage());
-          }
-        }
-
+      mCollectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
+//      String remotePublishersPath = PathUtils.combine(BaseActivity.REMOTE_PATH, BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+//      File localFile = new File(getCacheDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+//      FirebaseStorage.getInstance().getReference().child(remotePublishersPath).getFile(localFile).addOnCompleteListener(task -> {
+//
+//        if (task.isSuccessful()) {
+//          LogUtils.debug(TAG, "Retrieved %s from Firestore.", remotePublishersPath);
+//        } else {
+//          LogUtils.error(TAG, "Could not retrieve remote data.");
+//          if (task.getException() != null) {
+//            LogUtils.debug(TAG, "%s", task.getException().getMessage());
+//          }
+//        }
+//
         mNavigationView.setSelectedItemId(R.id.navigation_series);
-      });
+//      });
     } else {
       showDismissableSnackbar(getString(R.string.err_unknown_user));
     }
@@ -325,12 +326,11 @@ public class MainActivity extends BaseActivity implements
       "++onComicBookAddedToLibrary(%s)",
       comicBook != null ? comicBook.toString() : "null");
     if (comicBook != null) {
-      CollectorViewModel collectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
-      collectorViewModel.insert(comicBook);
-      mTargetSeriesId = comicBook.SeriesId;
+      mCollectorViewModel.insert(comicBook);
+      mTargetProductCode = comicBook.ProductCode;
       mNavigationView.setSelectedItemId(R.id.navigation_books);
     } else {
-      // TODO: handle error case
+      showDismissableSnackbar(getString(R.string.err_add_comic_book));
     }
   }
 
@@ -338,17 +338,16 @@ public class MainActivity extends BaseActivity implements
   public void onComicBookInit(boolean isSuccessful) {
 
     LogUtils.debug(TAG, "++onComicBookInit(%s)", String.valueOf(isSuccessful));
-    // TODO: add message if unsuccessful
+    if (!isSuccessful) {
+      showDismissableSnackbar(getString(R.string.err_comic_book_details));
+    }
   }
 
   @Override
-  public void onComicBookRemoved(ComicBook comicBook) {
+  public void onComicListActionComplete(String message) {
 
-    LogUtils.debug(
-      TAG,
-      "++onComicBookRemoved(%s)",
-      comicBook != null ? comicBook.toString() : "null");
-    replaceFragment(ComicBookListFragment.newInstance());
+    LogUtils.debug(TAG, "++onComicListActionComplete(%s)", message);
+    showDismissableSnackbar(message);
   }
 
   @Override
@@ -356,6 +355,13 @@ public class MainActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++onComicListAddBook()");
     addComicBook();
+  }
+
+  @Override
+  public void onComicListDeleteBook() {
+
+    LogUtils.debug(TAG, "onComicListDeleteBook()");
+    mNavigationView.setSelectedItemId(R.id.navigation_series);
   }
 
   @Override
@@ -420,7 +426,7 @@ public class MainActivity extends BaseActivity implements
   public void onSeriesListItemSelected(ComicSeriesDetails comicSeries) {
 
     LogUtils.debug(TAG, "++onSeriesListItemSelected(%s)", comicSeries.toString());
-    mTargetSeriesId = comicSeries.Id;
+    mTargetProductCode = comicSeries.Id;
     mNavigationView.setSelectedItemId(R.id.navigation_books);
   }
 

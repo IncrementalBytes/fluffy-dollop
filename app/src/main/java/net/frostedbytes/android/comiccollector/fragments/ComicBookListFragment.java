@@ -1,5 +1,6 @@
 package net.frostedbytes.android.comiccollector.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -32,7 +33,11 @@ public class ComicBookListFragment extends Fragment {
 
   public interface OnComicBookListListener {
 
+    void onComicListActionComplete(String message);
+
     void onComicListAddBook();
+
+    void onComicListDeleteBook();
 
     void onComicListItemSelected(ComicBookDetails comicBook);
 
@@ -40,6 +45,8 @@ public class ComicBookListFragment extends Fragment {
   }
 
   private OnComicBookListListener mCallback;
+
+  private CollectorViewModel mCollectorViewModel;
 
   private RecyclerView mRecyclerView;
 
@@ -93,20 +100,20 @@ public class ComicBookListFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-    CollectorViewModel collectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
+    mCollectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
     if (mProductCode != null && mProductCode.length() > 0) {
-      collectorViewModel.getComicBooksByProductCode(mProductCode).observe(this, bookList -> {
+      mCollectorViewModel.getComicBooksByProductCode(mProductCode).observe(this, bookList -> {
 
-        LogUtils.debug(TAG, "Book data has changed.");
         ComicBookAdapter comicAdapter = new ComicBookAdapter(bookList);
         mRecyclerView.setAdapter(comicAdapter);
+        mCallback.onComicListPopulated(bookList.size());
       });
     } else {
-      collectorViewModel.getComicBooks().observe(this, bookList -> {
+      mCollectorViewModel.getComicBooks().observe(this, bookList -> {
 
-        LogUtils.debug(TAG, "Book data has changed.");
         ComicBookAdapter comicAdapter = new ComicBookAdapter(bookList);
         mRecyclerView.setAdapter(comicAdapter);
+        mCallback.onComicListPopulated(bookList.size());
       });
     }
 
@@ -180,6 +187,7 @@ public class ComicBookListFragment extends Fragment {
    */
   private class ComicHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+    private final ImageView mDeleteImage;
     private final TextView mIssueTextView;
     private final ImageView mOwnImage;
     private final ImageView mReadImage;
@@ -191,6 +199,7 @@ public class ComicBookListFragment extends Fragment {
     ComicHolder(LayoutInflater inflater, ViewGroup parent) {
       super(inflater.inflate(R.layout.comic_book_item, parent, false));
 
+      mDeleteImage = itemView.findViewById(R.id.comic_item_image_delete);
       mIssueTextView = itemView.findViewById(R.id.comic_item_text_issue_value);
       mOwnImage = itemView.findViewById(R.id.comic_item_image_own);
       mReadImage = itemView.findViewById(R.id.comic_item_image_read);
@@ -203,6 +212,28 @@ public class ComicBookListFragment extends Fragment {
     void bind(ComicBookDetails comicBook) {
 
       mComicBook = comicBook;
+
+      mDeleteImage.setOnClickListener(v -> {
+        if (getActivity() != null) {
+          String message = String.format(Locale.US, getString(R.string.remove_specific_book_message), mComicBook.Title);
+          if (mComicBook.Title.isEmpty()) {
+            message = getString(R.string.remove_book_message);
+          }
+
+          AlertDialog removeBookDialog = new AlertDialog.Builder(getActivity())
+            .setMessage(message)
+            .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+              mCollectorViewModel.deleteComicBookById(mComicBook.Id);
+              mCallback.onComicListDeleteBook();
+            })
+            .setNegativeButton(android.R.string.no, null)
+            .create();
+          removeBookDialog.show();
+        } else {
+          mCallback.onComicListActionComplete(getString(R.string.err_remove_comic_book));
+        }
+      });
+
       if (mComicBook.IsOwned) {
         mOwnImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_checked_dark, null));
       } else {

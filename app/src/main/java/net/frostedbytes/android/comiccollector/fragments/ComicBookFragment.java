@@ -2,6 +2,8 @@ package net.frostedbytes.android.comiccollector.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -31,8 +33,6 @@ public class ComicBookFragment extends Fragment {
     void onComicBookAddedToLibrary(ComicBook comicBook);
 
     void onComicBookInit(boolean isSuccessful);
-
-    void onComicBookRemoved(ComicBook comicBook);
   }
 
   private OnComicBookListener mCallback;
@@ -47,7 +47,6 @@ public class ComicBookFragment extends Fragment {
   private ToggleButton mReadToggle;
   private EditText mTitleEdit;
   private Button mSaveButton;
-  private Button mRemoveButton;
 
   private ComicBookDetails mComicBook;
 
@@ -120,7 +119,6 @@ public class ComicBookFragment extends Fragment {
     mOwnedToggle = view.findViewById(R.id.comic_book_toggle_owned);
     mReadToggle = view.findViewById(R.id.comic_book_toggle_read);
     mSaveButton = view.findViewById(R.id.comic_book_button_save);
-    mRemoveButton = view.findViewById(R.id.comic_book_button_remove);
     updateUI(mComicBook);
   }
 
@@ -139,6 +137,22 @@ public class ComicBookFragment extends Fragment {
         mPublishedDateEdit.setText(comicBook.Published);
       }
 
+      mPublishedDateEdit.addTextChangedListener(new TextWatcher() {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+          validateAll();
+        }
+      });
+
       if (comicBook.PublisherName.length() > 0) {
         mPublisherText.setText(comicBook.PublisherName);
       } else {
@@ -147,8 +161,6 @@ public class ComicBookFragment extends Fragment {
 
       if (comicBook.SeriesTitle.length() > 0) {
         mSeriesText.setText(comicBook.SeriesTitle);
-      } else {
-        mSeriesText.setText(getString(R.string.placeholder));
       }
 
       mVolumeText.setText(String.valueOf(comicBook.Volume));
@@ -157,6 +169,7 @@ public class ComicBookFragment extends Fragment {
       mOwnedToggle.setChecked(comicBook.IsOwned);
       mReadToggle.setChecked(comicBook.IsRead);
 
+      mSaveButton.setEnabled(false);
       mSaveButton.setOnClickListener(v -> {
 
         ComicBook updatedBook = new ComicBook();
@@ -169,11 +182,19 @@ public class ComicBookFragment extends Fragment {
         if (updatedBook.isValid()) {
           mCallback.onComicBookAddedToLibrary(updatedBook);
         } else {
-          // -??? mCallback.onComicBookActionComplete();
+          mCallback.onComicBookActionComplete(getString(R.string.err_manual_search));
         }
       });
+    }
+  }
 
-      mRemoveButton.setVisibility(View.INVISIBLE);
+  private void validateAll() {
+
+    if (mPublishedDateEdit.getText().toString().length() == BaseActivity.DEFAULT_PUBLISHED_DATE.length() &&
+      !mPublishedDateEdit.getText().toString().equals(BaseActivity.DEFAULT_PUBLISHED_DATE)) {
+      mSaveButton.setEnabled(true);
+    } else {
+      mSaveButton.setEnabled(false);
     }
   }
 }

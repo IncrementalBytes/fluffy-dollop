@@ -23,7 +23,7 @@ public class ComicBook {
   public String Id;
 
   @ColumnInfo(name = "product_code")
-  @SerializedName("series_id")
+  @SerializedName("product_code")
   public String ProductCode;
 
   @NonNull
