@@ -8,6 +8,7 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 
@@ -15,7 +16,7 @@ import net.frostedbytes.android.comiccollector.BaseActivity;
   tableName = "comic_book_table",
   foreignKeys = {@ForeignKey(entity = ComicSeries.class, parentColumns = "id", childColumns = "product_code")},
     indices = {@Index(value = {"product_code", "issue_code"}, unique = true)})
-public class ComicBook {
+public class ComicBook implements Serializable {
 
   @NonNull
   @PrimaryKey

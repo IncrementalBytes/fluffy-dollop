@@ -249,9 +249,7 @@ public class AddActivity extends BaseActivity implements
       String queryPath = PathUtils.combine(ComicSeries.ROOT, comicSeries.Id);
       FirebaseFirestore.getInstance().document(queryPath).set(comicSeries, SetOptions.merge()).addOnCompleteListener(task -> {
 
-        if (task.isSuccessful()) {
-          getIssueIdFromUser(seriesDetails);
-        } else { // not fatal but we need to know this information for review
+        if (!task.isSuccessful()) { // not fatal but we need to know this information for review
           Crashlytics.logException(
             new ComicCollectorException(
               String.format(
@@ -260,6 +258,10 @@ public class AddActivity extends BaseActivity implements
                 mUser.Id,
                 comicSeries.toString())));
         }
+
+        ComicBook workableBook = new ComicBook();
+        workableBook.parseProductCode(comicSeries.Id);
+        getIssueIdFromUser(workableBook);
       });
     } else {
       LogUtils.debug(TAG, "++onComicSeriesActionComplete(null)");
@@ -301,6 +303,10 @@ public class AddActivity extends BaseActivity implements
   public void onTutorialContinue() {
 
     LogUtils.debug(TAG, "++onTutorialContinue()");
+    if (mProgress != null) {
+      mProgress.setIndeterminate(true);
+    }
+
     showPictureIntent();
   }
 
@@ -397,14 +403,14 @@ public class AddActivity extends BaseActivity implements
     }
   }
 
-  private void getIssueIdFromUser(ComicSeriesDetails comicSeries) {
+  private void getIssueIdFromUser(ComicBook comicBook) {
 
-    LogUtils.debug(TAG, "++getIssueIdFromUser(%s)", comicSeries.toString());
+    LogUtils.debug(TAG, "++getIssueIdFromUser(%s)", comicBook.toString());
     if (mProgress != null) {
       mProgress.setIndeterminate(false);
     }
 
-    replaceFragment(ManualSearchFragment.newInstance(comicSeries, mImageBitmap));
+    replaceFragment(ManualSearchFragment.newInstance(comicBook));
   }
 
   private void replaceFragment(Fragment fragment) {
@@ -566,13 +572,13 @@ public class AddActivity extends BaseActivity implements
           }
 
           if (comicBook != null) { // we have a legit barcode
-            final String productCode = comicBook.ProductCode;
-            mCollectorViewModel.getComicSeriesByProductCode(productCode).observe(this, comicSeries -> {
+            final ComicBook workableBook = new ComicBook(comicBook);
+            mCollectorViewModel.getComicSeriesByProductCode(workableBook.ProductCode).observe(this, comicSeries -> {
 
               if (comicSeries != null) {
-                getIssueIdFromUser(comicSeries);
+                getIssueIdFromUser(workableBook);
               } else {
-                new RetrieveComicSeriesDataTask(this, productCode).execute();
+                new RetrieveComicSeriesDataTask(this, workableBook.ProductCode).execute();
               }
             });
           } else { // try rotating the image, escape after 3 attempts
@@ -602,7 +608,7 @@ public class AddActivity extends BaseActivity implements
                 true);
               mRotationAttempts = 0;
               LogUtils.warn(TAG, "Rotated image completely and could not find a bar code.");
-              replaceFragment(ManualSearchFragment.newInstance(new ComicSeriesDetails(), mImageBitmap));
+              replaceFragment(ManualSearchFragment.newInstance(new ComicBook()));
             }
           }
         } else {

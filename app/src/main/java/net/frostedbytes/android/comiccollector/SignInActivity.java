@@ -70,7 +70,7 @@ public class SignInActivity extends BaseActivity {
 
     mProgressBar = findViewById(R.id.sign_in_progress);
     if (mProgressBar != null) {
-      mProgressBar.setVisibility(View.INVISIBLE);
+      mProgressBar.setVisibility(View.GONE);
     }
 
     mAuth = FirebaseAuth.getInstance();

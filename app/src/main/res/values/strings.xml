@@ -121,6 +121,7 @@
   <string name="hint_title_of_issue">(Optional) Title of issue.</string>
   <string name="hint_remove_comic">Remove comic from library.</string>
   <string name="err_comic_book_details">Could not display comic book details at this time.</string>
+  <string name="hint_example">Example:</string>
   <string-array name="debug_scenario_array">
     <item>scenario_barcode_not_found.jpg</item>
     <item>scenario_existing_comic.jpg</item>

@@ -3,8 +3,6 @@ package net.frostedbytes.android.comiccollector.fragments;
 import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
@@ -17,13 +15,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import java.io.ByteArrayOutputStream;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.db.entity.ComicBook;
-import net.frostedbytes.android.comiccollector.db.views.ComicSeriesDetails;
 
 public class ManualSearchFragment extends Fragment {
 
@@ -41,19 +37,13 @@ public class ManualSearchFragment extends Fragment {
   private EditText mProductCodeEdit;
 
   private ComicBook mComicBook;
-  private ComicSeriesDetails mComicSeries;
-  private Bitmap mImageBitmap;
 
-  public static ManualSearchFragment newInstance(ComicSeriesDetails comicSeries, Bitmap barcodeImage) {
+  public static ManualSearchFragment newInstance(ComicBook comicBook) {
 
-    LogUtils.debug(TAG, "++newInstance(%s, Bitmap)", comicSeries.toString());
+    LogUtils.debug(TAG, "++newInstance(%s)", comicBook.toString());
     ManualSearchFragment fragment = new ManualSearchFragment();
     Bundle args = new Bundle();
-    args.putSerializable(BaseActivity.ARG_COMIC_SERIES, comicSeries);
-    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    barcodeImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
-    byte[] byteArray = stream.toByteArray();
-    args.putByteArray(BaseActivity.ARG_SNAPSHOT, byteArray);
+    args.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicBook);
     fragment.setArguments(args);
     return fragment;
   }
@@ -81,11 +71,7 @@ public class ManualSearchFragment extends Fragment {
     LogUtils.debug(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicSeries = (ComicSeriesDetails)arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
-      byte[] byteArray = arguments.getByteArray(BaseActivity.ARG_SNAPSHOT);
-      if (byteArray != null) {
-        mImageBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-      }
+      mComicBook = (ComicBook) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
     } else {
       LogUtils.error(TAG, "Arguments were null.");
     }
@@ -129,35 +115,64 @@ public class ManualSearchFragment extends Fragment {
       mCallback.onManualSearchActionComplete(mComicBook);
     });
 
-    if (mImageBitmap != null) {
-      ImageView snapShot = view.findViewById(R.id.manual_search_image_snapshot);
-      snapShot.setImageBitmap(mImageBitmap);
-    }
-
+    TextView productCodeExampleText = view.findViewById(R.id.manual_search_text_product_example);
+    ImageView productCodeImage = view.findViewById(R.id.manual_search_image_product);
     mProductCodeEdit = view.findViewById(R.id.manual_search_edit_product);
+    TextView issueCodeText = view.findViewById(R.id.manual_search_text_issue);
+    TextView issueCodeExampleText = view.findViewById(R.id.manual_search_text_issue_example);
+    ImageView issueCodeImage = view.findViewById(R.id.manual_search_image_issue);
     mIssueCodeEdit = view.findViewById(R.id.manual_search_edit_issue);
     TextView messageText = view.findViewById(R.id.manual_search_text_no_barcode);
-    if (mComicSeries == null || mComicSeries.Id.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
-      mProductCodeEdit.addTextChangedListener(new TextWatcher() {
 
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-          validateAll();
-        }
-      });
+    if (mComicBook == null) {
+      // we need both ProductCode and IssueCode
+      messageText.setVisibility(View.VISIBLE);
+      productCodeExampleText.setVisibility(View.VISIBLE);
+      productCodeImage.setVisibility(View.VISIBLE);
+      issueCodeExampleText.setVisibility(View.VISIBLE);
+      issueCodeImage.setVisibility(View.VISIBLE);
     } else {
-      messageText.setVisibility(View.INVISIBLE);
-      mProductCodeEdit.setText(mComicSeries.Id);
-      mProductCodeEdit.setEnabled(false);
+      if (mComicBook.ProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) ||
+        mComicBook.ProductCode.length() != BaseActivity.DEFAULT_PRODUCT_CODE.length()) { // we need ProductCode
+        productCodeExampleText.setVisibility(View.VISIBLE);
+        productCodeImage.setVisibility(View.VISIBLE);
+      } else {
+        messageText.setVisibility(View.GONE);
+        productCodeExampleText.setVisibility(View.GONE);
+        productCodeImage.setVisibility(View.GONE);
+        mProductCodeEdit.setText(mComicBook.ProductCode);
+        mProductCodeEdit.setEnabled(false);
+      }
+
+      if (mComicBook.IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) ||
+        mComicBook.IssueCode.length() != BaseActivity.DEFAULT_ISSUE_CODE.length()) {
+        issueCodeText.setVisibility(View.VISIBLE);
+        issueCodeImage.setVisibility(View.VISIBLE);
+      } else {
+        messageText.setVisibility(View.GONE);
+        issueCodeExampleText.setVisibility(View.GONE);
+        issueCodeImage.setVisibility(View.GONE);
+        mIssueCodeEdit.setText(mComicBook.IssueCode);
+        mIssueCodeEdit.setEnabled(false);
+      }
     }
+
+    // setup text change watchers
+    mProductCodeEdit.addTextChangedListener(new TextWatcher() {
+
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+      }
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) {
+        validateAll();
+      }
+    });
 
     mIssueCodeEdit.addTextChangedListener(new TextWatcher() {
 

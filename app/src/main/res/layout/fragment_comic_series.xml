@@ -120,22 +120,22 @@
 
   <Button
     android:id="@+id/comic_series_button_continue"
+    style="@style/Widget.AppCompat.Button.Colored"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    android:background="@color/primaryColor"
     android:text="@string/continue_button"
     app:layout_constraintEnd_toStartOf="@+id/comic_series_button_cancel"
-    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_volume"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_volume" />
   <Button
     android:id="@+id/comic_series_button_cancel"
+    style="@style/Widget.AppCompat.Button.Colored"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    android:background="@color/primaryColor"
     android:text="@string/cancel_button"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_volume"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_volume" />
 
   <TextView
     android:id="@+id/comic_series_text_disclaimer"

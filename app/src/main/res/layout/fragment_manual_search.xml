@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:orientation="vertical">
@@ -17,27 +16,7 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"/>
-  <ImageView
-    android:id="@+id/manual_search_image_snapshot"
-    android:layout_width="wrap_content"
-    android:layout_height="@dimen/image_height_thumbnail"
-    android:layout_margin="@dimen/default_view_margin"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/manual_search_text_no_barcode"
-    android:contentDescription="@string/hint_snapshot"/>
-  <ImageButton
-    android:id="@+id/manual_search_button_rotate"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/default_view_margin"
-    android:backgroundTint="@color/primaryColor"
-    android:contentDescription="@string/hint_rotate"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/manual_search_image_snapshot"
-    app:layout_constraintBottom_toTopOf="@id/manual_search_edit_product"
-    tools:src="@drawable/ic_rotate_dark" />
+
   <TextView
     android:id="@+id/manual_search_text_product"
     android:textStyle="bold"
@@ -62,14 +41,24 @@
     android:inputType="number|textNoSuggestions"
     android:textColor="@color/primaryDarkColor"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/manual_search_button_rotate"/>
+    app:layout_constraintTop_toBottomOf="@id/manual_search_text_no_barcode"/>
+
+  <TextView
+    android:id="@+id/manual_search_text_product_example"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/hint_example"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toStartOf="@id/manual_search_image_product"
+    app:layout_constraintTop_toTopOf="@id/manual_search_image_product"
+    app:layout_constraintBottom_toBottomOf="@id/manual_search_image_product"/>
   <ImageView
     android:id="@+id/manual_search_image_product"
     android:layout_width="@android:dimen/thumbnail_width"
     android:layout_height="@android:dimen/notification_large_icon_width"
     android:layout_margin="@dimen/default_view_margin"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintStart_toEndOf="@id/manual_search_text_product_example"
     app:layout_constraintTop_toBottomOf="@id/manual_search_edit_product"
     app:srcCompat="@drawable/barcode_product"
     android:contentDescription="@string/hint_img_product_code"/>
@@ -99,25 +88,35 @@
     android:textColor="@color/primaryDarkColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/manual_search_image_product"/>
+
+  <TextView
+    android:id="@+id/manual_search_text_issue_example"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/hint_example"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toStartOf="@id/manual_search_image_issue"
+    app:layout_constraintTop_toTopOf="@id/manual_search_image_issue"
+    app:layout_constraintBottom_toBottomOf="@id/manual_search_image_issue"/>
   <ImageView
     android:id="@+id/manual_search_image_issue"
     android:layout_width="@android:dimen/thumbnail_width"
     android:layout_height="@android:dimen/notification_large_icon_height"
     android:layout_margin="@dimen/default_view_margin"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintStart_toEndOf="@id/manual_search_text_issue_example"
     app:layout_constraintTop_toBottomOf="@id/manual_search_edit_issue"
     app:srcCompat="@drawable/barcode_issue"
     android:contentDescription="@string/hint_img_issue_code"/>
 
   <Button
     android:id="@+id/manual_search_button_continue"
+    style="@style/Widget.AppCompat.Button.Colored"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:background="@color/primaryColor"
     android:text="@string/continue_button"
-    app:layout_constraintTop_toBottomOf="@+id/manual_search_image_issue"
-    app:layout_constraintEnd_toEndOf="parent"/>
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/manual_search_image_issue" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

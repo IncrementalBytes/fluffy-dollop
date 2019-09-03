@@ -12,7 +12,6 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String ARG_MESSAGE = "message";
     public static final String ARG_MESSAGE_ID = "message_id";
     public static final String ARG_PRODUCT_CODE = "product_code";
-    public static final String ARG_SNAPSHOT = "snapshot";
     public static final String ARG_USER = "user";
     public static final String ARG_USER_NAME = "user_name";
 
