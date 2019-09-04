@@ -1,6 +1,7 @@
 package net.frostedbytes.android.comiccollector;
 
 import android.Manifest.permission;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -9,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProviders;
+import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
@@ -27,10 +29,23 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.Reader;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
+import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.db.entity.ComicBook;
 import net.frostedbytes.android.comiccollector.db.views.ComicBookDetails;
 import net.frostedbytes.android.comiccollector.db.views.ComicSeriesDetails;
@@ -60,6 +75,7 @@ public class MainActivity extends BaseActivity implements
 
   private StorageReference mStorage;
 
+  private String mRemotePath;
   private String mTargetProductCode;
   private User mUser;
 
@@ -136,21 +152,9 @@ public class MainActivity extends BaseActivity implements
     mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
     if (User.isValid(mUser)) { // get most recent publisher and series data
       mCollectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
-//      String remotePublishersPath = PathUtils.combine(BaseActivity.REMOTE_PATH, BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
-//      File localFile = new File(getCacheDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
-//      FirebaseStorage.getInstance().getReference().child(remotePublishersPath).getFile(localFile).addOnCompleteListener(task -> {
-//
-//        if (task.isSuccessful()) {
-//          LogUtils.debug(TAG, "Retrieved %s from Firestore.", remotePublishersPath);
-//        } else {
-//          LogUtils.error(TAG, "Could not retrieve remote data.");
-//          if (task.getException() != null) {
-//            LogUtils.debug(TAG, "%s", task.getException().getMessage());
-//          }
-//        }
-//
-        mNavigationView.setSelectedItemId(R.id.navigation_series);
-//      });
+      mRemotePath = PathUtils.combine(User.ROOT, mUser.Id, BaseActivity.DEFAULT_LIBRARY_FILE);
+      mStorage = FirebaseStorage.getInstance().getReference().child(mRemotePath);
+      mNavigationView.setSelectedItemId(R.id.navigation_series);
     } else {
       showDismissableSnackbar(getString(R.string.err_unknown_user));
     }
@@ -375,30 +379,7 @@ public class MainActivity extends BaseActivity implements
   public void onComicListPopulated(int size) {
 
     LogUtils.debug(TAG, "++onComicListPopulated(%d)", size);
-    if (mMainToolbar != null && mMainToolbar.getMenu() != null) {
-      MenuItem item = mMainToolbar.getMenu().findItem(R.id.action_add);
-      if (item != null) {
-        item.setEnabled(true);
-      }
-
-      item = mMainToolbar.getMenu().findItem(R.id.action_home);
-      if (item != null) {
-        item.setEnabled(true);
-      }
-    }
-
-    if (size == 0) {
-      if (mSnackbar == null || !mSnackbar.isShown()) {
-        mSnackbar = Snackbar.make(
-          findViewById(R.id.main_fragment_container),
-          getString(R.string.err_no_data),
-          Snackbar.LENGTH_LONG)
-          .setAction(
-            getString(R.string.add),
-            view -> addComicBook());
-        mSnackbar.show();
-      }
-    }
+    listPopulated(size);
   }
 
   @Override
@@ -430,6 +411,13 @@ public class MainActivity extends BaseActivity implements
     mNavigationView.setSelectedItemId(R.id.navigation_books);
   }
 
+  @Override
+  public void onSeriesListOnPopulated(int size) {
+
+    LogUtils.debug(TAG, "++onSeriesListOnPopulated(%d)", size);
+    listPopulated(size);
+  }
+
   // TODO: add comparison
   @Override
   public void onSyncExport() {
@@ -439,8 +427,55 @@ public class MainActivity extends BaseActivity implements
       mProgress.setIndeterminate(true);
     }
 
-    // TODO: rework export for books database
-    showDismissableSnackbar(getString(R.string.err_export_task));
+    mCollectorViewModel.exportable().observe(this, comicBookList -> {
+
+      if (comicBookList != null) {
+        FileOutputStream outputStream;
+        try {
+          outputStream = getApplicationContext().openFileOutput(BaseActivity.DEFAULT_EXPORT_FILE, Context.MODE_PRIVATE);
+          Gson gson = new Gson();
+          Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
+          ArrayList<ComicBook> booksWritten = new ArrayList<>(comicBookList);
+          outputStream.write(gson.toJson(booksWritten, collectionType).getBytes());
+          LogUtils.debug(TAG, "Wrote %d comic books to %s", booksWritten.size(), BaseActivity.DEFAULT_EXPORT_FILE);
+        } catch (Exception e) {
+          LogUtils.warn(TAG, "Exception when exporting local database.");
+          Crashlytics.logException(e);
+        }
+      }
+
+      try { // look for file output
+        InputStream stream = getApplicationContext().openFileInput(BaseActivity.DEFAULT_EXPORT_FILE);
+        UploadTask uploadTask = mStorage.putStream(stream);
+        uploadTask.addOnCompleteListener(task -> {
+
+          if (task.isSuccessful()) {
+            if (task.getResult() != null) {
+              showDismissableSnackbar(getString(R.string.message_export_success));
+            } else {
+              LogUtils.warn(TAG, "Storage task results were null; this is unexpected.");
+              showDismissableSnackbar(getString(R.string.err_storage_task_unexpected));
+            }
+          } else {
+            if (task.getException() != null) {
+              LogUtils.error(TAG, "Could not export library: %s", task.getException().getMessage());
+            }
+          }
+        });
+      } catch (FileNotFoundException fnfe) {
+        LogUtils.warn(TAG, fnfe.getMessage());
+        Crashlytics.logException(fnfe);
+      } finally {
+        File tempFile = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
+        if (tempFile.exists()) {
+          if (tempFile.delete()) {
+            LogUtils.debug(TAG, "Removed temporary local export file.");
+          } else {
+            LogUtils.warn(TAG, "Unable t");
+          }
+        }
+      }
+    });
   }
 
   // TODO: add comparison
@@ -452,8 +487,47 @@ public class MainActivity extends BaseActivity implements
       mProgress.setIndeterminate(true);
     }
 
-    // TODO: rework import to sync publisher and series data, and book library data
-    showDismissableSnackbar(getString(R.string.err_import_task));
+    File localFile = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
+    FirebaseStorage.getInstance().getReference().child(mRemotePath).getFile(localFile).addOnCompleteListener(task -> {
+
+      if (task.isSuccessful() && task.getException() == null) {
+        File file = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
+        LogUtils.debug(TAG, "Loading %s", file.getAbsolutePath());
+        if (file.exists() && file.canRead()) {
+          try (Reader reader = new FileReader(file.getAbsolutePath())) {
+            mCollectorViewModel.deleteAllComicBooks();
+            Gson gson = new Gson();
+            Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
+            List<ComicBook> comics = gson.fromJson(reader, collectionType);
+            mCollectorViewModel.insertAll(comics);
+            showDismissableSnackbar(getString(R.string.status_sync_import_success));
+          } catch (Exception e) {
+            LogUtils.warn(TAG, "Failed reading local library: %s", e.getMessage());
+            Crashlytics.logException(e);
+          } finally {
+            if (file.delete()) { // remove temporary file
+              LogUtils.debug(TAG, "Removed temporary local import file.");
+            } else {
+              LogUtils.warn(TAG, "Could not remove temporary file after importing.");
+            }
+          }
+        } else {
+          LogUtils.debug(TAG, "%s does not exist yet.", BaseActivity.DEFAULT_EXPORT_FILE);
+        }
+      } else {
+        if (task.getException() != null) {
+          StorageException exception = (StorageException) task.getException();
+          if (exception.getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
+            showDismissableSnackbar(getString(R.string.err_remote_library_not_found));
+          } else {
+            LogUtils.error(TAG, "Could not import library: %s", task.getException().getMessage());
+            showDismissableSnackbar(getString(R.string.err_import_task));
+          }
+        } else {
+          showDismissableSnackbar(getString(R.string.err_import_unknown));
+        }
+      }
+    });
   }
 
   @Override
@@ -499,6 +573,35 @@ public class MainActivity extends BaseActivity implements
     } else {
       LogUtils.debug(TAG, "%s permission granted.", permission.WRITE_EXTERNAL_STORAGE);
       addComicBook();
+    }
+  }
+
+  private void listPopulated(int size) {
+
+    LogUtils.debug(TAG, "++listPopulated(%d)", size);
+    if (mMainToolbar != null && mMainToolbar.getMenu() != null) {
+      MenuItem item = mMainToolbar.getMenu().findItem(R.id.action_add);
+      if (item != null) {
+        item.setEnabled(true);
+      }
+
+      item = mMainToolbar.getMenu().findItem(R.id.action_home);
+      if (item != null) {
+        item.setEnabled(true);
+      }
+    }
+
+    if (size == 0) {
+      if (mSnackbar == null || !mSnackbar.isShown()) {
+        mSnackbar = Snackbar.make(
+          findViewById(R.id.main_fragment_container),
+          getString(R.string.err_no_data),
+          Snackbar.LENGTH_LONG)
+          .setAction(
+            getString(R.string.add),
+            view -> addComicBook());
+        mSnackbar.show();
+      }
     }
   }
 

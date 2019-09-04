@@ -4,7 +4,6 @@
   <color name="primaryLightColor">#6DEA74</color>
   <color name="primaryDarkColor">#008613</color>
 
-  <color name="primaryTextColor">#ffffff</color>
   <color name="secondaryTextColor">#000000</color>
 
   <color name="accent">@color/primaryLightColor</color>

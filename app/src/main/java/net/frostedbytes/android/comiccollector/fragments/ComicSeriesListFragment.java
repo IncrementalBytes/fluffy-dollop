@@ -34,6 +34,8 @@ public class ComicSeriesListFragment extends Fragment {
     void onSeriesListAddBook();
 
     void onSeriesListItemSelected(ComicSeriesDetails comicSeries);
+
+    void onSeriesListOnPopulated(int size);
   }
 
   private OnComicSeriesListListener mCallback;
@@ -105,6 +107,9 @@ public class ComicSeriesListFragment extends Fragment {
         LogUtils.debug(TAG, "Found %d comic series from %d comic books.", mComicSeries.size(), comicList.size());
         ComicSeriesAdapter comicAdapter = new ComicSeriesAdapter(new ArrayList<>(mComicSeries.values()));
         mRecyclerView.setAdapter(comicAdapter);
+        mCallback.onSeriesListOnPopulated(mComicSeries.size());
+      } else {
+        mCallback.onSeriesListOnPopulated(0);
       }
     });
 

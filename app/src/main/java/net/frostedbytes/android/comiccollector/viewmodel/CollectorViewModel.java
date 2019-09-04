@@ -24,9 +24,19 @@ public class CollectorViewModel extends AndroidViewModel {
     mAllComicBooks = mRepository.getComicBooks();
   }
 
+  public void deleteAllComicBooks() {
+
+    mRepository.deleteAllComicBooks();
+  }
+
   public void deleteComicBookById(String comicBookId) {
 
     mRepository.deleteComicBookById(comicBookId);
+  }
+
+  public LiveData<List<ComicBook>> exportable() {
+
+    return mRepository.exportable();
   }
 
   public LiveData<ComicBookDetails> getComicBookById(String productCode, String issueCode) {
@@ -58,8 +68,14 @@ public class CollectorViewModel extends AndroidViewModel {
 
     mRepository.insert(comicBook);
   }
+
   public void insert(ComicSeries comicSeries) {
 
     mRepository.insert(comicSeries);
+  }
+
+  public void insertAll(List<ComicBook> comicBooks) {
+
+    mRepository.insertAll(comicBooks);
   }
 }

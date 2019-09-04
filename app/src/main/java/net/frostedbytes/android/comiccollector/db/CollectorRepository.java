@@ -16,7 +16,6 @@ import net.frostedbytes.android.comiccollector.db.views.ComicSeriesDetails;
 public class CollectorRepository {
 
   private LiveData<List<ComicBookDetails>> mComicBooksExtended;
-  private LiveData<List<ComicSeriesDetails>> mComicSeriesExtended;
 
   private ComicBookDao mComicBookDao;
   private ComicPublisherDao mComicPublisherDao;
@@ -30,12 +29,21 @@ public class CollectorRepository {
     mComicSeriesDao = db.seriesDao();
 
     mComicBooksExtended = mComicBookDao.getAll();
-    mComicSeriesExtended = mComicSeriesDao.getAll();
+  }
+
+  public void deleteAllComicBooks() {
+
+    new deleteAllComicBooksAsyncTask(mComicBookDao).execute();
   }
 
   public void deleteComicBookById(String comicBookId) {
 
     new deleteComicBookByIdAsyncTask(mComicBookDao).execute(comicBookId);
+  }
+
+  public LiveData<List<ComicBook>> exportable() {
+
+    return mComicBookDao.exportable();
   }
 
   public LiveData<ComicBookDetails> getComicBookById(String comicBookId, String issueCode) {
@@ -58,11 +66,6 @@ public class CollectorRepository {
     return mComicPublisherDao.get(publisherId);
   }
 
-  public LiveData<List<ComicSeriesDetails>> getComicSeries() {
-
-    return mComicSeriesExtended;
-  }
-
   public LiveData<ComicSeriesDetails> getComicSeriesByProductCode(String productCode) {
 
     return mComicSeriesDao.get(productCode);
@@ -81,6 +84,29 @@ public class CollectorRepository {
   public void insert(ComicSeries series) {
 
     new insertComicSeriesAsyncTask(mComicSeriesDao).execute(series);
+  }
+
+  @SuppressWarnings({"unchecked", "varargs"})
+  public void insertAll(List<ComicBook> comicBooks) {
+
+    new insertAllComicBookAsyncTask(mComicBookDao).execute(comicBooks);
+  }
+
+  private static class deleteAllComicBooksAsyncTask extends AsyncTask<Void, Void, Void> {
+
+    private ComicBookDao mAsyncTaskDao;
+
+    deleteAllComicBooksAsyncTask(ComicBookDao dao) {
+
+      mAsyncTaskDao = dao;
+    }
+
+    @Override
+    protected Void doInBackground(final Void... params) {
+
+      mAsyncTaskDao.deleteAll();
+      return null;
+    }
   }
 
   private static class deleteComicBookByIdAsyncTask extends AsyncTask<String, Void, Void> {
@@ -147,6 +173,24 @@ public class CollectorRepository {
     protected Void doInBackground(final ComicSeries... params) {
 
       mAsyncTaskDao.insert(params[0].Id, params[0].PublisherId, params[0].SeriesId, params[0].Title, params[0].Volume);
+      return null;
+    }
+  }
+
+  private static class insertAllComicBookAsyncTask extends AsyncTask<List<ComicBook>, Void, Void> {
+
+    private ComicBookDao mAsyncTaskDao;
+
+    insertAllComicBookAsyncTask(ComicBookDao dao) {
+
+      mAsyncTaskDao = dao;
+    }
+
+    @SafeVarargs
+    @Override
+    protected final Void doInBackground(final List<ComicBook>... params) {
+
+      mAsyncTaskDao.insertAll(params[0]);
       return null;
     }
   }

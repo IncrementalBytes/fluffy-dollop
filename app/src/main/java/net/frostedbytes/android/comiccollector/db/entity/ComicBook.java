@@ -21,6 +21,7 @@ public class ComicBook implements Serializable {
   @NonNull
   @PrimaryKey
   @ColumnInfo(name = "id")
+  @SerializedName("id")
   public String Id;
 
   @ColumnInfo(name = "product_code")
@@ -33,13 +34,13 @@ public class ComicBook implements Serializable {
   public String IssueCode;
 
   @ColumnInfo(name = "issue_number")
-  public int IssueNumber;
+  public transient int IssueNumber;
 
   @ColumnInfo(name = "cover_variant")
-  public int CoverVariant;
+  public transient int CoverVariant;
 
   @ColumnInfo(name = "print_run")
-  public int PrintRun;
+  public transient int PrintRun;
 
   @ColumnInfo(name = "owned")
   @SerializedName("owned")
