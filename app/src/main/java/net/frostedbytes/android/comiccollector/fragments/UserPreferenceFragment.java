@@ -15,10 +15,11 @@ import net.frostedbytes.android.comiccollector.models.User;
 
 public class UserPreferenceFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-  private static final String TAG = BASE_TAG + "UserPreferenceFragment";
+  private static final String TAG = BaseActivity.BASE_TAG + "UserPreferenceFragment";
 
   public static final String IS_GEEK_PREFERENCE = "preference_is_geek";
   public static final String SHOW_TUTORIAL_PREFERENCE = "preference_show_tutorial";
+  public static final String USE_IMAGE_PREVIEW = "preference_image_preview";
 
   public interface OnPreferencesListener {
 
@@ -68,9 +69,19 @@ public class UserPreferenceFragment extends PreferenceFragmentCompat implements 
     LogUtils.debug(TAG, "++onCreatePreferences(Bundle, String)");
     addPreferencesFromResource(R.xml.app_preferences);
     SwitchPreference switchPreference = (SwitchPreference) findPreference(IS_GEEK_PREFERENCE);
-    switchPreference.setChecked(mUser.IsGeek);
+    if (switchPreference != null) {
+      switchPreference.setChecked(mUser.IsGeek);
+    }
+
     switchPreference = (SwitchPreference) findPreference(SHOW_TUTORIAL_PREFERENCE);
-    switchPreference.setChecked(mUser.ShowBarcodeHint);
+    if (switchPreference != null) {
+      switchPreference.setChecked(mUser.ShowBarcodeHint);
+    }
+
+    switchPreference = (SwitchPreference) findPreference(USE_IMAGE_PREVIEW);
+    if (switchPreference != null) {
+      switchPreference.setChecked(mUser.UseImageCapture);
+    }
   }
 
   @Override

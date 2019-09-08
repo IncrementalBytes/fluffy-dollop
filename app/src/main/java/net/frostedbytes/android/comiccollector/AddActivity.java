@@ -45,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import net.frostedbytes.android.comiccollector.common.BarcodeScanningProcessor;
 import net.frostedbytes.android.comiccollector.common.ComicCollectorException;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.PathUtils;
@@ -53,6 +54,7 @@ import net.frostedbytes.android.comiccollector.db.entity.ComicBook;
 import net.frostedbytes.android.comiccollector.db.entity.ComicSeries;
 import net.frostedbytes.android.comiccollector.db.views.ComicBookDetails;
 import net.frostedbytes.android.comiccollector.db.views.ComicSeriesDetails;
+import net.frostedbytes.android.comiccollector.fragments.CameraSourceFragment;
 import net.frostedbytes.android.comiccollector.fragments.ComicSeriesFragment;
 import net.frostedbytes.android.comiccollector.fragments.ManualSearchFragment;
 import net.frostedbytes.android.comiccollector.fragments.TutorialFragment;
@@ -61,11 +63,12 @@ import net.frostedbytes.android.comiccollector.models.User;
 import net.frostedbytes.android.comiccollector.viewmodel.CollectorViewModel;
 
 public class AddActivity extends BaseActivity implements
+  BarcodeScanningProcessor.OnBarcodeScanningListener,
   ComicSeriesFragment.OnComicSeriesListener,
   ManualSearchFragment.OnManualSearchListener,
   TutorialFragment.OnTutorialListener {
 
-  private static final String TAG = BASE_TAG + "AddActivity";
+  private static final String TAG = BaseActivity.BASE_TAG + "AddActivity";
 
   private ProgressBar mProgress;
 
@@ -100,6 +103,8 @@ public class AddActivity extends BaseActivity implements
           setTitle(getString(R.string.title_gathering_data));
         } else if (fragmentClassName.equals(TutorialFragment.class.getName())) {
           setTitle(getString(R.string.title_tutorial));
+        } else if (fragmentClassName.equals(CameraSourceFragment.class.getName())) {
+          setTitle(getString(R.string.title_camera_source));
         }
       }
     });
@@ -230,6 +235,35 @@ public class AddActivity extends BaseActivity implements
   /*
     Fragment Callback(s)
    */
+  @Override
+  public void onBarcodeProcessed(String barcode) {
+
+    LogUtils.debug(TAG, "onBarcodeProcessed(%s)", barcode);
+    ComicBook comicBook = null;
+    if (barcode != null &&
+      !barcode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) &&
+      barcode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) {
+      comicBook = new ComicBook();
+      comicBook.parseProductCode(barcode);
+    } else {
+      LogUtils.warn(TAG, "Unexpected bar code: %s", barcode);
+    }
+
+    if (comicBook != null) { // we have a legit barcode
+      final ComicBook workableBook = new ComicBook(comicBook);
+      mCollectorViewModel.getComicSeriesByProductCode(workableBook.ProductCode).observe(this, comicSeries -> {
+
+        if (comicSeries != null) {
+          getIssueIdFromUser(workableBook);
+        } else {
+          new RetrieveComicSeriesDataTask(this, workableBook.ProductCode).execute();
+        }
+      });
+    } else {
+      setFailAndFinish(R.string.err_bar_code_not_found);
+    }
+  }
+
   @Override
   public void onComicSeriesActionComplete(ComicSeriesDetails seriesDetails) {
 
@@ -475,7 +509,9 @@ public class AddActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++showPictureIntent()");
     deleteImageFile();
-    if (BuildConfig.DEBUG) {
+    if (mUser.UseImageCapture) {
+      replaceFragment(CameraSourceFragment.newInstance());
+    } else if (BuildConfig.DEBUG) {
       LayoutInflater layoutInflater = LayoutInflater.from(this);
       View promptView = layoutInflater.inflate(R.layout.dialog_debug_camera, null);
 
@@ -539,8 +575,8 @@ public class AddActivity extends BaseActivity implements
         .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_UPC_A, FirebaseVisionBarcode.FORMAT_UPC_E)
         .build();
     FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(mImageBitmap);
-    FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
-      .getVisionBarcodeDetector(options);
+    FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance().getVisionBarcodeDetector(options);
+
     com.google.android.gms.tasks.Task<java.util.List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
       .addOnCompleteListener(task -> {
 

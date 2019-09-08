@@ -64,7 +64,7 @@ public class MainActivity extends BaseActivity implements
   SyncFragment.OnSyncListener,
   UserPreferenceFragment.OnPreferencesListener {
 
-  private static final String TAG = BASE_TAG + "MainActivity";
+  private static final String TAG = BaseActivity.BASE_TAG + "MainActivity";
 
   private BottomNavigationView mNavigationView;
   private Toolbar mMainToolbar;
@@ -191,6 +191,9 @@ public class MainActivity extends BaseActivity implements
         break;
       case R.id.action_add:
         addComicBook();
+        break;
+      case R.id.action_settings:
+        replaceFragment(UserPreferenceFragment.newInstance(mUser));
         break;
       case R.id.action_logout:
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -379,6 +382,10 @@ public class MainActivity extends BaseActivity implements
   public void onComicListPopulated(int size) {
 
     LogUtils.debug(TAG, "++onComicListPopulated(%d)", size);
+    if (mProgress != null) {
+      mProgress.setIndeterminate(false);
+    }
+
     listPopulated(size);
   }
 
@@ -393,6 +400,10 @@ public class MainActivity extends BaseActivity implements
 
     if (preferences.contains(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE)) {
       mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
+    }
+
+    if (preferences.contains(UserPreferenceFragment.USE_IMAGE_PREVIEW)) {
+      mUser.UseImageCapture = preferences.getBoolean(UserPreferenceFragment.USE_IMAGE_PREVIEW, false);
     }
   }
 
@@ -415,6 +426,10 @@ public class MainActivity extends BaseActivity implements
   public void onSeriesListOnPopulated(int size) {
 
     LogUtils.debug(TAG, "++onSeriesListOnPopulated(%d)", size);
+    if (mProgress != null) {
+      mProgress.setIndeterminate(false);
+    }
+
     listPopulated(size);
   }
 
@@ -586,6 +601,11 @@ public class MainActivity extends BaseActivity implements
       }
 
       item = mMainToolbar.getMenu().findItem(R.id.action_home);
+      if (item != null) {
+        item.setEnabled(true);
+      }
+
+      item = mMainToolbar.getMenu().findItem(R.id.action_settings);
       if (item != null) {
         item.setEnabled(true);
       }

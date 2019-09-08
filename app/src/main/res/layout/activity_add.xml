@@ -30,7 +30,7 @@
       android:layout_height="wrap_content"
       android:background="@color/primaryColor"
       android:indeterminate="true"
-      android:indeterminateTint="@color/primaryDarkColor"/>
+      android:indeterminateTint="@color/accent" />
 
   </com.google.android.material.appbar.AppBarLayout>
 

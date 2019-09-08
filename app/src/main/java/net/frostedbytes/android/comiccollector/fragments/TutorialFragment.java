@@ -19,7 +19,7 @@ import net.frostedbytes.android.comiccollector.models.User;
 
 public class TutorialFragment extends Fragment {
 
-  private static final String TAG = BASE_TAG + "TutorialFragment";
+  private static final String TAG = BaseActivity.BASE_TAG + "TutorialFragment";
 
   public interface OnTutorialListener {
 

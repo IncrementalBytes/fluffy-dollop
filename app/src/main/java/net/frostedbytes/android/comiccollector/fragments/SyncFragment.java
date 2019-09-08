@@ -18,7 +18,7 @@ import net.frostedbytes.android.comiccollector.models.User;
 
 public class SyncFragment extends Fragment {
 
-  private static final String TAG = BASE_TAG + "SyncFragment";
+  private static final String TAG = BaseActivity.BASE_TAG + "SyncFragment";
 
   public interface OnSyncListener {
 

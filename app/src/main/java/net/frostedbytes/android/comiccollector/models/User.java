@@ -20,6 +20,8 @@ public class User implements Serializable {
 
   public boolean ShowBarcodeHint;
 
+  public boolean UseImageCapture;
+
   public User() {
 
     this.Email = "";
@@ -27,6 +29,7 @@ public class User implements Serializable {
     this.Id = BaseActivity.DEFAULT_USER_ID;
     this.IsGeek = false;
     this.ShowBarcodeHint = true;
+    this.UseImageCapture = false;
   }
 
   public static boolean isValid(User user) {

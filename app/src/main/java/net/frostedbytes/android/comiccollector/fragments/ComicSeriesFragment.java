@@ -21,7 +21,7 @@ import static net.frostedbytes.android.comiccollector.BaseActivity.BASE_TAG;
 
 public class ComicSeriesFragment extends Fragment {
 
-  private static final String TAG = BASE_TAG + "ComicSeriesFragment";
+  private static final String TAG = BaseActivity.BASE_TAG + "ComicSeriesFragment";
 
   public interface OnComicSeriesListener {
 

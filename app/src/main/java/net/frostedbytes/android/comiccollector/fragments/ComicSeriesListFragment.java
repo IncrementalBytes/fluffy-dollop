@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.SortUtils;
@@ -27,7 +28,7 @@ import net.frostedbytes.android.comiccollector.viewmodel.CollectorViewModel;
 
 public class ComicSeriesListFragment extends Fragment {
 
-  private static final String TAG = BASE_TAG + "ComicSeriesListFragment";
+  private static final String TAG = BaseActivity.BASE_TAG + "ComicSeriesListFragment";
 
   public interface OnComicSeriesListListener {
 

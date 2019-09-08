@@ -23,7 +23,7 @@ import net.frostedbytes.android.comiccollector.db.entity.ComicBook;
 
 public class ManualSearchFragment extends Fragment {
 
-  private static final String TAG = BASE_TAG + "ManualSearchFragment";
+  private static final String TAG = BaseActivity.BASE_TAG + "ManualSearchFragment";
 
   public interface OnManualSearchListener {
 

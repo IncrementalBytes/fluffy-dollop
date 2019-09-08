@@ -11,4 +11,9 @@
     android:key="preference_show_tutorial"
     android:summary="Show tutorial about taking picture of comic book bar code."
     android:title="Show tutorial"/>
+  <SwitchPreference
+    android:defaultValue="false"
+    android:key="preference_image_preview"
+    android:summary="Use realtime image capture instead of photo for bar code."
+    android:title="Image Capture (BETA)"/>
 </PreferenceScreen>

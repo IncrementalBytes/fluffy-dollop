@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
 import net.frostedbytes.android.comiccollector.AddActivity;
+import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.db.entity.ComicSeries;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +20,7 @@ import org.json.JSONObject;
 
 public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeries> {
 
-  private static final String TAG = BASE_TAG + "RetrieveComicSeriesDataTask";
+  private static final String TAG = BaseActivity.BASE_TAG + "RetrieveComicSeriesDataTask";
 
   private WeakReference<AddActivity> mActivityWeakReference;
   private String mQueryForSeries;

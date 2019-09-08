@@ -28,7 +28,7 @@ import java.util.Locale;
 
 public class SignInActivity extends BaseActivity {
 
-  private static final String TAG = BASE_TAG + "SignInActivity";
+  private static final String TAG = BaseActivity.BASE_TAG + "SignInActivity";
 
   private static final int RC_SIGN_IN = 4701;
 

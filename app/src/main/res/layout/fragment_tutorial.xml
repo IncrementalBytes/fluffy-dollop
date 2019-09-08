@@ -43,10 +43,10 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/show_hint"
-    android:textSize="14sp"
+    android:textSize="18sp"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/tutorial_text_note"/>
+    app:layout_constraintTop_toBottomOf="@+id/tutorial_text_note" />
   <Button
     android:id="@+id/tutorial_button_continue"
     style="@style/Widget.AppCompat.Button.Colored"
