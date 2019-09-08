@@ -98,7 +98,7 @@ public class CameraSource {
 
   private final Object processorLock = new Object();
   // @GuardedBy("processorLock")
-  private BarcodeScanningProcessor frameProcessor;
+  private VisionImageProcessor frameProcessor;
 
   /**
    * Map to convert between a byte array, received from the camera, and its associated byte buffer.
@@ -570,7 +570,7 @@ public class CameraSource {
     }
   }
 
-  public void setMachineLearningFrameProcessor(BarcodeScanningProcessor processor) {
+  public void setMachineLearningFrameProcessor(VisionImageProcessor processor) {
     synchronized (processorLock) {
       cleanScreen();
       if (frameProcessor != null) {
