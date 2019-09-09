@@ -107,6 +107,7 @@
   <string name="err_comic_book_details">Could not display comic book details at this time.</string>
   <string name="hint_example">Example:</string>
   <string name="title_camera_source">Scanning for bar code…</string>
+  <string name="retry">Retry</string>
   <string-array name="debug_scenario_array">
     <item>scenario_barcode_not_found.jpg</item>
     <item>scenario_existing_comic.jpg</item>

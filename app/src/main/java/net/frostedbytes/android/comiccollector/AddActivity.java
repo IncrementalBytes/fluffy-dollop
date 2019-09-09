@@ -349,6 +349,17 @@ public class AddActivity extends BaseActivity implements
   }
 
   @Override
+  public void onManualSearchRetry() {
+
+    LogUtils.debug(TAG, "onManualSearchRetry()");
+    if (mProgress != null) {
+      mProgress.setIndeterminate(true);
+    }
+
+    showPictureIntent();
+  }
+
+  @Override
   public void onTutorialContinue() {
 
     LogUtils.debug(TAG, "++onTutorialContinue()");
@@ -524,9 +535,7 @@ public class AddActivity extends BaseActivity implements
 
     LogUtils.debug(TAG, "++showPictureIntent()");
     deleteImageFile();
-    if (mUser.UseImageCapture) {
-      replaceFragment(CameraSourceFragment.newInstance());
-    } else if (BuildConfig.DEBUG) {
+    if (BuildConfig.DEBUG) {
       LayoutInflater layoutInflater = LayoutInflater.from(this);
       View promptView = layoutInflater.inflate(R.layout.dialog_debug_camera, null);
 
@@ -543,6 +552,8 @@ public class AddActivity extends BaseActivity implements
 
       AlertDialog alert = alertDialogBuilder.create();
       alert.show();
+    } else if (mUser.UseImageCapture) {
+      replaceFragment(CameraSourceFragment.newInstance());
     } else {
       Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
       if (takePictureIntent.resolveActivity(getPackageManager()) != null) {

@@ -41,6 +41,8 @@ public class ManualSearchFragment extends Fragment {
   public interface OnManualSearchListener {
 
     void onManualSearchActionComplete(ComicBook comicBook);
+
+    void onManualSearchRetry();
   }
 
   private OnManualSearchListener mCallback;
@@ -115,6 +117,8 @@ public class ManualSearchFragment extends Fragment {
     //   1) Product Code (Publisher & Series) is known, we need the IssueCode
     //   2) We need Product Code (Publisher & Series), & IssueCode
 
+    Button retryButton = view.findViewById(R.id.manual_search_button_retry);
+    retryButton.setOnClickListener(v -> mCallback.onManualSearchRetry());
     mContinueButton = view.findViewById(R.id.manual_search_button_continue);
     mContinueButton.setEnabled(false);
     mContinueButton.setOnClickListener(v -> {
