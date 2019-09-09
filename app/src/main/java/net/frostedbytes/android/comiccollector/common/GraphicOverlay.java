@@ -1,3 +1,18 @@
+/*
+ * Copyright 2019 Ryan Ward
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package net.frostedbytes.android.comiccollector.common;
 
 import android.content.Context;
@@ -21,21 +36,12 @@ import java.util.List;
  *
  * <p>Associated {@link Graphic} items should use the following methods to convert to view
  * coordinates for the graphics that are drawn:
- *
- * <ol>
- *   <li>{@link Graphic#scaleX(float)} and {@link Graphic#scaleY(float)} adjust the size of the
- *       supplied value from the preview scale to the view scale.
- *   <li>{@link Graphic#translateX(float)} and {@link Graphic#translateY(float)} adjust the
- *       coordinate from the preview's coordinate system to the view coordinate system.
- * </ol>
  */
 public class GraphicOverlay extends View {
+
   private final Object lock = new Object();
   private int previewWidth;
-  private float widthScaleFactor = 1.0f;
   private int previewHeight;
-  private float heightScaleFactor = 1.0f;
-  private int facing = CameraSource.CAMERA_FACING_BACK;
   private final List<Graphic> graphics = new ArrayList<>();
 
   /**
@@ -44,92 +50,42 @@ public class GraphicOverlay extends View {
    * instances to the overlay using {@link GraphicOverlay#add(Graphic)}.
    */
   public abstract static class Graphic {
-    private GraphicOverlay overlay;
 
-    public Graphic(GraphicOverlay overlay) {
-      this.overlay = overlay;
+    Graphic(GraphicOverlay overlay) {
     }
 
     /**
      * Draw the graphic on the supplied canvas. Drawing should use the following methods to convert
      * to view coordinates for the graphics that are drawn:
-     *
-     * <ol>
-     *   <li>{@link Graphic#scaleX(float)} and {@link Graphic#scaleY(float)} adjust the size of the
-     *       supplied value from the preview scale to the view scale.
-     *   <li>{@link Graphic#translateX(float)} and {@link Graphic#translateY(float)} adjust the
-     *       coordinate from the preview's coordinate system to the view coordinate system.
-     * </ol>
-     *
      * @param canvas drawing canvas
      */
     public abstract void draw(Canvas canvas);
-
-    /**
-     * Adjusts a horizontal value of the supplied value from the preview scale to the view scale.
-     */
-    public float scaleX(float horizontal) {
-      return horizontal * overlay.widthScaleFactor;
-    }
-
-    /** Adjusts a vertical value of the supplied value from the preview scale to the view scale. */
-    public float scaleY(float vertical) {
-      return vertical * overlay.heightScaleFactor;
-    }
-
-    /** Returns the application context of the app. */
-    public Context getApplicationContext() {
-      return overlay.getContext().getApplicationContext();
-    }
-
-    /**
-     * Adjusts the x coordinate from the preview's coordinate system to the view coordinate system.
-     */
-    public float translateX(float x) {
-      if (overlay.facing == CameraSource.CAMERA_FACING_FRONT) {
-        return overlay.getWidth() - scaleX(x);
-      } else {
-        return scaleX(x);
-      }
-    }
-
-    /**
-     * Adjusts the y coordinate from the preview's coordinate system to the view coordinate system.
-     */
-    public float translateY(float y) {
-      return scaleY(y);
-    }
-
-    public void postInvalidate() {
-      overlay.postInvalidate();
-    }
-  }
+}
 
   public GraphicOverlay(Context context, AttributeSet attrs) {
     super(context, attrs);
   }
 
-  /** Removes all graphics from the overlay. */
+  /**
+   *  Removes all graphics from the overlay.
+   */
   public void clear() {
+
     synchronized (lock) {
       graphics.clear();
     }
+
     postInvalidate();
   }
 
-  /** Adds a graphic to the overlay. */
+  /**
+   * Adds a graphic to the overlay.
+   */
   public void add(Graphic graphic) {
+
     synchronized (lock) {
       graphics.add(graphic);
     }
-  }
-
-  /** Removes a graphic from the overlay. */
-  public void remove(Graphic graphic) {
-    synchronized (lock) {
-      graphics.remove(graphic);
-    }
-    postInvalidate();
   }
 
   /**
@@ -137,23 +93,26 @@ public class GraphicOverlay extends View {
    * coordinates later.
    */
   public void setCameraInfo(int previewWidth, int previewHeight, int facing) {
+
     synchronized (lock) {
       this.previewWidth = previewWidth;
       this.previewHeight = previewHeight;
-      this.facing = facing;
     }
+
     postInvalidate();
   }
 
-  /** Draws the overlay with its associated graphic objects. */
+  /**
+   *  Draws the overlay with its associated graphic objects.
+   **/
   @Override
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
 
     synchronized (lock) {
       if ((previewWidth != 0) && (previewHeight != 0)) {
-        widthScaleFactor = (float) canvas.getWidth() / (float) previewWidth;
-        heightScaleFactor = (float) canvas.getHeight() / (float) previewHeight;
+        float widthScaleFactor = (float) getWidth() / (float) previewWidth;
+        float heightScaleFactor = (float) getHeight() / (float) previewHeight;
       }
 
       for (Graphic graphic : graphics) {

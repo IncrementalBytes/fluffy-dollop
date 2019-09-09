@@ -1,3 +1,18 @@
+/*
+ * Copyright 2019 Ryan Ward
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package net.frostedbytes.android.comiccollector.common;
 
 import android.Manifest;
@@ -68,17 +83,6 @@ public class CameraSource {
 
   private Size previewSize;
 
-  // These values may be requested by the caller.  Due to hardware limitations, we may need to
-  // select close, but not exactly the same values for these.
-  private final float requestedFps = 20.0f;
-  private final int requestedPreviewWidth = 480;
-  private final int requestedPreviewHeight = 360;
-  private final boolean requestedAutoFocus = true;
-
-  // These instances need to be held onto to avoid GC of their underlying resources.  Even though
-  // these aren't used outside of the method that creates them, they still must have hard
-  // references maintained to them.
-  private SurfaceTexture dummySurfaceTexture;
   private final GraphicOverlay graphicOverlay;
 
   // True if a SurfaceTexture is being used for the preview, false if a SurfaceHolder is being
@@ -155,7 +159,10 @@ public class CameraSource {
     }
 
     camera = createCamera();
-    dummySurfaceTexture = new SurfaceTexture(DUMMY_TEXTURE_NAME);
+    // These instances need to be held onto to avoid GC of their underlying resources.  Even though
+    // these aren't used outside of the method that creates them, they still must have hard
+    // references maintained to them.
+    SurfaceTexture dummySurfaceTexture = new SurfaceTexture(DUMMY_TEXTURE_NAME);
     camera.setPreviewTexture(dummySurfaceTexture);
     usingSurfaceTexture = true;
     camera.startPreview();
@@ -268,6 +275,8 @@ public class CameraSource {
     }
     Camera camera = Camera.open(requestedCameraId);
 
+    int requestedPreviewHeight = 360;
+    int requestedPreviewWidth = 480;
     SizePair sizePair = selectSizePair(camera, requestedPreviewWidth, requestedPreviewHeight);
     if (sizePair == null) {
       throw new IOException("Could not find suitable preview size.");
@@ -275,6 +284,9 @@ public class CameraSource {
     Size pictureSize = sizePair.pictureSize();
     previewSize = sizePair.previewSize();
 
+    // These values may be requested by the caller.  Due to hardware limitations, we may need to
+    // select close, but not exactly the same values for these.
+    float requestedFps = 20.0f;
     int[] previewFpsRange = selectPreviewFpsRange(camera, requestedFps);
     if (previewFpsRange == null) {
       throw new IOException("Could not find suitable preview frames per second range.");
@@ -293,6 +305,7 @@ public class CameraSource {
 
     setRotation(camera, parameters, requestedCameraId);
 
+    boolean requestedAutoFocus = true;
     if (requestedAutoFocus) {
       if (parameters
         .getSupportedFocusModes()
