@@ -4,15 +4,13 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import java.io.IOException;
 import net.frostedbytes.android.comiccollector.BaseActivity;
 import net.frostedbytes.android.comiccollector.R;
-import net.frostedbytes.android.comiccollector.common.BarcodeScanningProcessor;
+import net.frostedbytes.android.comiccollector.common.BarcodeProcessor;
 import net.frostedbytes.android.comiccollector.common.CameraSource;
 import net.frostedbytes.android.comiccollector.common.CameraSourcePreview;
 import net.frostedbytes.android.comiccollector.common.GraphicOverlay;
@@ -78,37 +76,20 @@ public class CameraSourceFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState);
 
     mPreview = view.findViewById(R.id.camera_preview);
-    if (mPreview == null) {
-      LogUtils.debug(TAG, "preview is null");
-    }
-
     mGraphicOverlay = view.findViewById(R.id.camera_graphic_overlay);
-    if (mGraphicOverlay == null) {
-      LogUtils.debug(TAG, "graphicOverlay is null");
-    } else {
-      mGraphicOverlay.setOnClickListener(new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-
-        }
-      });
-    }
 
     if (mCameraSource == null) {
       mCameraSource = new CameraSource(getActivity(), mGraphicOverlay);
     }
 
-    mCameraSource.setMachineLearningFrameProcessor(new BarcodeScanningProcessor(getContext()));
+    mCameraSource.setMachineLearningFrameProcessor(new BarcodeProcessor(getContext()));
     if (mCameraSource != null) {
       try {
-        if (mPreview == null) {
-          LogUtils.debug(TAG, "resume: Preview is null");
+        if (mPreview != null && mGraphicOverlay != null) {
+          mPreview.start(mCameraSource, mGraphicOverlay);
+        } else {
+          LogUtils.error(TAG, "ImagePreview and/or GraphicsOverlay are not initialized.");
         }
-        if (mGraphicOverlay == null) {
-          LogUtils.debug(TAG, "resume: graphOverlay is null");
-        }
-
-        mPreview.start(mCameraSource, mGraphicOverlay);
       } catch (IOException e) {
         LogUtils.error(TAG, "Unable to start camera source.", e);
         mCameraSource.release();

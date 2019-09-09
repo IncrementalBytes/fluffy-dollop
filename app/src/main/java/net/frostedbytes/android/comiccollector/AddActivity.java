@@ -45,7 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import net.frostedbytes.android.comiccollector.common.BarcodeScanningProcessor;
+import net.frostedbytes.android.comiccollector.common.BarcodeProcessor;
 import net.frostedbytes.android.comiccollector.common.ComicCollectorException;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.PathUtils;
@@ -63,7 +63,7 @@ import net.frostedbytes.android.comiccollector.models.User;
 import net.frostedbytes.android.comiccollector.viewmodel.CollectorViewModel;
 
 public class AddActivity extends BaseActivity implements
-  BarcodeScanningProcessor.OnBarcodeScanningListener,
+  BarcodeProcessor.OnBarcodeProcessorListener,
   ComicSeriesFragment.OnComicSeriesListener,
   ManualSearchFragment.OnManualSearchListener,
   TutorialFragment.OnTutorialListener {

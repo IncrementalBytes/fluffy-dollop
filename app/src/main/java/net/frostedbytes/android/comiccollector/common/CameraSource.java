@@ -97,8 +97,7 @@ public class CameraSource {
   private final FrameProcessingRunnable processingRunnable;
 
   private final Object processorLock = new Object();
-  // @GuardedBy("processorLock")
-  private VisionImageProcessor frameProcessor;
+  private BarcodeProcessor frameProcessor;
 
   /**
    * Map to convert between a byte array, received from the camera, and its associated byte buffer.
@@ -112,6 +111,7 @@ public class CameraSource {
   private final Map<byte[], ByteBuffer> bytesToByteBuffer = new IdentityHashMap<>();
 
   public CameraSource(Activity activity, GraphicOverlay overlay) {
+
     this.activity = activity;
     graphicOverlay = overlay;
     graphicOverlay.clear();
@@ -570,12 +570,14 @@ public class CameraSource {
     }
   }
 
-  public void setMachineLearningFrameProcessor(VisionImageProcessor processor) {
+  public void setMachineLearningFrameProcessor(BarcodeProcessor processor) {
+
     synchronized (processorLock) {
       cleanScreen();
       if (frameProcessor != null) {
         frameProcessor.stop();
       }
+
       frameProcessor = processor;
     }
   }
@@ -709,7 +711,7 @@ public class CameraSource {
               graphicOverlay);
           }
         } catch (Throwable t) {
-          Log.e(TAG, "Exception thrown from receiver.", t);
+          LogUtils.error(TAG, "Exception thrown from receiver: %s", t.getMessage());
         } finally {
           camera.addCallbackBuffer(data.array());
         }
@@ -717,8 +719,11 @@ public class CameraSource {
     }
   }
 
-  /** Cleans up graphicOverlay and child classes can do their cleanups as well . */
+  /**
+   *  Cleans up graphicOverlay and child classes can do their cleanups as well .
+   */
   private void cleanScreen() {
+
     graphicOverlay.clear();
   }
 }
