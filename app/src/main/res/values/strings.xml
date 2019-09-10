@@ -81,7 +81,7 @@
   <string name="menu_sync">Sync</string>
   <string name="err_import_task">Unable to import library at this time, please try again later.</string>
   <string name="sync_import_explained">Download your library stored in the cloud.</string>
-  <string name="sync_export_explained">Save your current library to the cloud temporarily. Consider this option if you are upgrading your device and don\'t want to lose your library.</string>
+  <string name="sync_export_explained">Upload your library to the cloud temporarily.</string>
   <string name="sync_export_warning">WARNING! Uploaded library may be deleted after 30 days.</string>
   <string name="sync_import_warning">WARNING! Importing library will delete local library.</string>
   <string name="err_storage_task_unexpected">Could not complete storage task successfully, please try again later.</string>

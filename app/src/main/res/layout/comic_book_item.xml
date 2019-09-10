@@ -16,10 +16,10 @@
     android:layout_margin="@dimen/default_view_margin"
     android:ellipsize="end"
     android:text="@string/placeholder"
-    android:textSize="18sp"
+    android:textSize="14sp"
+    app:layout_constraintEnd_toStartOf="@id/comic_item_image_delete"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintEnd_toStartOf="@id/comic_item_image_delete"/>
+    app:layout_constraintTop_toTopOf="parent" />
 
   <TextView
     android:id="@+id/comic_item_text_series"

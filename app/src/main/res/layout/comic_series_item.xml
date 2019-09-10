@@ -28,12 +28,13 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
+    android:background="@color/background"
     android:text="@string/placeholder"
     android:textColor="@color/primaryDarkColor"
     android:textSize="12sp"
     app:layout_constraintBottom_toBottomOf="@id/series_item_text_series"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="@id/series_item_text_series"/>
+    app:layout_constraintTop_toTopOf="@id/series_item_text_series" />
 
   <TextView
     android:id="@+id/series_item_text_published"

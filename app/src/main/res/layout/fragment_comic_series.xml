@@ -27,9 +27,9 @@
     android:enabled="false"
     android:inputType="number|textNoSuggestions"
     android:text="@string/placeholder"
-    android:textColor="@color/primaryLightColor"
+    android:textColor="@color/primaryColor"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="parent"/>
+    app:layout_constraintTop_toTopOf="parent" />
 
   <TextView
     android:id="@+id/comic_series_text_publisher"
@@ -53,9 +53,9 @@
     android:enabled="false"
     android:inputType="textPersonName|textNoSuggestions"
     android:text="@string/placeholder"
-    android:textColor="@color/primaryLightColor"
+    android:textColor="@color/primaryColor"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_code"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_series_edit_code" />
 
   <TextView
     android:id="@+id/comic_series_text_name"
@@ -77,10 +77,10 @@
     android:autofillHints=""
     android:ems="10"
     android:inputType="textPersonName|textNoSuggestions"
-    android:textColor="@color/primaryLightColor"
+    android:textColor="@color/primaryDarkColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_series_text_name"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_series_text_name" />
   <TextView
     android:id="@+id/comic_series_text_name_hint"
     android:textStyle="italic"
@@ -114,9 +114,9 @@
     android:autofillHints=""
     android:ems="3"
     android:inputType="number|textNoSuggestions"
-    android:textColor="@color/primaryLightColor"
+    android:textColor="@color/primaryDarkColor"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_series_text_name_hint"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_series_text_name_hint" />
 
   <Button
     android:id="@+id/comic_series_button_continue"

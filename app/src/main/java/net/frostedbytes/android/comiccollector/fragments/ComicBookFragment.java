@@ -201,6 +201,8 @@ public class ComicBookFragment extends Fragment {
         }
       });
     }
+
+    validateAll();
   }
 
   private void validateAll() {

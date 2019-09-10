@@ -197,12 +197,7 @@ public class MainActivity extends BaseActivity implements
     LogUtils.debug(TAG, "++onOptionsItemSelected(%s)", item.getTitle());
     switch (item.getItemId()) {
       case R.id.action_home:
-        if (!mUser.Id.isEmpty() && !mUser.Id.equals(BaseActivity.DEFAULT_USER_ID)) {
-          checkForWritePermission();
-        } else {
-          showDismissableSnackbar(getString(R.string.err_unknown_user));
-        }
-
+        replaceFragment(ComicSeriesListFragment.newInstance());
         break;
       case R.id.action_add:
         addComicBook();
@@ -529,7 +524,16 @@ public class MainActivity extends BaseActivity implements
             Gson gson = new Gson();
             Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
             List<ComicBook> comics = gson.fromJson(reader, collectionType);
-            mCollectorViewModel.insertAll(comics);
+            List<ComicBook> updatedComics = new ArrayList<>();
+            for (ComicBook comicBook : comics) {
+              ComicBook updated = new ComicBook(comicBook);
+              updated.parseProductCode(comicBook.Id);
+              if (updated.isValid()) {
+                updatedComics.add(updated);
+              }
+            }
+
+            mCollectorViewModel.insertAll(updatedComics);
             showDismissableSnackbar(getString(R.string.status_sync_import_success));
           } catch (Exception e) {
             LogUtils.warn(TAG, "Failed reading local library: %s", e.getMessage());

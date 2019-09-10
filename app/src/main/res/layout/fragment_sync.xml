@@ -7,112 +7,119 @@
   android:layout_height="match_parent"
   android:background="@color/background">
 
+
   <androidx.cardview.widget.CardView
     android:id="@+id/sync_card_export"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
+    android:layout_height="wrap_content"
     android:layout_marginTop="@dimen/default_view_margin"
     android:layout_marginStart="@dimen/default_view_margin"
     android:layout_marginEnd="@dimen/default_view_margin"
     android:clickable="true"
     android:focusable="true"
-    app:cardBackgroundColor="@color/primaryLightColor"
-    app:layout_constraintBottom_toTopOf="@id/sync_card_import"
+    app:cardBackgroundColor="@color/primaryDarkColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    card_view:cardCornerRadius="14dp">
+    card_view:cardCornerRadius="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent">
-      <ImageView
-        android:id="@+id/sync_image_export"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/default_view_margin"
-        android:layout_gravity="center"
-        android:background="@color/primaryLightColor"
-        android:contentDescription="@string/title_export"
-        app:srcCompat="@drawable/ic_export_dark"
-        app:layout_constraintTop_toTopOf="parent"/>
       <TextView
         android:id="@+id/sync_text_export_explained"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
+        android:layout_marginStart="@dimen/default_view_margin"
         android:elevation="2dp"
         android:text="@string/sync_export_explained"
-        android:textAlignment="center"
-        android:textColor="@color/secondaryTextColor"
+        android:textColor="@color/primaryTextColor"
         android:textSize="18sp"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintBottom_toTopOf="@id/sync_image_export"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
       <TextView
         android:id="@+id/sync_text_export_warning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_view_margin"
-        android:layout_gravity="bottom"
-        android:elevation="2dp"
+        android:layout_marginStart="@dimen/default_view_margin"
+        android:layout_marginEnd="@dimen/default_view_margin"
         android:text="@string/sync_export_warning"
-        android:textAlignment="center"
         android:textColor="@color/warningTextColor"
         android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:elevation="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sync_image_export"/>
+      <ImageView
+        android:id="@+id/sync_image_export"
+        android:layout_width="@dimen/image_width_thumbnail"
+        android:layout_height="@dimen/image_height_thumbnail"
+        android:layout_marginEnd="@dimen/default_view_margin"
+        android:background="@color/primaryDarkColor"
+        android:contentDescription="@string/title_export"
+        app:srcCompat="@drawable/ic_export_dark"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
   </androidx.cardview.widget.CardView>
 
   <androidx.cardview.widget.CardView
     android:id="@+id/sync_card_import"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
+    android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:clickable="true"
     android:focusable="true"
-    app:cardBackgroundColor="@color/primaryLightColor"
-    app:cardElevation="2dp"
-    app:layout_constraintBottom_toBottomOf="parent"
+    app:cardBackgroundColor="@color/primaryColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/sync_card_export"
-    card_view:cardCornerRadius="14dp">
+    card_view:cardCornerRadius="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="match_parent"
       android:layout_height="match_parent">
-    <ImageView
-      android:id="@+id/sync_image_import"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:layout_margin="@dimen/default_view_margin"
-      android:layout_gravity="center"
-      android:background="@color/primaryLightColor"
-      android:contentDescription="@string/title_import"
-      app:srcCompat="@drawable/ic_import_dark"
-      app:layout_constraintTop_toTopOf="parent"/>
-    <TextView
-      android:id="@+id/sync_text_import_explained"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_margin="@dimen/default_view_margin"
-      android:elevation="2dp"
-      android:text="@string/sync_import_explained"
-      android:textAlignment="center"
-      android:textColor="@color/secondaryTextColor"
-      android:textSize="18sp"
-      app:layout_constraintTop_toTopOf="parent"/>
-    <TextView
-      android:id="@+id/sync_text_import_warning"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_margin="@dimen/default_view_margin"
-      android:layout_gravity="bottom"
-      android:elevation="2dp"
-      android:text="@string/sync_import_warning"
-      android:textAlignment="center"
-      android:textColor="@color/warningTextColor"
-      android:textSize="14sp"
-      app:layout_constraintBottom_toBottomOf="parent"/>
+      <TextView
+        android:id="@+id/sync_text_import_explained"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_view_margin"
+        android:layout_marginEnd="@dimen/default_view_margin"
+        android:text="@string/sync_import_explained"
+        android:textColor="@color/primaryTextColor"
+        android:textSize="18sp"
+        android:elevation="2dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/sync_image_import"/>
+      <TextView
+        android:id="@+id/sync_text_import_warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_view_margin"
+        android:layout_marginEnd="@dimen/default_view_margin"
+        android:text="@string/sync_import_warning"
+        android:textColor="@color/warningTextColor"
+        android:textSize="14sp"
+        android:elevation="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sync_image_import"/>
+      <ImageView
+        android:id="@+id/sync_image_import"
+        android:layout_width="@dimen/image_width_thumbnail"
+        android:layout_height="@dimen/image_height_thumbnail"
+        android:layout_marginEnd="@dimen/default_view_margin"
+        android:layout_gravity="center"
+        android:background="@color/primaryColor"
+        android:contentDescription="@string/title_import"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_import_dark"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
   </androidx.cardview.widget.CardView>
 
