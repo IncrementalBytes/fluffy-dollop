@@ -25,6 +25,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -65,25 +66,45 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
   private static volatile File sData;
   private static volatile File sLibrary;
 
-  public static CollectorRoomDatabase getDatabase(final Context context) {
+  static CollectorRoomDatabase getDatabase(final Context context) {
 
     if (sInstance == null) {
       synchronized (CollectorRoomDatabase.class) {
         if (sInstance == null) {
           sLibrary = new File(context.getFilesDir(), BaseActivity.DEFAULT_LIBRARY_FILE);
           sData = new File(context.getCacheDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+
+          File remoteData = new File(context.getFilesDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
           try {
-            try (InputStream inputStream = context.getAssets().open(BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE)) {
-              try (FileOutputStream outputStream = new FileOutputStream(sData)) {
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = inputStream.read(buf)) > 0) {
-                  outputStream.write(buf, 0, len);
+            if (!remoteData.exists()) {
+              LogUtils.debug(TAG, "Using %s from assets.", BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+              try (InputStream inputStream = context.getAssets().open(BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE)) {
+                try (FileOutputStream outputStream = new FileOutputStream(sData)) {
+                  byte[] buf = new byte[1024];
+                  int len;
+                  while ((len = inputStream.read(buf)) > 0) {
+                    outputStream.write(buf, 0, len);
+                  }
+                }
+              }
+            } else {
+              LogUtils.debug(TAG, "Using %s from remote.", BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+              try (InputStream inputStream = new FileInputStream(remoteData)) {
+                try (FileOutputStream outputStream = new FileOutputStream(sData)) {
+                  byte[] buf = new byte[1024];
+                  int len;
+                  while ((len = inputStream.read(buf)) > 0) {
+                    outputStream.write(buf, 0, len);
+                  }
                 }
               }
             }
           } catch (IOException ioe) {
-            LogUtils.warn(TAG, "Could not get assets: %s", ioe.getMessage());
+            LogUtils.warn(TAG, "Could not get assets.", ioe);
+          } finally {
+            if (remoteData.exists() && !remoteData.delete()) {
+              LogUtils.warn(TAG, "Could not remove local copy of remote %s", BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+            }
           }
 
           sInstance = Room.databaseBuilder(context.getApplicationContext(), CollectorRoomDatabase.class, BaseActivity.DATABASE_NAME)
@@ -127,8 +148,8 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
     @Override
     protected Void doInBackground(final Void... params) {
 
-      LogUtils.debug(TAG, "Loading %s", mData.getAbsolutePath());
       if (mData.exists() && mData.canRead()) {
+        LogUtils.debug(TAG, "Loading %s", mData.getAbsolutePath());
         RemoteData remoteData = null;
         try (Reader reader = new FileReader(mData.getAbsolutePath())) {
           Gson gson = new Gson();
@@ -150,7 +171,7 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
               message = String.format(Locale.US, "%s %d...", message, ++count);
             }
           } catch (Exception e) {
-            LogUtils.warn(TAG, "Could not process publisher data: %s", e.getMessage());
+            LogUtils.warn(TAG, "Could not process publisher data.", e);
           } finally {
             LogUtils.debug(TAG, message);
           }
@@ -163,7 +184,7 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
               message = String.format(Locale.US, "%s %d...", message, ++count);
             }
           } catch (Exception e) {
-            LogUtils.warn(TAG, "Could not process series data: %s", e.getMessage());
+            LogUtils.warn(TAG, "Could not process series data.", e);
           } finally {
             LogUtils.debug(TAG, message);
           }
@@ -218,7 +239,7 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
             }
           }
         } catch (Exception e) {
-          LogUtils.error(TAG, "Failed reading support data: %s", e.getMessage());
+          LogUtils.error(TAG, "Failed reading support data.", e);
         }
 
         if (mLibrary.delete()) {

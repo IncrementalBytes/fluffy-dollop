@@ -22,6 +22,7 @@ import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import com.google.firebase.firestore.Exclude;
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,25 +41,30 @@ public class ComicSeries {
   @NonNull
   @ColumnInfo(name = "id")
   @SerializedName("id")
+  @Exclude
   public String Id;
 
   @Ignore
   public boolean IsFlagged;
 
   @Ignore
+  @Exclude
   public List<String> OwnedIssues;
 
   @Ignore
+  @Exclude
   public String Published;
 
   @NonNull
   @ColumnInfo(name = "publisher_id")
   @SerializedName("publisher_id")
+  @Exclude
   public String PublisherId;
 
   @NonNull
   @ColumnInfo(name = "series_id")
   @SerializedName("series_id")
+  @Exclude
   public String SeriesId;
 
   @Ignore
@@ -122,6 +128,7 @@ public class ComicSeries {
   /*
     Public Method(s)
    */
+  @Exclude
   public boolean isValid() {
 
     return !Id.equals(BaseActivity.DEFAULT_PRODUCT_CODE) &&

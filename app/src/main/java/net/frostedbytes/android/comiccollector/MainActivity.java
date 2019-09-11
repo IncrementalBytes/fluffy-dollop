@@ -59,6 +59,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import net.frostedbytes.android.comiccollector.common.ComicCollectorException;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 import net.frostedbytes.android.comiccollector.common.PathUtils;
 import net.frostedbytes.android.comiccollector.db.entity.ComicBook;
@@ -165,6 +166,7 @@ public class MainActivity extends BaseActivity implements
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     mUser.IsGeek = preferences.getBoolean(UserPreferenceFragment.IS_GEEK_PREFERENCE, false);
     mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
+    mUser.UseImageCapture = preferences.getBoolean(UserPreferenceFragment.USE_IMAGE_PREVIEW_PREFERENCE, false);
     if (User.isValid(mUser)) { // get most recent publisher and series data
       mCollectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
       mRemotePath = PathUtils.combine(User.ROOT, mUser.Id, BaseActivity.DEFAULT_LIBRARY_FILE);
@@ -268,8 +270,16 @@ public class MainActivity extends BaseActivity implements
     LogUtils.debug(TAG, "++onActivityResult(%d, %d, Intent)", requestCode, resultCode);
     if (requestCode == BaseActivity.REQUEST_COMIC_ADD) { // pick up any change to tutorial
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+      if (preferences.contains(UserPreferenceFragment.IS_GEEK_PREFERENCE)) {
+        mUser.IsGeek = preferences.getBoolean(UserPreferenceFragment.IS_GEEK_PREFERENCE, false);
+      }
+
       if (preferences.contains(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE)) {
         mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
+      }
+
+      if (preferences.contains(UserPreferenceFragment.USE_IMAGE_PREVIEW_PREFERENCE)) {
+        mUser.UseImageCapture = preferences.getBoolean(UserPreferenceFragment.USE_IMAGE_PREVIEW_PREFERENCE, false);
       }
 
       String message = null;
@@ -400,7 +410,7 @@ public class MainActivity extends BaseActivity implements
   }
 
   @Override
-  public void onPreferenceChanged() {
+  public void onPreferenceChanged() throws ComicCollectorException {
 
     LogUtils.debug(TAG, "++onPreferenceChanged()");
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -412,8 +422,14 @@ public class MainActivity extends BaseActivity implements
       mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
     }
 
-    if (preferences.contains(UserPreferenceFragment.USE_IMAGE_PREVIEW)) {
-      mUser.UseImageCapture = preferences.getBoolean(UserPreferenceFragment.USE_IMAGE_PREVIEW, false);
+    if (preferences.contains(UserPreferenceFragment.USE_IMAGE_PREVIEW_PREFERENCE)) {
+      mUser.UseImageCapture = preferences.getBoolean(UserPreferenceFragment.USE_IMAGE_PREVIEW_PREFERENCE, false);
+    }
+
+    if (preferences.contains(UserPreferenceFragment.FORCE_EXCPETION_PREFERENCE)) {
+      if (BuildConfig.DEBUG) {
+        throw new ComicCollectorException("Testing the exceptional expection-ness");
+      }
     }
   }
 
@@ -483,12 +499,12 @@ public class MainActivity extends BaseActivity implements
             }
           } else {
             if (task.getException() != null) {
-              LogUtils.error(TAG, "Could not export library: %s", task.getException().getMessage());
+              LogUtils.error(TAG, "Could not export library.", task.getException());
             }
           }
         });
       } catch (FileNotFoundException fnfe) {
-        LogUtils.warn(TAG, fnfe.getMessage());
+        LogUtils.warn(TAG, "Could not export library.", fnfe);
         Crashlytics.logException(fnfe);
       } finally {
         File tempFile = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
@@ -536,7 +552,7 @@ public class MainActivity extends BaseActivity implements
             mCollectorViewModel.insertAll(updatedComics);
             showDismissableSnackbar(getString(R.string.status_sync_import_success));
           } catch (Exception e) {
-            LogUtils.warn(TAG, "Failed reading local library: %s", e.getMessage());
+            LogUtils.warn(TAG, "Failed reading local library.", e);
             Crashlytics.logException(e);
           } finally {
             if (file.delete()) { // remove temporary file
@@ -554,7 +570,7 @@ public class MainActivity extends BaseActivity implements
           if (exception.getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
             showDismissableSnackbar(getString(R.string.err_remote_library_not_found));
           } else {
-            LogUtils.error(TAG, "Could not import library: %s", task.getException().getMessage());
+            LogUtils.error(TAG, "Could not import library.", task.getException());
             showDismissableSnackbar(getString(R.string.err_import_task));
           }
         } else {

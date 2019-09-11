@@ -35,7 +35,9 @@ class BitmapUtils {
 
   private static final String TAG = BaseActivity.BASE_TAG + "BitmapUtils";
 
-  // Convert NV21 format byte buffer to bitmap.
+  /**
+   * Convert NV21 format byte buffer to bitmap.
+   */
   @Nullable
   static Bitmap getBitmap(ByteBuffer data, FrameMetadata metadata) {
 
@@ -50,13 +52,15 @@ class BitmapUtils {
       stream.close();
       return rotateBitmap(bmp, metadata.getRotation(), metadata.getCameraFacing());
     } catch (Exception e) {
-      LogUtils.error(TAG, "Error: %s", e.getMessage());
+      LogUtils.error(TAG, "Error in get bitmap.", e);
     }
 
     return null;
   }
 
-  // Rotates a bitmap if it is converted from a bytebuffer.
+  /**
+   * Rotates a bitmap if it is converted from a bytebuffer.
+   */
   private static Bitmap rotateBitmap(Bitmap bitmap, int rotation, int facing) {
 
     Matrix matrix = new Matrix();
@@ -75,7 +79,7 @@ class BitmapUtils {
         break;
     }
 
-    // Rotate the image back to straight.}
+    // Rotate the image back to straight.
     matrix.postRotate(rotationDegree);
     if (facing == CameraInfo.CAMERA_FACING_BACK) {
       return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);

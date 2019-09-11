@@ -16,4 +16,9 @@
     android:key="preference_image_preview"
     android:summary="Use realtime image capture instead of photo for bar code."
     android:title="Image Capture (BETA)"/>
+  <SwitchPreference
+    android:defaultValue="false"
+    android:key="preference_force_exception"
+    android:summary="Force exception (Debug test)"
+    android:title="Force Exception (DEBUG)"/>
 </PreferenceScreen>

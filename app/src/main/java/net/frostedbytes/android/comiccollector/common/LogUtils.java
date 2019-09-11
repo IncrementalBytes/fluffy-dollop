@@ -32,6 +32,15 @@ public class LogUtils {
     debug(tag, "%s", message);
   }
 
+  public static void debug(final String tag, String message, Exception e) {
+
+    if (e != null) {
+      Log.d(tag, message, e);
+    } else {
+      Log.d(tag, message);
+    }
+  }
+
   public static void debug(final String tag, String messageFormat, Object... args) {
 
     if (BuildConfig.DEBUG) {
@@ -46,6 +55,22 @@ public class LogUtils {
     error(tag, "%s", message);
   }
 
+  public static void error(final String tag, String message, Exception e) {
+
+    if (BuildConfig.DEBUG) {
+      if (e != null) {
+        Log.e(tag, message, e);
+      } else {
+        Log.e(tag, message);
+      }
+    } else {
+      Crashlytics.log(Log.ERROR, tag, message);
+      if (e != null) {
+        Crashlytics.logException(e);
+      }
+    }
+  }
+
   public static void error(final String tag, String messageFormat, Object... args) {
 
     if (BuildConfig.DEBUG) {
@@ -58,6 +83,22 @@ public class LogUtils {
   public static void warn(final String tag, String message) {
 
     warn(tag, "%s", message);
+  }
+
+  public static void warn(final String tag, String message, Exception e) {
+
+    if (BuildConfig.DEBUG) {
+      if (e != null) {
+        Log.w(tag, message, e);
+      } else {
+        Log.w(tag, message);
+      }
+    } else {
+      Crashlytics.log(Log.WARN, tag, message);
+      if (e != null) {
+        Crashlytics.logException(e);
+      }
+    }
   }
 
   public static void warn(final String tag, String messageFormat, Object... args) {

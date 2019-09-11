@@ -17,6 +17,7 @@ package net.frostedbytes.android.comiccollector;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.google.android.material.snackbar.Snackbar;
 import android.view.View;
@@ -35,11 +36,14 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import com.google.firebase.storage.FirebaseStorage;
 import io.fabric.sdk.android.Fabric;
+import java.io.File;
 import net.frostedbytes.android.comiccollector.common.LogUtils;
 
 import java.util.Calendar;
 import java.util.Locale;
+import net.frostedbytes.android.comiccollector.common.PathUtils;
 
 public class SignInActivity extends BaseActivity {
 
@@ -50,7 +54,9 @@ public class SignInActivity extends BaseActivity {
   private FirebaseAnalytics mFirebaseAnalytics;
 
   private ProgressBar mProgressBar;
+  private SignInButton mSignInWithGoogleButton;
   private Snackbar mSnackbar;
+  private TextView mSignInText;
 
   private GoogleSignInAccount mAccount;
   private FirebaseAuth mAuth;
@@ -71,11 +77,14 @@ public class SignInActivity extends BaseActivity {
 
     setContentView(R.layout.activity_sign_in);
 
-    SignInButton signInWithGoogleButton = findViewById(R.id.sign_in_button_google);
-    if (signInWithGoogleButton != null) {
-      signInWithGoogleButton.setOnClickListener(v -> {
+    mSignInText = findViewById(R.id.sign_in_text_sign_in);
+    mSignInWithGoogleButton = findViewById(R.id.sign_in_button_google);
+    if (mSignInWithGoogleButton != null) {
+      mSignInWithGoogleButton.setOnClickListener(v -> {
 
         if (v.getId() == R.id.sign_in_button_google) {
+          mProgressBar.setVisibility(View.VISIBLE);
+          mProgressBar.setIndeterminate(true);
           signInWithGoogle();
         }
       });
@@ -84,9 +93,7 @@ public class SignInActivity extends BaseActivity {
     mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
     mProgressBar = findViewById(R.id.sign_in_progress);
-    if (mProgressBar != null) {
-      mProgressBar.setVisibility(View.GONE);
-    }
+    mProgressBar.setVisibility(View.GONE);
 
     mAuth = FirebaseAuth.getInstance();
     mAccount = GoogleSignIn.getLastSignedInAccount(this);
@@ -122,6 +129,10 @@ public class SignInActivity extends BaseActivity {
 
     LogUtils.debug(TAG, "++onStart()");
     if (mAuth.getCurrentUser() != null && mAccount != null) {
+      mSignInText.setText(getString(R.string.signing_in));
+      mSignInWithGoogleButton.setVisibility(View.GONE);
+      mProgressBar.setVisibility(View.VISIBLE);
+      mProgressBar.setIndeterminate(true);
       onAuthenticateSuccess();
     }
   }
@@ -129,7 +140,6 @@ public class SignInActivity extends BaseActivity {
   /*
       View Override(s)
    */
-
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
@@ -174,12 +184,24 @@ public class SignInActivity extends BaseActivity {
       bundle.putString(FirebaseAnalytics.Param.METHOD, "onAuthenticateSuccess");
       mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle);
 
-      Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-      intent.putExtra(BaseActivity.ARG_FIREBASE_USER_ID, mAuth.getCurrentUser().getUid());
-      intent.putExtra(BaseActivity.ARG_USER_NAME, mAuth.getCurrentUser().getDisplayName());
-      intent.putExtra(BaseActivity.ARG_EMAIL, mAuth.getCurrentUser().getEmail());
-      startActivity(intent);
-      finish();
+      File localFile = new File(getFilesDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+      String appDataPath = PathUtils.combine(BaseActivity.REMOTE_PATH, BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+      FirebaseStorage.getInstance().getReference().child(appDataPath).getFile(localFile).addOnCompleteListener(task -> {
+
+        if (!task.isSuccessful()) {
+          LogUtils.warn(
+            TAG,
+            String.format(Locale.US,"Failed to copy %s", appDataPath),
+            task.getException());
+        }
+
+        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+        intent.putExtra(BaseActivity.ARG_FIREBASE_USER_ID, mAuth.getCurrentUser().getUid());
+        intent.putExtra(BaseActivity.ARG_USER_NAME, mAuth.getCurrentUser().getDisplayName());
+        intent.putExtra(BaseActivity.ARG_EMAIL, mAuth.getCurrentUser().getEmail());
+        startActivity(intent);
+        finish();
+      });
     } else {
       String message = "Authentication did not return expected account information; please try again.";
       showErrorInSnackBar(message);
@@ -189,11 +211,6 @@ public class SignInActivity extends BaseActivity {
   private void firebaseAuthenticateWithGoogle(GoogleSignInAccount acct) {
 
     LogUtils.debug(TAG, "++firebaseAuthWithGoogle(%s)", acct.getId());
-    if (mProgressBar != null) {
-      mProgressBar.setVisibility(View.VISIBLE);
-      mProgressBar.setIndeterminate(true);
-    }
-
     AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
     mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
 
@@ -207,16 +224,16 @@ public class SignInActivity extends BaseActivity {
         String message = "Authenticating with Google account failed.";
         showErrorInSnackBar(message);
       }
-
-      if (mProgressBar != null) {
-        mProgressBar.setIndeterminate(false);
-      }
     });
   }
 
   private void showErrorInSnackBar(String message) {
 
     LogUtils.error(TAG, message);
+    if (mProgressBar != null) {
+      mProgressBar.setIndeterminate(false);
+    }
+
     mSnackbar = Snackbar.make(
       findViewById(R.id.activity_sign_in),
       message,
@@ -232,4 +249,3 @@ public class SignInActivity extends BaseActivity {
     startActivityForResult(signInIntent, RC_SIGN_IN);
   }
 }
-

@@ -115,7 +115,7 @@ public class CameraSourcePreview extends ViewGroup {
       try {
         startIfReady();
       } catch (IOException e) {
-        LogUtils.error(TAG, "Could not start camera source: %s", e.getMessage());
+        LogUtils.error(TAG, "Could not start camera source.", e);
       }
     }
 
@@ -170,7 +170,7 @@ public class CameraSourcePreview extends ViewGroup {
     try {
       startIfReady();
     } catch (IOException e) {
-      LogUtils.error(TAG, "Could not start camera source: %s", e.getMessage());
+      LogUtils.error(TAG, "Could not start camera source.", e);
     }
   }
 

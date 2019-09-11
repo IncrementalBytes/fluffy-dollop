@@ -108,10 +108,13 @@
   <string name="hint_example">Example:</string>
   <string name="title_camera_source">Scanning for bar code…</string>
   <string name="retry">Retry</string>
+  <string name="sign_in_with">Sign-in with</string>
+  <string name="beta">BETA</string>
+  <string name="signing_in">Signing in…</string>
   <string-array name="debug_scenario_array">
     <item>scenario_barcode_not_found.jpg</item>
-    <item>scenario_existing_comic.jpg</item>
     <item>scenario_new_comic.jpg</item>
+    <item>scenario_unknown_publisher.jpg</item>
     <item>scenario_unknown_series.jpg</item>
   </string-array>
 </resources>

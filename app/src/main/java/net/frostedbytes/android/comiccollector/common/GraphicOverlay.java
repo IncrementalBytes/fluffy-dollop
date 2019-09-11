@@ -20,8 +20,6 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.google.android.gms.vision.CameraSource;
-
 import java.util.ArrayList;
 import java.util.List;
 

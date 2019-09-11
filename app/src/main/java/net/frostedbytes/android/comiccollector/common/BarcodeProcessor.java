@@ -86,7 +86,7 @@ public class BarcodeProcessor {
     try {
       mDetector.close();
     } catch (IOException e) {
-      LogUtils.error(TAG, "Exception thrown while trying to close Barcode Detector: %s", e.getMessage());
+      LogUtils.error(TAG, "Exception thrown while trying to close Barcode Detector.", e);
     }
   }
 
@@ -117,7 +117,7 @@ public class BarcodeProcessor {
         graphicOverlay.postInvalidate();
         processLatestImage(graphicOverlay);
       })
-      .addOnFailureListener(e -> LogUtils.error(TAG, "Barcode detection failed: %s", e.getMessage()));
+      .addOnFailureListener(e -> LogUtils.error(TAG, "Barcode detection failed.", e));
   }
 
   private void processImage(ByteBuffer data, final FrameMetadata frameMetadata, final GraphicOverlay graphicOverlay) {
