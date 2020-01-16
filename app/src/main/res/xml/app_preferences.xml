@@ -21,4 +21,10 @@
     android:key="preference_force_exception"
     android:summary="Force exception (Debug test)"
     android:title="Force Exception (DEBUG)"/>
+  <EditTextPreference
+    android:key="preference_app_version"
+    android:singleLine="true"
+    android:title="App Version"
+    android:summary=""
+    android:enabled="false"/>
 </PreferenceScreen>

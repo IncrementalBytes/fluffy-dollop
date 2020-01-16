@@ -5,18 +5,29 @@
   android:layout_height="match_parent"
   xmlns:app="http://schemas.android.com/apk/res-auto">
 
-  <net.frostedbytes.android.comiccollector.common.CameraSourcePreview
+  <net.whollynugatory.android.comiccollector.common.CameraSourcePreview
     android:id="@+id/camera_preview"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
 
-    <net.frostedbytes.android.comiccollector.common.GraphicOverlay
+    <net.whollynugatory.android.comiccollector.common.GraphicOverlay
       android:id="@+id/camera_graphic_overlay"
       android:layout_width="match_parent"
       android:layout_height="match_parent"/>
 
-  </net.frostedbytes.android.comiccollector.common.CameraSourcePreview>
+  </net.whollynugatory.android.comiccollector.common.CameraSourcePreview>
+
+  <Button
+    android:id="@+id/camera_button_retry"
+    style="@style/Widget.AppCompat.Button.Borderless"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/try_again"
+    android:textColor="@color/primaryColor"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

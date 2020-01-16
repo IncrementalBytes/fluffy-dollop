@@ -24,7 +24,7 @@ android {
         def updatedVersionName = majorVersionProperty + "." + minorVersionProperty + "." + versionCodeProperty + "." + updatedBuildVersion
 
         defaultConfig {
-            applicationId "net.frostedbytes.android.comiccollector"
+            applicationId "net.whollynugatory.android.comiccollector"
             minSdkVersion 26
             targetSdkVersion 28
             versionCode versionCodeProperty
@@ -73,28 +73,28 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'androidx.exifinterface:exifinterface:1.0.0'
-    implementation 'androidx.preference:preference:1.0.0'
+    implementation 'androidx.exifinterface:exifinterface:1.1.0'
+    implementation 'androidx.preference:preference:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     // Firebase
-    implementation 'com.google.firebase:firebase-auth:19.0.0'
-    implementation 'com.google.firebase:firebase-core:17.2.0'
-    implementation 'com.google.firebase:firebase-firestore:21.0.0'
-    implementation 'com.google.firebase:firebase-ml-vision:23.0.0'
-    implementation 'com.google.firebase:firebase-storage:19.0.0'
+    implementation 'com.google.firebase:firebase-auth:19.2.0'
+    implementation 'com.google.firebase:firebase-core:17.2.1'
+    implementation 'com.google.firebase:firebase-firestore:21.3.1'
+    implementation 'com.google.firebase:firebase-ml-vision:24.0.1'
+    implementation 'com.google.firebase:firebase-storage:19.1.0'
 
     // Room
-    implementation "androidx.room:room-runtime:2.2.0-beta01"
-    annotationProcessor "androidx.room:room-compiler:2.2.0-beta01"
-    androidTestImplementation "androidx.room:room-testing:2.2.0-beta01"
+    implementation "androidx.room:room-runtime:2.2.3"
+    annotationProcessor "androidx.room:room-compiler:2.2.3"
+    androidTestImplementation "androidx.room:room-testing:2.2.3"
 
     // Lifecycle
-    implementation "androidx.lifecycle:lifecycle-extensions:2.0.0"
-    annotationProcessor "androidx.lifecycle:lifecycle-common-java8:2.0.0"
+    implementation "androidx.lifecycle:lifecycle-extensions:2.1.0"
+    annotationProcessor "androidx.lifecycle:lifecycle-common-java8:2.1.0"
 
     // Other
     implementation 'com.google.code.gson:gson:2.8.5'
@@ -103,7 +103,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    androidTestImplementation 'androidx.test:rules:1.3.0-alpha02'
+    androidTestImplementation 'androidx.test:rules:1.3.0-alpha03'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -111,6 +111,7 @@
   <string name="sign_in_with">Sign-in with</string>
   <string name="beta">BETA</string>
   <string name="signing_in">Signing in…</string>
+  <string name="try_again">Try Again?</string>
   <string-array name="debug_scenario_array">
     <item>scenario_barcode_not_found.jpg</item>
     <item>scenario_new_comic.jpg</item>
