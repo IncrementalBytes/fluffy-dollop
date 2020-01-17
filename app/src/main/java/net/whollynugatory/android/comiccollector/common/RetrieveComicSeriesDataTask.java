@@ -16,6 +16,7 @@
 package net.whollynugatory.android.comiccollector.common;
 
 import android.os.AsyncTask;
+import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
     String urlString = String.format(Locale.US, "https://api.upcitemdb.com/prod/trial/lookup?upc=%s", mQueryForSeries);
 
 
-    LogUtils.debug(TAG, "Query: %s", urlString);
+    Log.d(TAG, "Query: " + urlString);
     HttpURLConnection connection = null;
     StringBuilder builder = new StringBuilder();
     try {
@@ -63,7 +64,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
 
       int responseCode = connection.getResponseCode();
       if (responseCode != 200) {
-        LogUtils.error(TAG, "upcitemdb request failed. Response Code: " + responseCode);
+        Log.e(TAG, "upcitemdb request failed. Response Code: " + responseCode);
         connection.disconnect();
         return comicSeries;
       }
@@ -99,12 +100,12 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
             comicSeries.Title = item.getString("title");
           }
         } catch (JSONException e) {
-          LogUtils.debug(TAG, "Failed to parse JSON object.");
+          Log.d(TAG, "Failed to parse JSON object.");
           Crashlytics.logException(e);
         }
       }
     } else {
-      LogUtils.warn(TAG, "No expected items where found in response.");
+      Log.w(TAG, "No expected items where found in response.");
     }
 
     connection.disconnect();
@@ -113,10 +114,10 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
 
   protected void onPostExecute(ComicSeries comicSeries) {
 
-    LogUtils.debug(TAG, "++onPostExecute(%s)", comicSeries.toString());
+    Log.d(TAG, "++onPostExecute(ComicSeries)");
     AddActivity activity = mActivityWeakReference.get();
     if (activity == null) {
-      LogUtils.error(TAG, "AddActivity is null or detached.");
+      Log.e(TAG, "AddActivity is null or detached.");
       return;
     }
 

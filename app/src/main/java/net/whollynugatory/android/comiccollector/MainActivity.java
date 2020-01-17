@@ -22,6 +22,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProviders;
@@ -59,10 +60,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import net.whollynugatory.android.comiccollector.BuildConfig;
-import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.common.ComicCollectorException;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 import net.whollynugatory.android.comiccollector.common.PathUtils;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBook;
 import net.whollynugatory.android.comiccollector.db.views.ComicBookDetails;
@@ -109,7 +107,7 @@ public class MainActivity extends BaseActivity implements
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    LogUtils.debug(TAG, "++onCreate(Bundle)");
+    Log.d(TAG, "++onCreate(Bundle)");
     setContentView(R.layout.activity_main);
 
     mMainToolbar = findViewById(R.id.main_toolbar);
@@ -141,7 +139,7 @@ public class MainActivity extends BaseActivity implements
 
     mNavigationView.setOnNavigationItemSelectedListener(menuItem -> {
 
-      LogUtils.debug(TAG, "++onNavigationItemSelectedListener(%s)", menuItem.getTitle());
+      Log.d(TAG, "++onNavigationItemSelectedListener(MenuItem)");
       switch (menuItem.getItemId()) {
         case R.id.navigation_series:
           replaceFragment(ComicSeriesListFragment.newInstance());
@@ -187,7 +185,7 @@ public class MainActivity extends BaseActivity implements
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
 
-    LogUtils.debug(TAG, "++onCreateOptionsMenu(Menu)");
+    Log.d(TAG, "++onCreateOptionsMenu(Menu)");
     getMenuInflater().inflate(R.menu.main, menu);
     return true;
   }
@@ -196,14 +194,14 @@ public class MainActivity extends BaseActivity implements
   public void onDestroy() {
     super.onDestroy();
 
-    LogUtils.debug(TAG, "++onDestroy()");
+    Log.d(TAG, "++onDestroy()");
     mUser = null;
   }
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
 
-    LogUtils.debug(TAG, "++onOptionsItemSelected(%s)", item.getTitle());
+    Log.d(TAG, "++onOptionsItemSelected(MenuItem)");
     switch (item.getItemId()) {
       case R.id.action_home:
         replaceFragment(ComicSeriesListFragment.newInstance());
@@ -274,7 +272,7 @@ public class MainActivity extends BaseActivity implements
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
-    LogUtils.debug(TAG, "++onActivityResult(%d, %d, Intent)", requestCode, resultCode);
+    Log.d(TAG, "++onActivityResult(int, int, Intent)");
     if (requestCode == BaseActivity.REQUEST_COMIC_ADD) { // pick up any change to tutorial
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
       if (preferences.contains(UserPreferenceFragment.IS_GEEK_PREFERENCE)) {
@@ -315,7 +313,7 @@ public class MainActivity extends BaseActivity implements
             showDismissableSnackbar(message);
             mNavigationView.setSelectedItemId(R.id.navigation_series);
           } else {
-            LogUtils.error(TAG, "Activity return with incomplete data or no message was sent.");
+            Log.e(TAG, "Activity return with incomplete data or no message was sent.");
             showDismissableSnackbar(getString(R.string.message_unknown_activity_result));
             mNavigationView.setSelectedItemId(R.id.navigation_series);
           }
@@ -330,7 +328,7 @@ public class MainActivity extends BaseActivity implements
           break;
       }
     } else {
-      LogUtils.warn(TAG, String.format(Locale.US, "Unexpected activity request: %d", requestCode));
+      Log.w(TAG, "Unexpected activity request: " + requestCode);
       mNavigationView.setSelectedItemId(R.id.navigation_series);
     }
   }
@@ -338,7 +336,7 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-    LogUtils.debug(TAG, "++onRequestPermissionsResult(int, String[], int[])");
+    Log.d(TAG, "++onRequestPermissionsResult(int, String[], int[])");
     checkForWritePermission();
   }
 
@@ -348,17 +346,14 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onComicBookActionComplete(String message) {
 
-    LogUtils.debug(TAG, "++onComicBookActionComplete(%s)", message);
+    Log.d(TAG, "++onComicBookActionComplete(String)");
     showDismissableSnackbar(message);
   }
 
   @Override
   public void onComicBookAddedToLibrary(ComicBook comicBook) {
 
-    LogUtils.debug(
-      TAG,
-      "++onComicBookAddedToLibrary(%s)",
-      comicBook != null ? comicBook.toString() : "null");
+    Log.d(TAG, "++onComicBookAddedToLibrary(ComicBook)");
     if (comicBook != null) {
       mCollectorViewModel.insert(comicBook);
       mTargetProductCode = comicBook.ProductCode;
@@ -371,7 +366,7 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onComicBookInit(boolean isSuccessful) {
 
-    LogUtils.debug(TAG, "++onComicBookInit(%s)", String.valueOf(isSuccessful));
+    Log.d(TAG, "++onComicBookInit(boolean)");
     if (!isSuccessful) {
       showDismissableSnackbar(getString(R.string.err_comic_book_details));
     }
@@ -380,35 +375,35 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onComicListActionComplete(String message) {
 
-    LogUtils.debug(TAG, "++onComicListActionComplete(%s)", message);
+    Log.d(TAG, "++onComicListActionComplete(String)");
     showDismissableSnackbar(message);
   }
 
   @Override
   public void onComicListAddBook() {
 
-    LogUtils.debug(TAG, "++onComicListAddBook()");
+    Log.d(TAG, "++onComicListAddBook()");
     addComicBook();
   }
 
   @Override
   public void onComicListDeleteBook() {
 
-    LogUtils.debug(TAG, "onComicListDeleteBook()");
+    Log.d(TAG, "onComicListDeleteBook()");
     mNavigationView.setSelectedItemId(R.id.navigation_series);
   }
 
   @Override
   public void onComicListItemSelected(ComicBookDetails comicBook) {
 
-    LogUtils.debug(TAG, "++onComicListItemSelected(%s)", comicBook.toString());
+    Log.d(TAG, "++onComicListItemSelected(ComicBookDetails)");
     replaceFragment(ComicBookFragment.newInstance(comicBook));
   }
 
   @Override
   public void onComicListPopulated(int size) {
 
-    LogUtils.debug(TAG, "++onComicListPopulated(%d)", size);
+    Log.d(TAG, "++onComicListPopulated(int)");
     if (mProgress != null) {
       mProgress.setIndeterminate(false);
     }
@@ -419,7 +414,7 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onPreferenceChanged() throws ComicCollectorException {
 
-    LogUtils.debug(TAG, "++onPreferenceChanged()");
+    Log.d(TAG, "++onPreferenceChanged()");
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
     if (preferences.contains(UserPreferenceFragment.IS_GEEK_PREFERENCE)) {
       mUser.IsGeek = preferences.getBoolean(UserPreferenceFragment.IS_GEEK_PREFERENCE, false);
@@ -443,14 +438,14 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onSeriesListAddBook() {
 
-    LogUtils.debug(TAG, "++onSeriesListAddBook()");
+    Log.d(TAG, "++onSeriesListAddBook()");
     checkForWritePermission();
   }
 
   @Override
   public void onSeriesListItemSelected(ComicSeriesDetails comicSeries) {
 
-    LogUtils.debug(TAG, "++onSeriesListItemSelected(%s)", comicSeries.toString());
+    Log.d(TAG, "++onSeriesListItemSelected(ComicSeriesDetails)");
     mTargetProductCode = comicSeries.Id;
     mNavigationView.setSelectedItemId(R.id.navigation_books);
   }
@@ -458,7 +453,7 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onSeriesListOnPopulated(int size) {
 
-    LogUtils.debug(TAG, "++onSeriesListOnPopulated(%d)", size);
+    Log.d(TAG, "++onSeriesListOnPopulated(int)");
     if (mProgress != null) {
       mProgress.setIndeterminate(false);
     }
@@ -470,7 +465,7 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onSyncExport() {
 
-    LogUtils.debug(TAG, "++onSyncExport()");
+    Log.d(TAG, "++onSyncExport()");
     if (mProgress != null) {
       mProgress.setIndeterminate(true);
     }
@@ -485,9 +480,9 @@ public class MainActivity extends BaseActivity implements
           Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
           ArrayList<ComicBook> booksWritten = new ArrayList<>(comicBookList);
           outputStream.write(gson.toJson(booksWritten, collectionType).getBytes());
-          LogUtils.debug(TAG, "Wrote %d comic books to %s", booksWritten.size(), BaseActivity.DEFAULT_EXPORT_FILE);
+          Log.d(TAG, "Comic books written: " + booksWritten.size());
         } catch (Exception e) {
-          LogUtils.warn(TAG, "Exception when exporting local database.");
+          Log.w(TAG, "Exception when exporting local database.");
           Crashlytics.logException(e);
         }
       }
@@ -501,25 +496,25 @@ public class MainActivity extends BaseActivity implements
             if (task.getResult() != null) {
               showDismissableSnackbar(getString(R.string.message_export_success));
             } else {
-              LogUtils.warn(TAG, "Storage task results were null; this is unexpected.");
+              Log.w(TAG, "Storage task results were null; this is unexpected.");
               showDismissableSnackbar(getString(R.string.err_storage_task_unexpected));
             }
           } else {
             if (task.getException() != null) {
-              LogUtils.error(TAG, "Could not export library.", task.getException());
+              Log.e(TAG, "Could not export library.", task.getException());
             }
           }
         });
       } catch (FileNotFoundException fnfe) {
-        LogUtils.warn(TAG, "Could not export library.", fnfe);
+        Log.w(TAG, "Could not export library.", fnfe);
         Crashlytics.logException(fnfe);
       } finally {
         File tempFile = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
         if (tempFile.exists()) {
           if (tempFile.delete()) {
-            LogUtils.debug(TAG, "Removed temporary local export file.");
+            Log.d(TAG, "Removed temporary local export file.");
           } else {
-            LogUtils.warn(TAG, "Unable t");
+            Log.w(TAG, "Temporary file was not removed.");
           }
         }
       }
@@ -530,7 +525,7 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onSyncImport() {
 
-    LogUtils.debug(TAG, "++onSyncImport()");
+    Log.d(TAG, "++onSyncImport()");
     if (mProgress != null) {
       mProgress.setIndeterminate(true);
     }
@@ -540,7 +535,7 @@ public class MainActivity extends BaseActivity implements
 
       if (task.isSuccessful() && task.getException() == null) {
         File file = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
-        LogUtils.debug(TAG, "Loading %s", file.getAbsolutePath());
+        Log.d(TAG, "Loading " + file.getAbsolutePath());
         if (file.exists() && file.canRead()) {
           try (Reader reader = new FileReader(file.getAbsolutePath())) {
             mCollectorViewModel.deleteAllComicBooks();
@@ -559,17 +554,17 @@ public class MainActivity extends BaseActivity implements
             mCollectorViewModel.insertAll(updatedComics);
             showDismissableSnackbar(getString(R.string.status_sync_import_success));
           } catch (Exception e) {
-            LogUtils.warn(TAG, "Failed reading local library.", e);
+            Log.w(TAG, "Failed reading local library.", e);
             Crashlytics.logException(e);
           } finally {
             if (file.delete()) { // remove temporary file
-              LogUtils.debug(TAG, "Removed temporary local import file.");
+              Log.d(TAG, "Removed temporary local import file.");
             } else {
-              LogUtils.warn(TAG, "Could not remove temporary file after importing.");
+              Log.w(TAG, "Could not remove temporary file after importing.");
             }
           }
         } else {
-          LogUtils.debug(TAG, "%s does not exist yet.", BaseActivity.DEFAULT_EXPORT_FILE);
+          Log.d(TAG, "%s does not exist yet: " + BaseActivity.DEFAULT_EXPORT_FILE);
         }
       } else {
         if (task.getException() != null) {
@@ -577,7 +572,7 @@ public class MainActivity extends BaseActivity implements
           if (exception.getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
             showDismissableSnackbar(getString(R.string.err_remote_library_not_found));
           } else {
-            LogUtils.error(TAG, "Could not import library.", task.getException());
+            Log.e(TAG, "Could not import library.", task.getException());
             showDismissableSnackbar(getString(R.string.err_import_task));
           }
         } else {
@@ -590,7 +585,7 @@ public class MainActivity extends BaseActivity implements
   @Override
   public void onSyncFail() {
 
-    LogUtils.debug(TAG, "++onSyncFail()");
+    Log.d(TAG, "++onSyncFail()");
     showDismissableSnackbar(getString(R.string.err_sync_unknown_user));
   }
 
@@ -599,7 +594,7 @@ public class MainActivity extends BaseActivity implements
    */
   private void addComicBook() {
 
-    LogUtils.debug(TAG, "++addComicBook()");
+    Log.d(TAG, "++addComicBook()");
     Intent intent = new Intent(this, AddActivity.class);
     intent.putExtra(BaseActivity.ARG_USER, mUser);
     startActivityForResult(intent, BaseActivity.REQUEST_COMIC_ADD);
@@ -607,7 +602,7 @@ public class MainActivity extends BaseActivity implements
 
   private void checkForWritePermission() {
 
-    LogUtils.debug(TAG, "++checkForWritePermission()");
+    Log.d(TAG, "++checkForWritePermission()");
     if (ContextCompat.checkSelfPermission(this, permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
       if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission.WRITE_EXTERNAL_STORAGE)) {
         Snackbar.make(
@@ -628,14 +623,14 @@ public class MainActivity extends BaseActivity implements
           BaseActivity.REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS);
       }
     } else {
-      LogUtils.debug(TAG, "%s permission granted.", permission.WRITE_EXTERNAL_STORAGE);
+      Log.d(TAG, "Permission granted: " + permission.WRITE_EXTERNAL_STORAGE);
       addComicBook();
     }
   }
 
   private void listPopulated(int size) {
 
-    LogUtils.debug(TAG, "++listPopulated(%d)", size);
+    Log.d(TAG, "++listPopulated(int)");
     if (mMainToolbar != null && mMainToolbar.getMenu() != null) {
       MenuItem item = mMainToolbar.getMenu().findItem(R.id.action_add);
       if (item != null) {
@@ -669,7 +664,7 @@ public class MainActivity extends BaseActivity implements
 
   private void replaceFragment(Fragment fragment) {
 
-    LogUtils.debug(TAG, "++replaceFragment(%s)", fragment.getClass().getSimpleName());
+    Log.d(TAG, "++replaceFragment(Fragment)");
     getSupportFragmentManager()
       .beginTransaction()
       .replace(R.id.main_fragment_container, fragment)
@@ -679,7 +674,7 @@ public class MainActivity extends BaseActivity implements
 
   private void showDismissableSnackbar(String message) {
 
-    LogUtils.warn(TAG, message);
+    Log.w(TAG, message);
     if (mProgress != null) {
       mProgress.setIndeterminate(false);
     }

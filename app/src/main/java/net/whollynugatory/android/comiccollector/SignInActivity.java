@@ -17,6 +17,7 @@ package net.whollynugatory.android.comiccollector;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.google.android.material.snackbar.Snackbar;
@@ -39,9 +40,6 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.storage.FirebaseStorage;
 import io.fabric.sdk.android.Fabric;
 import java.io.File;
-import net.whollynugatory.android.comiccollector.BuildConfig;
-import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -71,7 +69,7 @@ public class SignInActivity extends BaseActivity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    LogUtils.debug(TAG, "++onCreate(Bundle)");
+    Log.d(TAG, "++onCreate(Bundle)");
     CrashlyticsCore crashlyticsCore = new CrashlyticsCore.Builder()
       .disabled(BuildConfig.DEBUG)
       .build();
@@ -112,7 +110,7 @@ public class SignInActivity extends BaseActivity {
 
     mGoogleApiClient = new GoogleApiClient.Builder(this)
       .enableAutoManage(this, connectionResult -> {
-        LogUtils.debug(TAG, "++onConnectionFailed(ConnectionResult)");
+        Log.d(TAG, "++onConnectionFailed(ConnectionResult)");
         String message = String.format(Locale.US, "Connection result was null: %s", connectionResult.getErrorMessage());
         showErrorInSnackBar(message);
       })
@@ -124,7 +122,7 @@ public class SignInActivity extends BaseActivity {
   public void onDestroy() {
     super.onDestroy();
 
-    LogUtils.debug(TAG, "++onDestroy()");
+    Log.d(TAG, "++onDestroy()");
     mAccount = null;
     mAuth = null;
     mGoogleApiClient = null;
@@ -134,7 +132,7 @@ public class SignInActivity extends BaseActivity {
   public void onStart() {
     super.onStart();
 
-    LogUtils.debug(TAG, "++onStart()");
+    Log.d(TAG, "++onStart()");
     if (mAuth.getCurrentUser() != null && mAccount != null) {
       mSignInText.setText(getString(R.string.signing_in));
       mSignInWithGoogleButton.setVisibility(View.GONE);
@@ -151,7 +149,7 @@ public class SignInActivity extends BaseActivity {
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
-    LogUtils.debug(TAG, "++onActivityResult(%d, %d, Intent)", requestCode, resultCode);
+    Log.d(TAG, "++onActivityResult(int, int, Intent)");
     if (requestCode == RC_SIGN_IN) {
       GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
       if (result.isSuccess()) {
@@ -183,9 +181,10 @@ public class SignInActivity extends BaseActivity {
   private void onAuthenticateSuccess() {
 
     if (mAuth.getCurrentUser() != null && mAccount != null) {
-      LogUtils.debug(TAG, "++onAuthenticateSuccess(%s)", mAuth.getCurrentUser().getDisplayName());
-      LogUtils.debug(TAG, "Timestamp: %d", Calendar.getInstance().getTimeInMillis());
-      LogUtils.debug(TAG, "Build: %s", BuildConfig.VERSION_NAME);
+      Log.d(TAG, "++onAuthenticateSuccess()");
+      Log.d(TAG, "User: " + mAuth.getCurrentUser().getDisplayName());
+      Log.d(TAG, "Timestamp: " + Calendar.getInstance().getTimeInMillis());
+      Log.d(TAG, "Build: " + BuildConfig.VERSION_NAME);
       Crashlytics.setUserIdentifier(mAuth.getCurrentUser().getUid());
       Bundle bundle = new Bundle();
       bundle.putString(FirebaseAnalytics.Param.METHOD, "onAuthenticateSuccess");
@@ -196,10 +195,7 @@ public class SignInActivity extends BaseActivity {
       FirebaseStorage.getInstance().getReference().child(appDataPath).getFile(localFile).addOnCompleteListener(task -> {
 
         if (!task.isSuccessful()) {
-          LogUtils.warn(
-            TAG,
-            String.format(Locale.US,"Failed to copy %s", appDataPath),
-            task.getException());
+          Log.w(TAG, "Failed to copy " + appDataPath, task.getException());
         }
 
         Intent intent = new Intent(SignInActivity.this, MainActivity.class);
@@ -217,7 +213,7 @@ public class SignInActivity extends BaseActivity {
 
   private void firebaseAuthenticateWithGoogle(GoogleSignInAccount acct) {
 
-    LogUtils.debug(TAG, "++firebaseAuthWithGoogle(%s)", acct.getId());
+    Log.d(TAG, "++firebaseAuthWithGoogle(GoogleSignInAccount)");
     AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
     mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
 
@@ -236,7 +232,7 @@ public class SignInActivity extends BaseActivity {
 
   private void showErrorInSnackBar(String message) {
 
-    LogUtils.error(TAG, message);
+    Log.e(TAG, message);
     if (mProgressBar != null) {
       mProgressBar.setIndeterminate(false);
     }
@@ -251,7 +247,7 @@ public class SignInActivity extends BaseActivity {
 
   private void signInWithGoogle() {
 
-    LogUtils.debug(TAG, "++signInWithGoogle()");
+    Log.d(TAG, "++signInWithGoogle()");
     Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
     startActivityForResult(signInIntent, RC_SIGN_IN);
   }

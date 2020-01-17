@@ -43,7 +43,6 @@ import java.util.Collections;
 import java.util.List;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 
 public class Camera2Fragment extends Fragment {
 
@@ -71,7 +70,7 @@ public class Camera2Fragment extends Fragment {
 
   public static Camera2Fragment newInstance() {
 
-    LogUtils.debug(TAG, "++newInstance()");
+    Log.d(TAG, "++newInstance()");
     Camera2Fragment fragment = new Camera2Fragment();
     Bundle args = new Bundle();
     fragment.setArguments(args);
@@ -85,25 +84,25 @@ public class Camera2Fragment extends Fragment {
   public void onAttach(Context context) {
     super.onAttach(context);
 
-    LogUtils.debug(TAG, "++onAttach(Context)");
+    Log.d(TAG, "++onAttach(Context)");
   }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    LogUtils.debug(TAG, "++onCreate(Bundle)");
+    Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
     } else {
-      LogUtils.error(TAG, "Arguments were null.");
+      Log.e(TAG, "Arguments were null.");
     }
   }
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
+    Log.d(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     return inflater.inflate(R.layout.fragment_camera2, container, false);
   }
 
@@ -111,7 +110,7 @@ public class Camera2Fragment extends Fragment {
   public void onDetach() {
     super.onDetach();
 
-    LogUtils.debug(TAG, "++onDetach()");
+    Log.d(TAG, "++onDetach()");
   }
 
   @Override
@@ -151,7 +150,7 @@ public class Camera2Fragment extends Fragment {
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
+    Log.d(TAG, "++onViewCreated(View, Bundle)");
     textureView = view.findViewById(R.id.camera2_texture);
     assert textureView != null;
     textureView.setSurfaceTextureListener(new SurfaceTextureListener() {

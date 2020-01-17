@@ -17,6 +17,7 @@ package net.whollynugatory.android.comiccollector.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
@@ -27,7 +28,6 @@ import android.widget.Switch;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 import net.whollynugatory.android.comiccollector.models.User;
 
 public class TutorialFragment extends Fragment {
@@ -47,7 +47,7 @@ public class TutorialFragment extends Fragment {
 
   public static TutorialFragment newInstance(User user) {
 
-    LogUtils.debug(TAG, "++newInstance()");
+    Log.d(TAG, "++newInstance()");
     TutorialFragment fragment = new TutorialFragment();
     Bundle args = new Bundle();
     args.putSerializable(BaseActivity.ARG_USER, user);
@@ -62,7 +62,7 @@ public class TutorialFragment extends Fragment {
   public void onAttach(Context context) {
     super.onAttach(context);
 
-    LogUtils.debug(TAG, "++onAttach(Context)");
+    Log.d(TAG, "++onAttach(Context)");
     try {
       mCallback = (OnTutorialListener) context;
     } catch (ClassCastException e) {
@@ -75,19 +75,19 @@ public class TutorialFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    LogUtils.debug(TAG, "++onCreate(Bundle)");
+    Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
       mUser = (User)arguments.getSerializable(BaseActivity.ARG_USER);
     } else {
-      LogUtils.error(TAG, "Arguments were null.");
+      Log.e(TAG, "Arguments were null.");
     }
   }
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
+    Log.d(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     return inflater.inflate(R.layout.fragment_tutorial, container, false);
   }
 
@@ -95,7 +95,7 @@ public class TutorialFragment extends Fragment {
   public void onDetach() {
     super.onDetach();
 
-    LogUtils.debug(TAG, "++onDetach()");
+    Log.d(TAG, "++onDetach()");
     mCallback = null;
   }
 
@@ -103,7 +103,7 @@ public class TutorialFragment extends Fragment {
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
+    Log.d(TAG, "++onViewCreated(View, Bundle)");
     Switch showHintSwitch = view.findViewById(R.id.tutorial_switch_hide);
     showHintSwitch.setChecked(mUser.ShowBarcodeHint);
     showHintSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> mCallback.onTutorialShowHint(isChecked));

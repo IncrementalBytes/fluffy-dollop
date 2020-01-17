@@ -17,6 +17,7 @@ package net.whollynugatory.android.comiccollector.common;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import androidx.annotation.GuardedBy;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
@@ -72,7 +73,7 @@ public class BarcodeProcessor {
 
   synchronized void process(ByteBuffer data, final FrameMetadata frameMetadata, final GraphicOverlay graphicOverlay) {
 
-    LogUtils.debug(TAG, "++process(ByteBuffer, FrameMetadata, GraphicOverlay)");
+    Log.d(TAG, "++process(ByteBuffer, FrameMetadata, GraphicOverlay)");
     mLatestImage = data;
     mLatestImageMetaData = frameMetadata;
     if (mProcessingImage == null && mProcessingMetaData == null) {
@@ -82,11 +83,11 @@ public class BarcodeProcessor {
 
   void stop() {
 
-    LogUtils.debug(TAG, "++stop()");
+    Log.d(TAG, "++stop()");
     try {
       mDetector.close();
     } catch (IOException e) {
-      LogUtils.error(TAG, "Exception thrown while trying to close Barcode Detector.", e);
+      Log.e(TAG, "Exception thrown while trying to close Barcode Detector.", e);
     }
   }
 
@@ -99,7 +100,7 @@ public class BarcodeProcessor {
     final FrameMetadata metadata,
     final GraphicOverlay graphicOverlay) {
 
-    LogUtils.debug(TAG, "++detectInVisionImage(Bitmap, FirebaseVisionImage, FrameMetadata, GraphicOverlay)");
+    Log.d(TAG, "++detectInVisionImage(Bitmap, FirebaseVisionImage, FrameMetadata, GraphicOverlay)");
     mDetector.detectInImage(image)
       .addOnSuccessListener(firebaseVisionBarcodes -> {
 
@@ -117,12 +118,12 @@ public class BarcodeProcessor {
         graphicOverlay.postInvalidate();
         processLatestImage(graphicOverlay);
       })
-      .addOnFailureListener(e -> LogUtils.error(TAG, "Barcode detection failed.", e));
+      .addOnFailureListener(e -> Log.e(TAG, "Barcode detection failed.", e));
   }
 
   private void processImage(ByteBuffer data, final FrameMetadata frameMetadata, final GraphicOverlay graphicOverlay) {
 
-    LogUtils.debug(TAG, "++processImage(ByteBuffer, FrameMetadata, GraphicOverlay)");
+    Log.d(TAG, "++processImage(ByteBuffer, FrameMetadata, GraphicOverlay)");
     FirebaseVisionImageMetadata metadata =
       new FirebaseVisionImageMetadata.Builder()
         .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
@@ -137,7 +138,7 @@ public class BarcodeProcessor {
 
   private synchronized void processLatestImage(final GraphicOverlay graphicOverlay) {
 
-    LogUtils.debug(TAG, "++processLatestImage(GraphicOverlay)");
+    Log.d(TAG, "++processLatestImage(GraphicOverlay)");
     mProcessingImage = mLatestImage;
     mProcessingMetaData = mLatestImageMetaData;
     mLatestImage = null;

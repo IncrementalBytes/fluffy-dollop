@@ -26,6 +26,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -57,10 +58,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import net.whollynugatory.android.comiccollector.BuildConfig;
-import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.common.ComicCollectorException;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 import net.whollynugatory.android.comiccollector.common.PathUtils;
 import net.whollynugatory.android.comiccollector.common.RetrieveComicSeriesDataTask;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBook;
@@ -106,7 +104,7 @@ public class AddActivity extends BaseActivity implements
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    LogUtils.debug(TAG, "++onCreate(Bundle)");
+    Log.d(TAG, "++onCreate(Bundle)");
     setContentView(R.layout.activity_add);
 
     mProgress = findViewById(R.id.add_progress);
@@ -152,14 +150,14 @@ public class AddActivity extends BaseActivity implements
   @Override
   public void onBackPressed() {
 
-    LogUtils.debug(TAG, "++onBackPressed()");
+    Log.d(TAG, "++onBackPressed()");
     setCancelAndFinish();
   }
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
 
-    LogUtils.debug(TAG, "++onCreateOptionsMenu(Menu)");
+    Log.d(TAG, "++onCreateOptionsMenu(Menu)");
     getMenuInflater().inflate(R.menu.add, menu);
     return true;
   }
@@ -168,7 +166,7 @@ public class AddActivity extends BaseActivity implements
   public void onDestroy() {
     super.onDestroy();
 
-    LogUtils.debug(TAG, "++onDestroy()");
+    Log.d(TAG, "++onDestroy()");
     mCurrentImageFile = null;
     mImageBitmap = null;
     mUser = null;
@@ -177,7 +175,7 @@ public class AddActivity extends BaseActivity implements
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
 
-    LogUtils.debug(TAG, "++onOptionsItemSelected(%s)", item.getTitle());
+    Log.d(TAG, "++onOptionsItemSelected(MenuItem)");
     if (item.getItemId() == R.id.action_cancel) {
       setCancelAndFinish();
     }
@@ -189,22 +187,22 @@ public class AddActivity extends BaseActivity implements
   public void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
 
-    LogUtils.debug(TAG, "++onSaveInstanceState(Bundle)");
+    Log.d(TAG, "++onSaveInstanceState(Bundle)");
   }
 
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
-    LogUtils.debug(TAG, "++onActivityResult(%d, %d, Intent)", requestCode, resultCode);
+    Log.d(TAG, "++onActivityResult(int, int, Intent)");
     if (requestCode == BaseActivity.REQUEST_IMAGE_CAPTURE) {
       if (resultCode != RESULT_OK) {
-        LogUtils.debug(TAG, "User canceled camera intent.");
+        Log.d(TAG, "User canceled camera intent.");
         setCancelAndFinish();
       } else {
         if (BuildConfig.DEBUG) { // use static file in storage
           File f = new File(getString(R.string.debug_path), data.getStringExtra(BaseActivity.ARG_DEBUG_FILE_NAME));
-          LogUtils.debug(TAG, "Using %s", f.getAbsolutePath());
+          Log.d(TAG, "Using " + f.getAbsolutePath());
           try {
             mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
           } catch (FileNotFoundException e) {
@@ -248,7 +246,7 @@ public class AddActivity extends BaseActivity implements
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-    LogUtils.debug(TAG, "++onRequestPermissionsResult(int, String[], int[])");
+    Log.d(TAG, "++onRequestPermissionsResult(int, String[], int[])");
     checkForCameraPermission();
   }
 
@@ -258,7 +256,7 @@ public class AddActivity extends BaseActivity implements
   @Override
   public void onBarcodeProcessed(String barcode) {
 
-    LogUtils.debug(TAG, "onBarcodeProcessed(%s)", barcode);
+    Log.d(TAG, "onBarcodeProcessed(String)");
     ComicBook comicBook = null;
     if (barcode != null &&
       !barcode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) &&
@@ -266,7 +264,7 @@ public class AddActivity extends BaseActivity implements
       comicBook = new ComicBook();
       comicBook.parseProductCode(barcode);
     } else {
-      LogUtils.warn(TAG, "Unexpected bar code: %s", barcode);
+      Log.w(TAG, "Unexpected bar code: " + barcode);
     }
 
     if (comicBook != null) { // we have a legit barcode
@@ -287,7 +285,7 @@ public class AddActivity extends BaseActivity implements
   @Override
   public void onCameraSourceRetry() {
 
-    LogUtils.debug(TAG, "++onCameraSourceRetry()");
+    Log.d(TAG, "++onCameraSourceRetry()");
     replaceFragment(CameraSourceFragment.newInstance());
   }
 
@@ -295,7 +293,7 @@ public class AddActivity extends BaseActivity implements
   public void onComicSeriesActionComplete(ComicSeriesDetails seriesDetails) {
 
     if (seriesDetails != null) {
-      LogUtils.debug(TAG, "++onComicSeriesActionComplete(%s)", seriesDetails.toString());
+      Log.d(TAG, "++onComicSeriesActionComplete(ComicSeriesDetails)");
 
       ComicSeries comicSeries = new ComicSeries();
       comicSeries.parseProductCode(seriesDetails.Id);
@@ -325,7 +323,7 @@ public class AddActivity extends BaseActivity implements
         getIssueIdFromUser(workableBook);
       });
     } else {
-      LogUtils.debug(TAG, "++onComicSeriesActionComplete(null)");
+      Log.d(TAG, "++onComicSeriesActionComplete(null)");
       setFailAndFinish(R.string.err_add_comic_series);
     }
   }
@@ -333,7 +331,7 @@ public class AddActivity extends BaseActivity implements
   @Override
   public void onManualSearchActionComplete(ComicBook comicBook) {
 
-    LogUtils.debug(TAG, "++onManualSearchActionComplete(%s)", comicBook.toString());
+    Log.d(TAG, "++onManualSearchActionComplete(ComicBook)");
     if (mProgress != null) {
       mProgress.setIndeterminate(true);
     }
@@ -363,7 +361,7 @@ public class AddActivity extends BaseActivity implements
   @Override
   public void onManualSearchRetry() {
 
-    LogUtils.debug(TAG, "onManualSearchRetry()");
+    Log.d(TAG, "onManualSearchRetry()");
     if (mProgress != null) {
       mProgress.setIndeterminate(true);
     }
@@ -374,7 +372,7 @@ public class AddActivity extends BaseActivity implements
   @Override
   public void onTutorialContinue() {
 
-    LogUtils.debug(TAG, "++onTutorialContinue()");
+    Log.d(TAG, "++onTutorialContinue()");
     if (mProgress != null) {
       mProgress.setIndeterminate(true);
     }
@@ -385,7 +383,7 @@ public class AddActivity extends BaseActivity implements
   @Override
   public void onTutorialShowHint(boolean show) {
 
-    LogUtils.debug(TAG, "++onTutorialShowHint(%s)", String.valueOf(show));
+    Log.d(TAG, "++onTutorialShowHint(boolean)");
     SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
     editor.putBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, show);
     editor.apply();
@@ -397,7 +395,7 @@ public class AddActivity extends BaseActivity implements
    */
   public void retrieveComicSeriesComplete(ComicSeries comicSeries) {
 
-    LogUtils.debug(TAG, "++retrieveComicSeriesComplete(%s)", comicSeries.toString());
+    Log.d(TAG, "++retrieveComicSeriesComplete(ComicSeries)");
     if (comicSeries.isValid()) {
       if (mProgress != null) {
         mProgress.setIndeterminate(false);
@@ -431,7 +429,7 @@ public class AddActivity extends BaseActivity implements
    */
   private void checkForCameraPermission() {
 
-    LogUtils.debug(TAG, "++checkDevicePermission()");
+    Log.d(TAG, "++checkDevicePermission()");
     if (ContextCompat.checkSelfPermission(this, permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
       if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission.CAMERA)) {
         Snackbar.make(
@@ -449,14 +447,14 @@ public class AddActivity extends BaseActivity implements
         ActivityCompat.requestPermissions(this, new String[]{permission.CAMERA}, BaseActivity.REQUEST_CAMERA_PERMISSIONS);
       }
     } else {
-      LogUtils.debug(TAG, "%s permission granted.", permission.CAMERA);
+      Log.d(TAG, "Permission granted: " + permission.CAMERA);
       takePictureIntent();
     }
   }
 
   private File createImageFile() throws IOException {
 
-    LogUtils.debug(TAG, "++createImageFile()");
+    Log.d(TAG, "++createImageFile()");
     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
     String imageFileName = "JPEG_" + timeStamp + "_";
     File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
@@ -465,19 +463,19 @@ public class AddActivity extends BaseActivity implements
 
   private void deleteImageFile() {
 
-    LogUtils.debug(TAG, "++deleteImageFile()");
+    Log.d(TAG, "++deleteImageFile()");
     if (mCurrentImageFile != null && mCurrentImageFile.exists()) {
       if (mCurrentImageFile.delete()) {
-        LogUtils.debug(TAG, "Removed processed image: %s", mCurrentImageFile.getName());
+        Log.d(TAG, "Removed processed image: " + mCurrentImageFile.getName());
       } else {
-        LogUtils.warn(TAG, "Unable to remove processed image: %s", mCurrentImageFile.getName());
+        Log.w(TAG, "Unable to remove processed image: " + mCurrentImageFile.getName());
       }
     }
   }
 
   private void getIssueIdFromUser(ComicBook comicBook) {
 
-    LogUtils.debug(TAG, "++getIssueIdFromUser(%s)", comicBook.toString());
+    Log.d(TAG, "++getIssueIdFromUser(ComicBook)");
     if (mProgress != null) {
       mProgress.setIndeterminate(false);
     }
@@ -487,7 +485,7 @@ public class AddActivity extends BaseActivity implements
 
   private void replaceFragment(Fragment fragment) {
 
-    LogUtils.debug(TAG, "++replaceFragment(%s)", fragment.getClass().getSimpleName());
+    Log.d(TAG, "++replaceFragment(Fragment)");
     getSupportFragmentManager()
       .beginTransaction()
       .replace(R.id.add_fragment_container, fragment)
@@ -497,7 +495,7 @@ public class AddActivity extends BaseActivity implements
 
   private void scanImageForProductCode() {
 
-    LogUtils.debug(TAG, "++scanImageForProductCode()");
+    Log.d(TAG, "++scanImageForProductCode()");
     if (mImageBitmap != null) {
       if (mUser.IsGeek) {
         LayoutInflater layoutInflater = LayoutInflater.from(this);
@@ -545,7 +543,7 @@ public class AddActivity extends BaseActivity implements
 
   private void showPictureIntent() {
 
-    LogUtils.debug(TAG, "++showPictureIntent()");
+    Log.d(TAG, "++showPictureIntent()");
     deleteImageFile();
     if (BuildConfig.DEBUG) {
       LayoutInflater layoutInflater = LayoutInflater.from(this);
@@ -594,7 +592,7 @@ public class AddActivity extends BaseActivity implements
 
   private void takePictureIntent() {
 
-    LogUtils.debug(TAG, "++takePictureIntent()");
+    Log.d(TAG, "++takePictureIntent()");
     if (mUser.ShowBarcodeHint) {
       if (mProgress != null) {
         mProgress.setIndeterminate(false);
@@ -608,7 +606,7 @@ public class AddActivity extends BaseActivity implements
 
   private void useFirebaseBarcodeScanning() {
 
-    LogUtils.debug(TAG, "++useFirebaseBarcodeScanning()");
+    Log.d(TAG, "++useFirebaseBarcodeScanning()");
     FirebaseVisionBarcodeDetectorOptions options =
       new FirebaseVisionBarcodeDetectorOptions.Builder()
         .setBarcodeFormats(FirebaseVisionBarcode.FORMAT_UPC_A, FirebaseVisionBarcode.FORMAT_UPC_E)
@@ -624,25 +622,17 @@ public class AddActivity extends BaseActivity implements
           for (FirebaseVisionBarcode barcode : task.getResult()) {
             if (barcode.getValueType() == FirebaseVisionBarcode.TYPE_PRODUCT) {
               String barcodeValue = barcode.getDisplayValue();
-              LogUtils.debug(TAG, "Found a bar code: %s", barcodeValue);
+              Log.d(TAG, "Found a bar code: " + barcodeValue);
               comicBook = new ComicBook();
               if (barcodeValue != null &&
                 !barcodeValue.equals(BaseActivity.DEFAULT_PRODUCT_CODE) &&
                 barcodeValue.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) {
                 comicBook.parseProductCode(barcodeValue);
               } else {
-                LogUtils.warn(
-                  TAG,
-                  "Unexpected bar code: %s (%d)",
-                  barcode.getDisplayValue(),
-                  barcode.getValueType());
+                Log.w(TAG, "Unexpected bar code: " + barcode.getDisplayValue());
               }
             } else {
-              LogUtils.warn(
-                TAG,
-                "Unexpected bar code: %s (%d)",
-                barcode.getDisplayValue(),
-                barcode.getValueType());
+              Log.w(TAG, "Unexpected bar code: " + barcode.getDisplayValue());
             }
           }
 
@@ -682,7 +672,7 @@ public class AddActivity extends BaseActivity implements
                 matrix,
                 true);
               mRotationAttempts = 0;
-              LogUtils.warn(TAG, "Rotated image completely and could not find a bar code.");
+              Log.w(TAG, "Rotated image completely and could not find a bar code.");
               replaceFragment(ManualSearchFragment.newInstance(new ComicBook()));
             }
           }

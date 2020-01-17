@@ -19,6 +19,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
@@ -115,7 +116,7 @@ public class CameraSourcePreview extends ViewGroup {
       try {
         startIfReady();
       } catch (IOException e) {
-        LogUtils.error(TAG, "Could not start camera source.", e);
+        Log.e(TAG, "Could not start camera source.", e);
       }
     }
 
@@ -164,13 +165,13 @@ public class CameraSourcePreview extends ViewGroup {
 
     for (int i = 0; i < getChildCount(); ++i) {
       getChildAt(i).layout(0, 0, childWidth, childHeight);
-      LogUtils.debug(TAG, "Assigned view: %d", i);
+      Log.d(TAG, "Assigned view: " + i);
     }
 
     try {
       startIfReady();
     } catch (IOException e) {
-      LogUtils.error(TAG, "Could not start camera source.", e);
+      Log.e(TAG, "Could not start camera source.", e);
     }
   }
 
@@ -184,7 +185,7 @@ public class CameraSourcePreview extends ViewGroup {
       return true;
     }
 
-    LogUtils.debug(TAG, "isPortraitMode returning false by default");
+    Log.d(TAG, "isPortraitMode returning false by default");
     return false;
   }
 }

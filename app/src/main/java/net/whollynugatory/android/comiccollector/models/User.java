@@ -15,9 +15,9 @@
  */
 package net.whollynugatory.android.comiccollector.models;
 
+import android.util.Log;
 import java.io.Serializable;
 import net.whollynugatory.android.comiccollector.BaseActivity;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 
 public class User implements Serializable {
 
@@ -49,7 +49,7 @@ public class User implements Serializable {
 
   public static boolean isValid(User user) {
 
-    LogUtils.debug(TAG, "++isValid(User)");
+    Log.d(TAG, "++isValid(User)");
     return user != null &&
       !user.Id.isEmpty() &&
       !user.Id.equals(BaseActivity.DEFAULT_USER_ID) &&

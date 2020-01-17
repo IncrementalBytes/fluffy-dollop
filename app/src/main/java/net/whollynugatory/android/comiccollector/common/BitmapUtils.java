@@ -22,6 +22,7 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera.CameraInfo;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 import java.io.ByteArrayOutputStream;
@@ -52,7 +53,7 @@ class BitmapUtils {
       stream.close();
       return rotateBitmap(bmp, metadata.getRotation(), metadata.getCameraFacing());
     } catch (Exception e) {
-      LogUtils.error(TAG, "Error in get bitmap.", e);
+      Log.e(TAG, "Error in get bitmap.", e);
     }
 
     return null;

@@ -18,6 +18,7 @@ package net.whollynugatory.android.comiccollector.fragments;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProviders;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -34,7 +35,6 @@ import android.widget.TextView;
 import java.util.List;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.db.views.ComicBookDetails;
@@ -67,13 +67,13 @@ public class ComicBookListFragment extends Fragment {
 
   public static ComicBookListFragment newInstance() {
 
-    LogUtils.debug(TAG, "++newInstance()");
+    Log.d(TAG, "++newInstance()");
     return new ComicBookListFragment();
   }
 
   public static ComicBookListFragment newInstance(String productCode) {
 
-    LogUtils.debug(TAG, "++newInstance(%s)", productCode);
+    Log.d(TAG, "++newInstance(String)");
     ComicBookListFragment fragment = new ComicBookListFragment();
     Bundle args = new Bundle();
     args.putString(BaseActivity.ARG_PRODUCT_CODE, productCode);
@@ -87,7 +87,7 @@ public class ComicBookListFragment extends Fragment {
   public void onAttach(Context context) {
     super.onAttach(context);
 
-    LogUtils.debug(TAG, "++onAttach(Context)");
+    Log.d(TAG, "++onAttach(Context)");
     try {
       mCallback = (OnComicBookListListener) context;
     } catch (ClassCastException e) {
@@ -100,19 +100,19 @@ public class ComicBookListFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    LogUtils.debug(TAG, "++onCreate(Bundle)");
+    Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
       mProductCode = arguments.getString(BaseActivity.ARG_PRODUCT_CODE);
     } else {
-      LogUtils.error(TAG, "Arguments were null.");
+      Log.e(TAG, "Arguments were null.");
     }
   }
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
+    Log.d(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     mCollectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
     if (mProductCode != null && mProductCode.length() > 0) {
       mCollectorViewModel.getComicBooksByProductCode(mProductCode).observe(this, bookList -> {
@@ -138,14 +138,14 @@ public class ComicBookListFragment extends Fragment {
   public void onDestroy() {
     super.onDestroy();
 
-    LogUtils.debug(TAG, "++onDestroy()");
+    Log.d(TAG, "++onDestroy()");
   }
 
   @Override
   public void onDetach() {
     super.onDetach();
 
-    LogUtils.debug(TAG, "++onDetach()");
+    Log.d(TAG, "++onDetach()");
     mCallback = null;
   }
 
@@ -153,7 +153,7 @@ public class ComicBookListFragment extends Fragment {
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
+    Log.d(TAG, "++onViewCreated(View, Bundle)");
     FloatingActionButton addButton = view.findViewById(R.id.comic_fab_add);
     mRecyclerView = view.findViewById(R.id.comic_list_view);
 
@@ -267,7 +267,7 @@ public class ComicBookListFragment extends Fragment {
     @Override
     public void onClick(View view) {
 
-      LogUtils.debug(TAG, "++ComicHolder::onClick(View)");
+      Log.d(TAG, "++ComicHolder::onClick(View)");
       mCallback.onComicListItemSelected(mComicBook);
     }
   }

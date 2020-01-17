@@ -17,6 +17,7 @@ package net.whollynugatory.android.comiccollector.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -31,7 +32,6 @@ import android.widget.TextView;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBook;
 
 public class ManualSearchFragment extends Fragment {
@@ -55,7 +55,7 @@ public class ManualSearchFragment extends Fragment {
 
   public static ManualSearchFragment newInstance(ComicBook comicBook) {
 
-    LogUtils.debug(TAG, "++newInstance(%s)", comicBook.toString());
+    Log.d(TAG, "++newInstance(ComicBook)");
     ManualSearchFragment fragment = new ManualSearchFragment();
     Bundle args = new Bundle();
     args.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicBook);
@@ -70,7 +70,7 @@ public class ManualSearchFragment extends Fragment {
   public void onAttach(Context context) {
     super.onAttach(context);
 
-    LogUtils.debug(TAG, "++onAttach(Context)");
+    Log.d(TAG, "++onAttach(Context)");
     try {
       mCallback = (OnManualSearchListener) context;
     } catch (ClassCastException e) {
@@ -83,19 +83,19 @@ public class ManualSearchFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    LogUtils.debug(TAG, "++onCreate(Bundle)");
+    Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
       mComicBook = (ComicBook) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
     } else {
-      LogUtils.error(TAG, "Arguments were null.");
+      Log.e(TAG, "Arguments were null.");
     }
   }
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
+    Log.d(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     return inflater.inflate(R.layout.fragment_manual_search, container, false);
   }
 
@@ -103,7 +103,7 @@ public class ManualSearchFragment extends Fragment {
   public void onDetach() {
     super.onDetach();
 
-    LogUtils.debug(TAG, "++onDetach()");
+    Log.d(TAG, "++onDetach()");
     mCallback = null;
   }
 
@@ -111,7 +111,7 @@ public class ManualSearchFragment extends Fragment {
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
+    Log.d(TAG, "++onViewCreated(View, Bundle)");
 
     // 2 Scenarios:
     //   1) Product Code (Publisher & Series) is known, we need the IssueCode

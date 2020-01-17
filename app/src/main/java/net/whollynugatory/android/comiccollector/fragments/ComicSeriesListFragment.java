@@ -17,6 +17,7 @@ package net.whollynugatory.android.comiccollector.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +34,6 @@ import java.util.List;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 import net.whollynugatory.android.comiccollector.common.SortUtils;
 import net.whollynugatory.android.comiccollector.db.views.ComicBookDetails;
 import net.whollynugatory.android.comiccollector.db.views.ComicSeriesDetails;
@@ -60,7 +60,7 @@ public class ComicSeriesListFragment extends Fragment {
 
   public static ComicSeriesListFragment newInstance() {
 
-    LogUtils.debug(TAG, "++newInstance()");
+    Log.d(TAG, "++newInstance()");
     return new ComicSeriesListFragment();
   }
 
@@ -71,7 +71,7 @@ public class ComicSeriesListFragment extends Fragment {
   public void onAttach(Context context) {
     super.onAttach(context);
 
-    LogUtils.debug(TAG, "++onAttach(Context)");
+    Log.d(TAG, "++onAttach(Context)");
     try {
       mCallback = (OnComicSeriesListListener) context;
     } catch (ClassCastException e) {
@@ -83,7 +83,7 @@ public class ComicSeriesListFragment extends Fragment {
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
+    Log.d(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     mComicSeries = new HashMap<>();
     CollectorViewModel collectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
     collectorViewModel.getComicBooks().observe(this, comicList -> {
@@ -118,7 +118,6 @@ public class ComicSeriesListFragment extends Fragment {
           }
         }
 
-        LogUtils.debug(TAG, "Found %d comic series from %d comic books.", mComicSeries.size(), comicList.size());
         ComicSeriesAdapter comicAdapter = new ComicSeriesAdapter(new ArrayList<>(mComicSeries.values()));
         mRecyclerView.setAdapter(comicAdapter);
         mCallback.onSeriesListOnPopulated(mComicSeries.size());
@@ -134,14 +133,14 @@ public class ComicSeriesListFragment extends Fragment {
   public void onDestroy() {
     super.onDestroy();
 
-    LogUtils.debug(TAG, "++onDestroy()");
+    Log.d(TAG, "++onDestroy()");
   }
 
   @Override
   public void onDetach() {
     super.onDetach();
 
-    LogUtils.debug(TAG, "++onDetach()");
+    Log.d(TAG, "++onDetach()");
     mCallback = null;
   }
 
@@ -149,7 +148,7 @@ public class ComicSeriesListFragment extends Fragment {
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
+    Log.d(TAG, "++onViewCreated(View, Bundle)");
     FloatingActionButton addButton = view.findViewById(R.id.series_fab_add);
     mRecyclerView = view.findViewById(R.id.series_list_view);
 
@@ -231,7 +230,7 @@ public class ComicSeriesListFragment extends Fragment {
     @Override
     public void onClick(View view) {
 
-      LogUtils.debug(TAG, "++ComicHolder::onClick(View)");
+      Log.d(TAG, "++ComicHolder::onClick(View)");
       mCallback.onSeriesListItemSelected(mSeries);
     }
   }

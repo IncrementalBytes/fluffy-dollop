@@ -17,6 +17,7 @@ package net.whollynugatory.android.comiccollector.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +32,6 @@ import net.whollynugatory.android.comiccollector.common.BarcodeProcessor;
 import net.whollynugatory.android.comiccollector.common.CameraSource;
 import net.whollynugatory.android.comiccollector.common.CameraSourcePreview;
 import net.whollynugatory.android.comiccollector.common.GraphicOverlay;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 
 public class CameraSourceFragment extends Fragment {
 
@@ -50,7 +50,7 @@ public class CameraSourceFragment extends Fragment {
 
   public static CameraSourceFragment newInstance() {
 
-    LogUtils.debug(TAG, "++newInstance()");
+    Log.d(TAG, "++newInstance()");
     return new CameraSourceFragment();
   }
 
@@ -61,7 +61,7 @@ public class CameraSourceFragment extends Fragment {
   public void onAttach(Context context) {
     super.onAttach(context);
 
-    LogUtils.debug(TAG, "++onAttach(Context)");
+    Log.d(TAG, "++onAttach(Context)");
     try {
       mCallback = (OnCameraSourceListener) context;
     } catch (ClassCastException e) {
@@ -74,7 +74,7 @@ public class CameraSourceFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    LogUtils.debug(TAG, "++onCreate(Bundle)");
+    Log.d(TAG, "++onCreate(Bundle)");
   }
 
   @Override
@@ -86,7 +86,7 @@ public class CameraSourceFragment extends Fragment {
   @Override
   public void onDetach() {
     super.onDetach();
-    LogUtils.debug(TAG, "++onDetach()");
+    Log.d(TAG, "++onDetach()");
 
     if (mCameraSource != null) {
       mCameraSource.release();
@@ -118,10 +118,10 @@ public class CameraSourceFragment extends Fragment {
         if (mPreview != null && mGraphicOverlay != null) {
           mPreview.start(mCameraSource, mGraphicOverlay);
         } else {
-          LogUtils.error(TAG, "ImagePreview and/or GraphicsOverlay are not initialized.");
+          Log.e(TAG, "ImagePreview and/or GraphicsOverlay are not initialized.");
         }
       } catch (IOException e) {
-        LogUtils.error(TAG, "Unable to start camera source.", e);
+        Log.e(TAG, "Unable to start camera source.", e);
         mCameraSource.release();
         mCameraSource = null;
       }

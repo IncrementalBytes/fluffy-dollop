@@ -17,6 +17,7 @@ package net.whollynugatory.android.comiccollector.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.text.Editable;
@@ -29,7 +30,6 @@ import android.widget.EditText;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 import net.whollynugatory.android.comiccollector.db.views.ComicSeriesDetails;
 
 public class ComicSeriesFragment extends Fragment {
@@ -54,7 +54,7 @@ public class ComicSeriesFragment extends Fragment {
 
   public static ComicSeriesFragment newInstance(ComicSeriesDetails comicSeries) {
 
-    LogUtils.debug(TAG, "++newInstance(%s)", comicSeries.toString());
+    Log.d(TAG, "++newInstance(ComicSeriesDetails)");
     ComicSeriesFragment fragment = new ComicSeriesFragment();
     Bundle args = new Bundle();
     args.putSerializable(BaseActivity.ARG_COMIC_SERIES, comicSeries);
@@ -69,7 +69,7 @@ public class ComicSeriesFragment extends Fragment {
   public void onAttach(Context context) {
     super.onAttach(context);
 
-    LogUtils.debug(TAG, "++onAttach(Context)");
+    Log.d(TAG, "++onAttach(Context)");
     try {
       mCallback = (OnComicSeriesListener) context;
     } catch (ClassCastException e) {
@@ -82,19 +82,19 @@ public class ComicSeriesFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    LogUtils.debug(TAG, "++onCreate(Bundle)");
+    Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
       mComicSeries = (ComicSeriesDetails)arguments.getSerializable(BaseActivity.ARG_COMIC_SERIES);
     } else {
-      LogUtils.error(TAG, "Arguments were null.");
+      Log.e(TAG, "Arguments were null.");
     }
   }
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    LogUtils.debug(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
+    Log.d(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     return inflater.inflate(R.layout.fragment_comic_series, container, false);
   }
 
@@ -102,7 +102,7 @@ public class ComicSeriesFragment extends Fragment {
   public void onDetach() {
     super.onDetach();
 
-    LogUtils.debug(TAG, "++onDetach()");
+    Log.d(TAG, "++onDetach()");
     mCallback = null;
   }
 
@@ -110,7 +110,7 @@ public class ComicSeriesFragment extends Fragment {
   public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    LogUtils.debug(TAG, "++onViewCreated(View, Bundle)");
+    Log.d(TAG, "++onViewCreated(View, Bundle)");
     mSeriesIdEdit = view.findViewById(R.id.comic_series_edit_code);
     mPublisherNameEdit = view.findViewById(R.id.comic_series_edit_publisher);
     mSeriesNameEdit = view.findViewById(R.id.comic_series_edit_name);
@@ -125,7 +125,7 @@ public class ComicSeriesFragment extends Fragment {
    */
   private void updateUI() {
 
-    LogUtils.debug(TAG, "++updateUI()");
+    Log.d(TAG, "++updateUI()");
     mSeriesIdEdit.setText(mComicSeries.Id);
     mSeriesIdEdit.setEnabled(false);
     mPublisherNameEdit.setText(mComicSeries.PublisherName);

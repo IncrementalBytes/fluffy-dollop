@@ -17,6 +17,7 @@ package net.whollynugatory.android.comiccollector.db;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
@@ -36,7 +37,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.BaseActivity;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 import net.whollynugatory.android.comiccollector.db.dao.ComicBookDao;
 import net.whollynugatory.android.comiccollector.db.dao.ComicPublisherDao;
 import net.whollynugatory.android.comiccollector.db.dao.ComicSeriesDao;
@@ -77,7 +77,7 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
           File remoteData = new File(context.getFilesDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
           try {
             if (!remoteData.exists()) {
-              LogUtils.debug(TAG, "Using %s from assets.", BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+              Log.d(TAG, "From assets: " + BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
               try (InputStream inputStream = context.getAssets().open(BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE)) {
                 try (FileOutputStream outputStream = new FileOutputStream(sData)) {
                   byte[] buf = new byte[1024];
@@ -88,7 +88,7 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
                 }
               }
             } else {
-              LogUtils.debug(TAG, "Using %s from remote.", BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+              Log.d(TAG, "From remote: " + BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
               try (InputStream inputStream = new FileInputStream(remoteData)) {
                 try (FileOutputStream outputStream = new FileOutputStream(sData)) {
                   byte[] buf = new byte[1024];
@@ -100,10 +100,10 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
               }
             }
           } catch (IOException ioe) {
-            LogUtils.warn(TAG, "Could not get assets.", ioe);
+            Log.w(TAG, "Could not get assets.", ioe);
           } finally {
             if (remoteData.exists() && !remoteData.delete()) {
-              LogUtils.warn(TAG, "Could not remove local copy of remote %s", BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+              Log.w(TAG, "Could not remove local copy of remote " + BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
             }
           }
 
@@ -123,7 +123,7 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
     public void onOpen(@NonNull SupportSQLiteDatabase db) {
       super.onOpen(db);
 
-      LogUtils.debug(TAG, "++onOpen(SupportSQLiteDatabase)");
+      Log.d(TAG, "++onOpen(SupportSQLiteDatabase)");
       new PopulateDbAsync(sInstance, sData, sLibrary).execute();
     }
   };
@@ -149,7 +149,7 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
     protected Void doInBackground(final Void... params) {
 
       if (mData.exists() && mData.canRead()) {
-        LogUtils.debug(TAG, "Loading %s", mData.getAbsolutePath());
+        Log.d(TAG, "Loading " + mData.getAbsolutePath());
         RemoteData remoteData = null;
         try (Reader reader = new FileReader(mData.getAbsolutePath())) {
           Gson gson = new Gson();
@@ -157,9 +157,9 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
           }.getType();
           remoteData = gson.fromJson(reader, collectionType);
         } catch (FileNotFoundException e) {
-          LogUtils.warn(TAG, "Source data from server not found locally.");
+          Log.w(TAG, "Source data from server not found locally.");
         } catch (IOException e) {
-          LogUtils.warn(TAG, "Could not read the source data.");
+          Log.w(TAG, "Could not read the source data.");
         }
 
         if (remoteData != null) {
@@ -171,9 +171,9 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
               message = String.format(Locale.US, "%s %d...", message, ++count);
             }
           } catch (Exception e) {
-            LogUtils.warn(TAG, "Could not process publisher data.", e);
+            Log.w(TAG, "Could not process publisher data.", e);
           } finally {
-            LogUtils.debug(TAG, message);
+            Log.d(TAG, message);
           }
 
           message = "Series data processed:";
@@ -184,24 +184,24 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
               message = String.format(Locale.US, "%s %d...", message, ++count);
             }
           } catch (Exception e) {
-            LogUtils.warn(TAG, "Could not process series data.", e);
+            Log.w(TAG, "Could not process series data.", e);
           } finally {
-            LogUtils.debug(TAG, message);
+            Log.d(TAG, message);
           }
         } else {
-          LogUtils.error(TAG, "Source data was incomplete.");
+          Log.e(TAG, "Source data was incomplete.");
         }
       } else {
-        LogUtils.error(TAG, "%s does not exist yet.", sData.getAbsoluteFile());
+        Log.e(TAG, "%s does not exist yet: " + sData.getAbsoluteFile());
       }
 
       if (mLibrary != null && mLibrary.exists()) {
-        LogUtils.debug(TAG, "Loading %s", mLibrary.getAbsoluteFile());
+        Log.d(TAG, "Loading " + mLibrary.getAbsoluteFile());
         try (Reader reader = new FileReader(mLibrary.getAbsolutePath())) {
           Gson gson = new Gson();
           Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
           ArrayList<ComicBook> comicBookList = gson.fromJson(reader, collectionType);
-          LogUtils.debug(TAG, "Migrating %d ComicBook(s) to database.", comicBookList.size());
+          Log.d(TAG, "Migrating ComicBook(s) to database: " + comicBookList.size());
           for (ComicBook comic : comicBookList) {
             if (comic.IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length()) {
               try {
@@ -239,13 +239,13 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
             }
           }
         } catch (Exception e) {
-          LogUtils.error(TAG, "Failed reading support data.", e);
+          Log.e(TAG, "Failed reading support data.", e);
         }
 
         if (mLibrary.delete()) {
-          LogUtils.debug(TAG, "Removing old library file.");
+          Log.d(TAG, "Removing old library file.");
         } else {
-          LogUtils.warn(TAG, "Could not remove old library file.");
+          Log.w(TAG, "Could not remove old library file.");
         }
       }
 

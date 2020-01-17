@@ -18,6 +18,7 @@ package net.whollynugatory.android.comiccollector.fragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.preference.EditTextPreference;
 import androidx.preference.SwitchPreference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -26,7 +27,6 @@ import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.BuildConfig;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.common.ComicCollectorException;
-import net.whollynugatory.android.comiccollector.common.LogUtils;
 import net.whollynugatory.android.comiccollector.models.User;
 
 public class UserPreferenceFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -50,7 +50,7 @@ public class UserPreferenceFragment extends PreferenceFragmentCompat implements 
 
   public static UserPreferenceFragment newInstance(User user) {
 
-    LogUtils.debug(TAG, "++newInstance()");
+    Log.d(TAG, "++newInstance()");
     UserPreferenceFragment fragment = new UserPreferenceFragment();
     Bundle args = new Bundle();
     args.putSerializable(BaseActivity.ARG_USER, user);
@@ -65,7 +65,7 @@ public class UserPreferenceFragment extends PreferenceFragmentCompat implements 
   public void onAttach(Context context) {
     super.onAttach(context);
 
-    LogUtils.debug(TAG, "++onAttach(Context)");
+    Log.d(TAG, "++onAttach(Context)");
     try {
       mCallback = (OnPreferencesListener) context;
     } catch (ClassCastException e) {
@@ -77,14 +77,14 @@ public class UserPreferenceFragment extends PreferenceFragmentCompat implements 
     if (arguments != null) {
       mUser = (User)arguments.getSerializable(BaseActivity.ARG_USER);
     } else {
-      LogUtils.error(TAG, "Arguments were null.");
+      Log.e(TAG, "Arguments were null.");
     }
   }
 
   @Override
   public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
-    LogUtils.debug(TAG, "++onCreatePreferences(Bundle, String)");
+    Log.d(TAG, "++onCreatePreferences(Bundle, String)");
     addPreferencesFromResource(R.xml.app_preferences);
     SwitchPreference switchPreference = (SwitchPreference) findPreference(IS_GEEK_PREFERENCE);
     if (switchPreference != null) {
@@ -120,7 +120,7 @@ public class UserPreferenceFragment extends PreferenceFragmentCompat implements 
   public void onPause() {
     super.onPause();
 
-    LogUtils.debug(TAG, "++onPause()");
+    Log.d(TAG, "++onPause()");
     getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
   }
 
@@ -128,19 +128,19 @@ public class UserPreferenceFragment extends PreferenceFragmentCompat implements 
   public void onResume() {
     super.onResume();
 
-    LogUtils.debug(TAG, "++onResume()");
+    Log.d(TAG, "++onResume()");
     getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
   }
 
   @Override
   public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String keyName) {
 
-    LogUtils.debug(TAG, "++onSharedPreferenceChanged(SharedPreferences, String)");
+    Log.d(TAG, "++onSharedPreferenceChanged(SharedPreferences, String)");
     getPreferenceScreen().getSharedPreferences().edit().apply();
     try {
       mCallback.onPreferenceChanged();
     } catch (ComicCollectorException e) {
-      LogUtils.debug(TAG, "Exception!", e);
+      Log.d(TAG, "Exception!", e);
     }
   }
 }
