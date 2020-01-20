@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.fragments;
 
 import android.content.Context;
@@ -35,9 +36,8 @@ import java.util.Locale;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.common.SortUtils;
-import net.whollynugatory.android.comiccollector.db.views.ComicBookDetails;
+import net.whollynugatory.android.comiccollector.db.viewmodel.SeriesViewModel;
 import net.whollynugatory.android.comiccollector.db.views.ComicSeriesDetails;
-import net.whollynugatory.android.comiccollector.viewmodel.CollectorViewModel;
 
 public class ComicSeriesListFragment extends Fragment {
 
@@ -85,38 +85,38 @@ public class ComicSeriesListFragment extends Fragment {
 
     Log.d(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     mComicSeries = new HashMap<>();
-    CollectorViewModel collectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
-    collectorViewModel.getComicBooks().observe(this, comicList -> {
+    SeriesViewModel seriesViewModel = ViewModelProviders.of(this).get(SeriesViewModel.class);
+    seriesViewModel.getAll().observe(this, comicList -> {
 
       if (comicList.size() > 0) {
-        for (ComicBookDetails comicBookDetail : comicList) {
-          ComicSeriesDetails tempSeries = mComicSeries.get(comicBookDetail.ProductCode);
-          if (tempSeries == null) {
-            tempSeries = new ComicSeriesDetails();
-            tempSeries.Id = comicBookDetail.ProductCode;
-            tempSeries.OwnedIssues.add(comicBookDetail.IssueNumber);
-            tempSeries.PublisherName = comicBookDetail.PublisherName;
-            tempSeries.Title = comicBookDetail.SeriesTitle;
-            tempSeries.Volume = comicBookDetail.Volume;
-          }
-
-          if (!tempSeries.OwnedIssues.contains(comicBookDetail.IssueNumber)) {
-            tempSeries.OwnedIssues.add(comicBookDetail.IssueNumber);
-          }
-
-          int year = Integer.parseInt(comicBookDetail.Published.substring(3));
-          if (!tempSeries.Published.contains(year)) {
-            tempSeries.Published.add(year);
-          }
-
-          tempSeries.Published.add(Integer.parseInt(comicBookDetail.Published.substring(3)));
-
-          if (mComicSeries.containsKey(comicBookDetail.ProductCode)) {
-            mComicSeries.replace(comicBookDetail.ProductCode, tempSeries);
-          } else {
-            mComicSeries.put(comicBookDetail.ProductCode, tempSeries);
-          }
-        }
+//        for (ComicBookDetails comicBookDetail : comicList) {
+//          ComicSeriesDetails tempSeries = mComicSeries.get(comicBookDetail.ProductCode);
+//          if (tempSeries == null) {
+//            tempSeries = new ComicSeriesDetails();
+//            tempSeries.Id = comicBookDetail.ProductCode;
+//            tempSeries.OwnedIssues.add(comicBookDetail.IssueNumber);
+//            tempSeries.PublisherName = comicBookDetail.PublisherName;
+//            tempSeries.Title = comicBookDetail.SeriesTitle;
+//            tempSeries.Volume = comicBookDetail.Volume;
+//          }
+//
+//          if (!tempSeries.OwnedIssues.contains(comicBookDetail.IssueNumber)) {
+//            tempSeries.OwnedIssues.add(comicBookDetail.IssueNumber);
+//          }
+//
+//          int year = Integer.parseInt(comicBookDetail.Published.substring(3));
+//          if (!tempSeries.Published.contains(year)) {
+//            tempSeries.Published.add(year);
+//          }
+//
+//          tempSeries.Published.add(Integer.parseInt(comicBookDetail.Published.substring(3)));
+//
+//          if (mComicSeries.containsKey(comicBookDetail.ProductCode)) {
+//            mComicSeries.replace(comicBookDetail.ProductCode, tempSeries);
+//          } else {
+//            mComicSeries.put(comicBookDetail.ProductCode, tempSeries);
+//          }
+//        }
 
         ComicSeriesAdapter comicAdapter = new ComicSeriesAdapter(new ArrayList<>(mComicSeries.values()));
         mRecyclerView.setAdapter(comicAdapter);

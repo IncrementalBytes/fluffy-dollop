@@ -23,8 +23,8 @@ import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 
-@Entity(tableName = "comic_publisher_table", indices = @Index(value = {"name"}))
-public class ComicPublisher {
+@Entity(tableName = "publisher_table", indices = @Index(value = {"name"}))
+public class PublisherEntity {
 
   @PrimaryKey()
   @NonNull
@@ -37,16 +37,16 @@ public class ComicPublisher {
   @SerializedName("name")
   public String Name;
 
-  public ComicPublisher() {
+  public PublisherEntity() {
 
-    Id = BaseActivity.DEFAULT_COMIC_PUBLISHER_ID;
+    Id = BaseActivity.DEFAULT_PUBLISHER_ID;
     Name = "";
   }
 
   public boolean isValid() {
 
-    return !Id.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) &&
-      Id.length() == BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length() &&
+    return !Id.equals(BaseActivity.DEFAULT_PUBLISHER_ID) &&
+      Id.length() == BaseActivity.DEFAULT_PUBLISHER_ID.length() &&
       !Name.isEmpty();
   }
 }

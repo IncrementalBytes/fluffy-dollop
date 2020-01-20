@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.db;
 
 import android.content.Context;
@@ -36,41 +37,43 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.db.dao.ComicBookDao;
-import net.whollynugatory.android.comiccollector.db.dao.ComicPublisherDao;
-import net.whollynugatory.android.comiccollector.db.dao.ComicSeriesDao;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBook;
-import net.whollynugatory.android.comiccollector.db.entity.ComicPublisher;
+import net.whollynugatory.android.comiccollector.db.dao.PublisherDao;
+import net.whollynugatory.android.comiccollector.db.dao.SeriesDao;
+import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
+import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
 import net.whollynugatory.android.comiccollector.db.entity.RemoteData;
-import net.whollynugatory.android.comiccollector.db.entity.ComicSeries;
-import net.whollynugatory.android.comiccollector.db.views.ComicBookDetails;
-import net.whollynugatory.android.comiccollector.db.views.ComicSeriesDetails;
+import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 
 @Database(
-  entities = {ComicBook.class, ComicPublisher.class, ComicSeries.class},
-  views = {ComicBookDetails.class, ComicSeriesDetails.class},
+  entities = {ComicBookEntity.class, PublisherEntity.class, SeriesEntity.class},
   version = 1,
   exportSchema = false)
-public abstract class CollectorRoomDatabase extends RoomDatabase {
+public abstract class CollectorDatabase extends RoomDatabase {
 
-  private static final String TAG = BaseActivity.BASE_TAG + "CollectorRoomDatabase";
+  private static final String TAG = BaseActivity.BASE_TAG + "CollectorDatabase";
 
-  public abstract ComicBookDao bookDao();
+  public abstract ComicBookDao comicBookDao();
 
-  public abstract ComicPublisherDao publisherDao();
+  public abstract PublisherDao publisherDao();
 
-  public abstract ComicSeriesDao seriesDao();
+  public abstract SeriesDao seriesDao();
 
-  private static volatile CollectorRoomDatabase sInstance;
+  private static volatile CollectorDatabase INSTANCE;
   private static volatile File sData;
   private static volatile File sLibrary;
+  private static final int NUMBER_OF_THREADS = 4;
 
-  static CollectorRoomDatabase getDatabase(final Context context) {
+  public static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
 
-    if (sInstance == null) {
-      synchronized (CollectorRoomDatabase.class) {
-        if (sInstance == null) {
+  public static CollectorDatabase getInstance(final Context context) {
+
+    if (INSTANCE == null) {
+      synchronized (CollectorDatabase.class) {
+        if (INSTANCE == null) {
           sLibrary = new File(context.getFilesDir(), BaseActivity.DEFAULT_LIBRARY_FILE);
           sData = new File(context.getCacheDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
 
@@ -107,14 +110,14 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
             }
           }
 
-          sInstance = Room.databaseBuilder(context.getApplicationContext(), CollectorRoomDatabase.class, BaseActivity.DATABASE_NAME)
+          INSTANCE = Room.databaseBuilder(context.getApplicationContext(), CollectorDatabase.class, BaseActivity.DATABASE_NAME)
             .addCallback(sRoomDatabaseCallback)
             .build();
         }
       }
     }
 
-    return sInstance;
+    return INSTANCE;
   }
 
   private static RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
@@ -124,21 +127,21 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
       super.onOpen(db);
 
       Log.d(TAG, "++onOpen(SupportSQLiteDatabase)");
-      new PopulateDbAsync(sInstance, sData, sLibrary).execute();
+      new PopulateDbAsync(INSTANCE, sData, sLibrary).execute();
     }
   };
 
   private static class PopulateDbAsync extends AsyncTask<Void, Void, Void> {
 
-    private final ComicBookDao mBookDao;
+    private final ComicBookDao mComicBookDao;
     private final File mData;
     private final File mLibrary;
-    private final ComicPublisherDao mPublisherDao;
-    private final ComicSeriesDao mSeriesDao;
+    private final PublisherDao mPublisherDao;
+    private final SeriesDao mSeriesDao;
 
-    PopulateDbAsync(CollectorRoomDatabase db, File data, File library) {
+    PopulateDbAsync(CollectorDatabase db, File data, File library) {
 
-      mBookDao = db.bookDao();
+      mComicBookDao = db.comicBookDao();
       mData = data;
       mLibrary = library;
       mPublisherDao = db.publisherDao();
@@ -166,7 +169,7 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
           String message = "Publisher data processed:";
           int count = 0;
           try {
-            for (ComicPublisher publisher : remoteData.ComicPublishers) {
+            for (PublisherEntity publisher : remoteData.ComicPublishers) {
               mPublisherDao.insert(publisher);
               message = String.format(Locale.US, "%s %d...", message, ++count);
             }
@@ -179,7 +182,7 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
           message = "Series data processed:";
           count = 0;
           try {
-            for (ComicSeries series : remoteData.ComicSeries) {
+            for (SeriesEntity series : remoteData.ComicSeries) {
               mSeriesDao.insert(series);
               message = String.format(Locale.US, "%s %d...", message, ++count);
             }
@@ -199,44 +202,30 @@ public abstract class CollectorRoomDatabase extends RoomDatabase {
         Log.d(TAG, "Loading " + mLibrary.getAbsoluteFile());
         try (Reader reader = new FileReader(mLibrary.getAbsolutePath())) {
           Gson gson = new Gson();
-          Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
-          ArrayList<ComicBook> comicBookList = gson.fromJson(reader, collectionType);
+          Type collectionType = new TypeToken<ArrayList<ComicBookEntity>>() {}.getType();
+          ArrayList<ComicBookEntity> comicBookList = gson.fromJson(reader, collectionType);
           Log.d(TAG, "Migrating ComicBook(s) to database: " + comicBookList.size());
-          for (ComicBook comic : comicBookList) {
+          for (ComicBookEntity comic : comicBookList) {
             if (comic.IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length()) {
               try {
-                String temp = comic.IssueCode.substring(0, comic.IssueCode.length() - 2);
-                comic.IssueNumber = Integer.parseInt(temp);
-                temp = comic.IssueCode.substring(comic.IssueCode.length() - 2, comic.IssueCode.length() - 1);
-                comic.CoverVariant = Integer.parseInt(temp);
-                temp = comic.IssueCode.substring(comic.IssueCode.length() -1);
-                comic.PrintRun = Integer.parseInt(temp);
-                comic.ProductCode = String.format(Locale.US, "%s%s", comic.PublisherId, comic.SeriesId);
+//                comic.ProductCode = String.format(Locale.US, "%s%s", comic.PublisherId, comic.SeriesId);
                 comic.Id = String.format(Locale.US, "%s-%s", comic.ProductCode, comic.IssueCode);
               } catch (Exception e) {
                 comic.Id = BaseActivity.DEFAULT_COMIC_BOOK_ID;
                 comic.ProductCode = BaseActivity.DEFAULT_PRODUCT_CODE;
                 comic.IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
-                comic.IssueNumber = -1;
-                comic.CoverVariant = -1;
-                comic.PrintRun = -1;
-                comic.PublisherId = BaseActivity.DEFAULT_COMIC_PUBLISHER_ID;
-                comic.SeriesId = BaseActivity.DEFAULT_COMIC_SERIES_ID;
+//                comic.PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
+//                comic.SeriesId = BaseActivity.DEFAULT_SERIES_ID;
               }
             } else {
               comic.Id = BaseActivity.DEFAULT_COMIC_BOOK_ID;
               comic.ProductCode = BaseActivity.DEFAULT_PRODUCT_CODE;
               comic.IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
-              comic.IssueNumber = -1;
-              comic.CoverVariant = -1;
-              comic.PrintRun = -1;
-              comic.PublisherId = BaseActivity.DEFAULT_COMIC_PUBLISHER_ID;
-              comic.SeriesId = BaseActivity.DEFAULT_COMIC_SERIES_ID;
+//              comic.PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
+//              comic.SeriesId = BaseActivity.DEFAULT_SERIES_ID;
             }
 
-            if (comic.isValid()) {
-              mBookDao.insert(comic);
-            }
+            mComicBookDao.insert(comic);
           }
         } catch (Exception e) {
           Log.e(TAG, "Failed reading support data.", e);

@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.db.entity;
 
 import com.google.gson.annotations.SerializedName;
@@ -21,10 +22,10 @@ import java.util.ArrayList;
 public class RemoteData {
 
   @SerializedName("publishers")
-  public ArrayList<ComicPublisher> ComicPublishers;
+  public ArrayList<PublisherEntity> ComicPublishers;
 
   @SerializedName("series")
-  public ArrayList<ComicSeries> ComicSeries;
+  public ArrayList<SeriesEntity> ComicSeries;
 
   public RemoteData() {
 

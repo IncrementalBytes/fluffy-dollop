@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.fragments;
 
 import android.app.AlertDialog;
@@ -37,8 +38,8 @@ import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
 
 import java.util.Locale;
-import net.whollynugatory.android.comiccollector.db.views.ComicBookDetails;
-import net.whollynugatory.android.comiccollector.viewmodel.CollectorViewModel;
+import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
+import net.whollynugatory.android.comiccollector.db.viewmodel.ComicBookViewModel;
 
 public class ComicBookListFragment extends Fragment {
 
@@ -52,14 +53,14 @@ public class ComicBookListFragment extends Fragment {
 
     void onComicListDeleteBook();
 
-    void onComicListItemSelected(ComicBookDetails comicBook);
+    void onComicListItemSelected(ComicBookEntity comicBook);
 
     void onComicListPopulated(int size);
   }
 
   private OnComicBookListListener mCallback;
 
-  private CollectorViewModel mCollectorViewModel;
+  private ComicBookViewModel mComicBookViewModel;
 
   private RecyclerView mRecyclerView;
 
@@ -113,16 +114,16 @@ public class ComicBookListFragment extends Fragment {
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     Log.d(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-    mCollectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
+    mComicBookViewModel = ViewModelProviders.of(this).get(ComicBookViewModel.class);
     if (mProductCode != null && mProductCode.length() > 0) {
-      mCollectorViewModel.getComicBooksByProductCode(mProductCode).observe(this, bookList -> {
-
-        ComicBookAdapter comicAdapter = new ComicBookAdapter(bookList);
-        mRecyclerView.setAdapter(comicAdapter);
-        mCallback.onComicListPopulated(bookList.size());
-      });
+//      mComicBookViewModel.getComicBooksByProductCode(mProductCode).observe(this, bookList -> {
+//
+//        ComicBookAdapter comicAdapter = new ComicBookAdapter(bookList);
+//        mRecyclerView.setAdapter(comicAdapter);
+//        mCallback.onComicListPopulated(bookList.size());
+//      });
     } else {
-      mCollectorViewModel.getComicBooks().observe(this, bookList -> {
+      mComicBookViewModel.getRecent().observe(this, bookList -> {
 
         ComicBookAdapter comicAdapter = new ComicBookAdapter(bookList);
         mRecyclerView.setAdapter(comicAdapter);
@@ -167,9 +168,9 @@ public class ComicBookListFragment extends Fragment {
    */
   private class ComicBookAdapter extends RecyclerView.Adapter<ComicHolder> {
 
-    private final List<ComicBookDetails> mComicBooks;
+    private final List<ComicBookEntity> mComicBooks;
 
-    ComicBookAdapter(List<ComicBookDetails> comicBooks) {
+    ComicBookAdapter(List<ComicBookEntity> comicBooks) {
 
       mComicBooks = comicBooks;
     }
@@ -185,7 +186,7 @@ public class ComicBookListFragment extends Fragment {
     @Override
     public void onBindViewHolder(@NonNull ComicHolder holder, int position) {
 
-      ComicBookDetails comicBook = mComicBooks.get(position);
+      ComicBookEntity comicBook = mComicBooks.get(position);
       holder.bind(comicBook);
     }
 
@@ -207,7 +208,7 @@ public class ComicBookListFragment extends Fragment {
     private final TextView mSeriesNameTextView;
     private final TextView mTitleTextView;
 
-    private ComicBookDetails mComicBook;
+    private ComicBookEntity mComicBook;
 
     ComicHolder(LayoutInflater inflater, ViewGroup parent) {
       super(inflater.inflate(R.layout.comic_book_item, parent, false));
@@ -222,7 +223,7 @@ public class ComicBookListFragment extends Fragment {
       itemView.setOnClickListener(this);
     }
 
-    void bind(ComicBookDetails comicBook) {
+    void bind(ComicBookEntity comicBook) {
 
       mComicBook = comicBook;
 
@@ -236,7 +237,7 @@ public class ComicBookListFragment extends Fragment {
           AlertDialog removeBookDialog = new AlertDialog.Builder(getActivity())
             .setMessage(message)
             .setPositiveButton(android.R.string.yes, (dialog, which) -> {
-              mCollectorViewModel.deleteComicBookById(mComicBook.Id);
+              mComicBookViewModel.delete(mComicBook.Id);
               mCallback.onComicListDeleteBook();
             })
             .setNegativeButton(android.R.string.no, null)
@@ -259,9 +260,9 @@ public class ComicBookListFragment extends Fragment {
         mReadImage.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_unchecked_dark, null));
       }
 
-      mSeriesNameTextView.setText(mComicBook.SeriesTitle);
+//      mSeriesNameTextView.setText(mComicBook.SeriesTitle);
       mTitleTextView.setText(mComicBook.Title);
-      mIssueTextView.setText(String.valueOf(mComicBook.IssueNumber));
+//      mIssueTextView.setText(String.valueOf(mComicBook.IssueNumber));
     }
 
     @Override

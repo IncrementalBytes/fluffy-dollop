@@ -13,10 +13,10 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector;
 
 import android.Manifest.permission;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -25,7 +25,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProviders;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -47,22 +46,17 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import net.whollynugatory.android.comiccollector.common.ComicCollectorException;
 import net.whollynugatory.android.comiccollector.common.PathUtils;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBook;
+import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 import net.whollynugatory.android.comiccollector.db.views.ComicBookDetails;
 import net.whollynugatory.android.comiccollector.db.views.ComicSeriesDetails;
 import net.whollynugatory.android.comiccollector.fragments.ComicBookFragment;
@@ -71,7 +65,6 @@ import net.whollynugatory.android.comiccollector.fragments.ComicSeriesListFragme
 import net.whollynugatory.android.comiccollector.fragments.SyncFragment;
 import net.whollynugatory.android.comiccollector.fragments.UserPreferenceFragment;
 import net.whollynugatory.android.comiccollector.models.User;
-import net.whollynugatory.android.comiccollector.viewmodel.CollectorViewModel;
 import net.whollynugatory.android.comiccollector.fragments.ComicBookFragment.OnComicBookListener;
 import net.whollynugatory.android.comiccollector.fragments.ComicBookListFragment.OnComicBookListListener;
 import net.whollynugatory.android.comiccollector.fragments.ComicSeriesListFragment.OnComicSeriesListListener;
@@ -91,8 +84,6 @@ public class MainActivity extends BaseActivity implements
   private Toolbar mMainToolbar;
   private ProgressBar mProgress;
   private Snackbar mSnackbar;
-
-  private CollectorViewModel mCollectorViewModel;
 
   private StorageReference mStorage;
 
@@ -173,7 +164,6 @@ public class MainActivity extends BaseActivity implements
     mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
     mUser.UseImageCapture = preferences.getBoolean(UserPreferenceFragment.USE_IMAGE_PREVIEW_PREFERENCE, false);
     if (User.isValid(mUser)) { // get most recent publisher and series data
-      mCollectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
       mRemotePath = PathUtils.combine(User.ROOT, mUser.Id, BaseActivity.DEFAULT_LIBRARY_FILE);
       mStorage = FirebaseStorage.getInstance().getReference().child(mRemotePath);
       mNavigationView.setSelectedItemId(R.id.navigation_series);
@@ -288,14 +278,14 @@ public class MainActivity extends BaseActivity implements
       }
 
       String message = null;
-      ComicBookDetails comicBook = null;
+      ComicBookEntity comicBook = null;
       if (data != null) {
         if (data.hasExtra(BaseActivity.ARG_MESSAGE)) {
           message = data.getStringExtra(BaseActivity.ARG_MESSAGE);
         }
 
         if (data.hasExtra(BaseActivity.ARG_COMIC_BOOK)) {
-          comicBook = (ComicBookDetails)data.getSerializableExtra(BaseActivity.ARG_COMIC_BOOK);
+          comicBook = (ComicBookEntity) data.getSerializableExtra(BaseActivity.ARG_COMIC_BOOK);
         }
       }
 
@@ -351,12 +341,13 @@ public class MainActivity extends BaseActivity implements
   }
 
   @Override
-  public void onComicBookAddedToLibrary(ComicBook comicBook) {
+  public void onComicBookAddedToLibrary(ComicBookEntity comicBookEntity) {
 
-    Log.d(TAG, "++onComicBookAddedToLibrary(ComicBook)");
-    if (comicBook != null) {
-      mCollectorViewModel.insert(comicBook);
-      mTargetProductCode = comicBook.ProductCode;
+    Log.d(TAG, "++onComicBookAddedToLibrary(ComicBookEntity)");
+    if (comicBookEntity != null) {
+      // TODO: move to fragment
+//      mCollectorViewModel.insert(comicBookEntity);
+      mTargetProductCode = comicBookEntity.ProductCode;
       mNavigationView.setSelectedItemId(R.id.navigation_books);
     } else {
       showDismissableSnackbar(getString(R.string.err_add_comic_book));
@@ -394,10 +385,10 @@ public class MainActivity extends BaseActivity implements
   }
 
   @Override
-  public void onComicListItemSelected(ComicBookDetails comicBook) {
+  public void onComicListItemSelected(ComicBookEntity comicBookEntity) {
 
-    Log.d(TAG, "++onComicListItemSelected(ComicBookDetails)");
-    replaceFragment(ComicBookFragment.newInstance(comicBook));
+    Log.d(TAG, "++onComicListItemSelected(ComicBookEntity)");
+    replaceFragment(ComicBookFragment.newInstance(comicBookEntity));
   }
 
   @Override
@@ -470,55 +461,56 @@ public class MainActivity extends BaseActivity implements
       mProgress.setIndeterminate(true);
     }
 
-    mCollectorViewModel.exportable().observe(this, comicBookList -> {
-
-      if (comicBookList != null) {
-        FileOutputStream outputStream;
-        try {
-          outputStream = getApplicationContext().openFileOutput(BaseActivity.DEFAULT_EXPORT_FILE, Context.MODE_PRIVATE);
-          Gson gson = new Gson();
-          Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
-          ArrayList<ComicBook> booksWritten = new ArrayList<>(comicBookList);
-          outputStream.write(gson.toJson(booksWritten, collectionType).getBytes());
-          Log.d(TAG, "Comic books written: " + booksWritten.size());
-        } catch (Exception e) {
-          Log.w(TAG, "Exception when exporting local database.");
-          Crashlytics.logException(e);
-        }
-      }
-
-      try { // look for file output
-        InputStream stream = getApplicationContext().openFileInput(BaseActivity.DEFAULT_EXPORT_FILE);
-        UploadTask uploadTask = mStorage.putStream(stream);
-        uploadTask.addOnCompleteListener(task -> {
-
-          if (task.isSuccessful()) {
-            if (task.getResult() != null) {
-              showDismissableSnackbar(getString(R.string.message_export_success));
-            } else {
-              Log.w(TAG, "Storage task results were null; this is unexpected.");
-              showDismissableSnackbar(getString(R.string.err_storage_task_unexpected));
-            }
-          } else {
-            if (task.getException() != null) {
-              Log.e(TAG, "Could not export library.", task.getException());
-            }
-          }
-        });
-      } catch (FileNotFoundException fnfe) {
-        Log.w(TAG, "Could not export library.", fnfe);
-        Crashlytics.logException(fnfe);
-      } finally {
-        File tempFile = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
-        if (tempFile.exists()) {
-          if (tempFile.delete()) {
-            Log.d(TAG, "Removed temporary local export file.");
-          } else {
-            Log.w(TAG, "Temporary file was not removed.");
-          }
-        }
-      }
-    });
+    // TODO: move to fragment
+//    mCollectorViewModel.exportable().observe(this, comicBookList -> {
+//
+//      if (comicBookList != null) {
+//        FileOutputStream outputStream;
+//        try {
+//          outputStream = getApplicationContext().openFileOutput(BaseActivity.DEFAULT_EXPORT_FILE, Context.MODE_PRIVATE);
+//          Gson gson = new Gson();
+//          Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
+//          ArrayList<ComicBook> booksWritten = new ArrayList<>(comicBookList);
+//          outputStream.write(gson.toJson(booksWritten, collectionType).getBytes());
+//          Log.d(TAG, "Comic books written: " + booksWritten.size());
+//        } catch (Exception e) {
+//          Log.w(TAG, "Exception when exporting local database.");
+//          Crashlytics.logException(e);
+//        }
+//      }
+//
+//      try { // look for file output
+//        InputStream stream = getApplicationContext().openFileInput(BaseActivity.DEFAULT_EXPORT_FILE);
+//        UploadTask uploadTask = mStorage.putStream(stream);
+//        uploadTask.addOnCompleteListener(task -> {
+//
+//          if (task.isSuccessful()) {
+//            if (task.getResult() != null) {
+//              showDismissableSnackbar(getString(R.string.message_export_success));
+//            } else {
+//              Log.w(TAG, "Storage task results were null; this is unexpected.");
+//              showDismissableSnackbar(getString(R.string.err_storage_task_unexpected));
+//            }
+//          } else {
+//            if (task.getException() != null) {
+//              Log.e(TAG, "Could not export library.", task.getException());
+//            }
+//          }
+//        });
+//      } catch (FileNotFoundException fnfe) {
+//        Log.w(TAG, "Could not export library.", fnfe);
+//        Crashlytics.logException(fnfe);
+//      } finally {
+//        File tempFile = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
+//        if (tempFile.exists()) {
+//          if (tempFile.delete()) {
+//            Log.d(TAG, "Removed temporary local export file.");
+//          } else {
+//            Log.w(TAG, "Temporary file was not removed.");
+//          }
+//        }
+//      }
+//    });
   }
 
   // TODO: add comparison
@@ -538,20 +530,20 @@ public class MainActivity extends BaseActivity implements
         Log.d(TAG, "Loading " + file.getAbsolutePath());
         if (file.exists() && file.canRead()) {
           try (Reader reader = new FileReader(file.getAbsolutePath())) {
-            mCollectorViewModel.deleteAllComicBooks();
+            // TODO: move to fragment
+//            mCollectorViewModel.deleteAllComicBooks();
             Gson gson = new Gson();
-            Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
-            List<ComicBook> comics = gson.fromJson(reader, collectionType);
-            List<ComicBook> updatedComics = new ArrayList<>();
-            for (ComicBook comicBook : comics) {
-              ComicBook updated = new ComicBook(comicBook);
+            Type collectionType = new TypeToken<ArrayList<ComicBookEntity>>() {}.getType();
+            List<ComicBookEntity> comics = gson.fromJson(reader, collectionType);
+            List<ComicBookEntity> updatedComics = new ArrayList<>();
+            for (ComicBookEntity comicBook : comics) {
+              ComicBookEntity updated = new ComicBookEntity(comicBook);
               updated.parseProductCode(comicBook.Id);
-              if (updated.isValid()) {
-                updatedComics.add(updated);
-              }
+              updatedComics.add(updated);
             }
 
-            mCollectorViewModel.insertAll(updatedComics);
+            // TODO: move to fragment
+//            mCollectorViewModel.insertAll(updatedComics);
             showDismissableSnackbar(getString(R.string.status_sync_import_success));
           } catch (Exception e) {
             Log.w(TAG, "Failed reading local library.", e);

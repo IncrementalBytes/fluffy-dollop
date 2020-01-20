@@ -13,20 +13,20 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.db.views;
 
 import androidx.room.DatabaseView;
 import java.io.Serializable;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.BaseActivity;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBook;
+import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 
 @DatabaseView(
   "SELECT Book.id AS Id, " +
     "Book.product_code AS ProductCode, " +
     "Book.issue_code AS IssueCode," +
     "Book.title AS Title, " +
-    "Book.issue_number AS IssueNumber, " +
     "Book.published_date AS Published, " +
     "Book.owned AS IsOwned, " +
     "Book.read AS IsRead, " +
@@ -34,8 +34,8 @@ import net.whollynugatory.android.comiccollector.db.entity.ComicBook;
     "Series.volume AS Volume, " +
     "Publishers.name AS PublisherName " +
   "FROM comic_book_table AS Book " +
-  "INNER JOIN comic_series_table AS Series ON Series.id = Book.product_code " +
-  "INNER JOIN comic_publisher_table AS Publishers ON Series.publisher_id = Publishers.id")
+  "INNER JOIN series_table AS Series ON Series.id = Book.product_code " +
+  "INNER JOIN publisher_table AS Publishers ON Series.publisher_id = Publishers.id")
 public class ComicBookDetails implements Serializable {
 
   public String Id;
@@ -65,18 +65,18 @@ public class ComicBookDetails implements Serializable {
     Volume = 0;
   }
 
-  public ComicBookDetails(ComicBook comicBook) {
+  public ComicBookDetails(ComicBookEntity comicBookEntity) {
 
-    Id = comicBook.Id;
-    IsOwned = comicBook.IsOwned;
-    IsRead = comicBook.IsRead;
-    IssueCode = comicBook.IssueCode;
-    IssueNumber = comicBook.IssueNumber;
-    Published = comicBook.PublishedDate;
+    Id = comicBookEntity.Id;
+    IsOwned = comicBookEntity.IsOwned;
+    IsRead = comicBookEntity.IsRead;
+    IssueCode = comicBookEntity.IssueCode;
+    IssueNumber = 0; // TODO: update
+    Published = comicBookEntity.PublishedDate;
     PublisherName = "";
-    ProductCode = comicBook.ProductCode;
+    ProductCode = comicBookEntity.ProductCode;
     SeriesTitle = "";
-    Title = comicBook.Title;
+    Title = comicBookEntity.Title;
     Volume = 0;
   }
 

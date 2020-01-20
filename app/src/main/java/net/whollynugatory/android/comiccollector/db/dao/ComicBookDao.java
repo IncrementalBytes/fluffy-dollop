@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.db.dao;
 
 import androidx.lifecycle.LiveData;
@@ -20,37 +21,31 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 import java.util.List;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBook;
-import net.whollynugatory.android.comiccollector.db.views.ComicBookDetails;
+import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 
 @Dao
 public interface ComicBookDao {
-
-  @Query("DELETE from comic_book_table")
-  void deleteAll();
 
   @Query("DELETE from comic_book_table WHERE Id == :comicBookId")
   void deleteById(String comicBookId);
 
   @Query("SELECT * from comic_book_table")
-  LiveData<List<ComicBook>> exportable();
+  LiveData<List<ComicBookEntity>> exportable();
 
-  @Query("SELECT * from ComicBookDetails WHERE Id == :comicBookId")
-  LiveData<ComicBookDetails> get(String comicBookId);
+  @Query("SELECT * from comic_book_table WHERE Id == :comicBookId")
+  LiveData<ComicBookEntity> find(String comicBookId);
 
-  @Query("SELECT * from ComicBookDetails WHERE ProductCode == :productCode AND IssueCode == :issueCode")
-  LiveData<ComicBookDetails> get(String productCode, String issueCode);
-
-  @Query("SELECT * from ComicBookDetails ORDER BY published DESC")
-  LiveData<List<ComicBookDetails>> getAll();
-
-  @Query("SELECT * from ComicBookDetails WHERE ProductCode == :productCode ORDER BY IssueNumber DESC")
-  LiveData<List<ComicBookDetails>> getByProductCode(String productCode);
+  @Query("SELECT * FROM comic_book_table ORDER BY added_date DESC LIMIT 50")
+  LiveData<List<ComicBookEntity>> getAllByRecent();
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void insert(ComicBook book);
+  void insert(ComicBookEntity comicBookEntity);
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void insertAll(List<ComicBook> comicBooks);
+  void insertAll(List<ComicBookEntity> comicBookEntityList);
+
+  @Update
+  void update(ComicBookEntity comicBookEntity);
 }

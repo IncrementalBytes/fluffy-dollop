@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector;
 
 import android.Manifest.permission;
@@ -31,7 +32,6 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModelProviders;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -43,8 +43,6 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import com.crashlytics.android.Crashlytics;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
@@ -58,12 +56,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import net.whollynugatory.android.comiccollector.common.ComicCollectorException;
-import net.whollynugatory.android.comiccollector.common.PathUtils;
-import net.whollynugatory.android.comiccollector.common.RetrieveComicSeriesDataTask;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBook;
-import net.whollynugatory.android.comiccollector.db.entity.ComicSeries;
-import net.whollynugatory.android.comiccollector.db.views.ComicBookDetails;
+import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
+import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 import net.whollynugatory.android.comiccollector.db.views.ComicSeriesDetails;
 import net.whollynugatory.android.comiccollector.fragments.Camera2Fragment;
 import net.whollynugatory.android.comiccollector.fragments.CameraSourceFragment;
@@ -72,7 +66,6 @@ import net.whollynugatory.android.comiccollector.fragments.ManualSearchFragment;
 import net.whollynugatory.android.comiccollector.fragments.TutorialFragment;
 import net.whollynugatory.android.comiccollector.fragments.UserPreferenceFragment;
 import net.whollynugatory.android.comiccollector.models.User;
-import net.whollynugatory.android.comiccollector.viewmodel.CollectorViewModel;
 import net.whollynugatory.android.comiccollector.common.BarcodeProcessor.OnBarcodeProcessorListener;
 import net.whollynugatory.android.comiccollector.fragments.CameraSourceFragment.OnCameraSourceListener;
 import net.whollynugatory.android.comiccollector.fragments.ComicSeriesFragment.OnComicSeriesListener;
@@ -89,8 +82,6 @@ public class AddActivity extends BaseActivity implements
   private static final String TAG = BaseActivity.BASE_TAG + "AddActivity";
 
   private ProgressBar mProgress;
-
-  private CollectorViewModel mCollectorViewModel;
 
   private File mCurrentImageFile;
   private Bitmap mImageBitmap;
@@ -136,7 +127,6 @@ public class AddActivity extends BaseActivity implements
         mProgress.setIndeterminate(true);
       }
 
-      mCollectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
       if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
         checkForCameraPermission();
       } else {
@@ -257,26 +247,27 @@ public class AddActivity extends BaseActivity implements
   public void onBarcodeProcessed(String barcode) {
 
     Log.d(TAG, "onBarcodeProcessed(String)");
-    ComicBook comicBook = null;
+    ComicBookEntity comicBook = null;
     if (barcode != null &&
       !barcode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) &&
       barcode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) {
-      comicBook = new ComicBook();
+      comicBook = new ComicBookEntity();
       comicBook.parseProductCode(barcode);
     } else {
       Log.w(TAG, "Unexpected bar code: " + barcode);
     }
 
     if (comicBook != null) { // we have a legit barcode
-      final ComicBook workableBook = new ComicBook(comicBook);
-      mCollectorViewModel.getComicSeriesByProductCode(workableBook.ProductCode).observe(this, comicSeries -> {
-
-        if (comicSeries != null) {
-          getIssueIdFromUser(workableBook);
-        } else {
-          new RetrieveComicSeriesDataTask(this, workableBook.ProductCode).execute();
-        }
-      });
+      final ComicBookEntity workableBook = new ComicBookEntity(comicBook);
+      // TODO: move to fragment
+//      mCollectorViewModel.getComicSeriesByProductCode(workableBook.ProductCode).observe(this, comicSeries -> {
+//
+//        if (comicSeries != null) {
+//          getIssueIdFromUser(workableBook);
+//        } else {
+//          new RetrieveComicSeriesDataTask(this, workableBook.ProductCode).execute();
+//        }
+//      });
     } else {
       setFailAndFinish(R.string.err_bar_code_not_found);
     }
@@ -295,33 +286,35 @@ public class AddActivity extends BaseActivity implements
     if (seriesDetails != null) {
       Log.d(TAG, "++onComicSeriesActionComplete(ComicSeriesDetails)");
 
-      ComicSeries comicSeries = new ComicSeries();
-      comicSeries.parseProductCode(seriesDetails.Id);
-      comicSeries.Title = seriesDetails.Title;
-      comicSeries.Volume = seriesDetails.Volume;
-      comicSeries.IsFlagged = true;
-      comicSeries.SubmissionDate = Calendar.getInstance().getTimeInMillis();
-      comicSeries.SubmittedBy = mUser.Id;
-      mCollectorViewModel.insert(comicSeries);
+      SeriesEntity seriesEntity = new SeriesEntity();
+      seriesEntity.parseProductCode(seriesDetails.Id);
+      seriesEntity.Title = seriesDetails.Title;
+      seriesEntity.Volume = seriesDetails.Volume;
+      seriesEntity.IsFlagged = true;
+      seriesEntity.SubmissionDate = Calendar.getInstance().getTimeInMillis();
+      seriesEntity.SubmittedBy = mUser.Id;
+        // TODO: move to fragment
+//      mCollectorViewModel.insert(comicSeries);
 
       // add entry for global review in firestore
-      String queryPath = PathUtils.combine(ComicSeries.ROOT, comicSeries.Id);
-      FirebaseFirestore.getInstance().document(queryPath).set(comicSeries, SetOptions.merge()).addOnCompleteListener(task -> {
-
-        if (!task.isSuccessful()) { // not fatal but we need to know this information for review
-          Crashlytics.logException(
-            new ComicCollectorException(
-              String.format(
-                Locale.US,
-                "%s could not write pending series: %s",
-                mUser.Id,
-                comicSeries.toString())));
-        }
-
-        ComicBook workableBook = new ComicBook();
-        workableBook.parseProductCode(comicSeries.Id);
-        getIssueIdFromUser(workableBook);
-      });
+      // TODO: continue utilizing Firebase?
+//      String queryPath = PathUtils.combine(ComicSeries.ROOT, comicSeries.Id);
+//      FirebaseFirestore.getInstance().document(queryPath).set(comicSeries, SetOptions.merge()).addOnCompleteListener(task -> {
+//
+//        if (!task.isSuccessful()) { // not fatal but we need to know this information for review
+//          Crashlytics.logException(
+//            new ComicCollectorException(
+//              String.format(
+//                Locale.US,
+//                "%s could not write pending series: %s",
+//                mUser.Id,
+//                comicSeries.toString())));
+//        }
+//
+//        ComicBook workableBook = new ComicBook();
+//        workableBook.parseProductCode(comicSeries.Id);
+//        getIssueIdFromUser(workableBook);
+//      });
     } else {
       Log.d(TAG, "++onComicSeriesActionComplete(null)");
       setFailAndFinish(R.string.err_add_comic_series);
@@ -329,7 +322,7 @@ public class AddActivity extends BaseActivity implements
   }
 
   @Override
-  public void onManualSearchActionComplete(ComicBook comicBook) {
+  public void onManualSearchActionComplete(ComicBookEntity comicBookEntity) {
 
     Log.d(TAG, "++onManualSearchActionComplete(ComicBook)");
     if (mProgress != null) {
@@ -337,25 +330,26 @@ public class AddActivity extends BaseActivity implements
     }
 
     // look for this specific comic book
-    mCollectorViewModel.getComicBookById(comicBook.ProductCode, comicBook.IssueCode).observe(this, comicBookDetails -> {
-
-      if (comicBookDetails != null) {
-        setSuccessAndFinish(comicBookDetails);
-      } else {
-        mCollectorViewModel.getComicSeriesByProductCode(comicBook.ProductCode).observe(this, comicSeriesDetails -> {
-
-          if (comicSeriesDetails != null) { // add series details to comic book
-            ComicBookDetails details = new ComicBookDetails(comicBook);
-            details.PublisherName = comicSeriesDetails.PublisherName;
-            details.SeriesTitle = comicSeriesDetails.Title;
-            details.Volume = comicSeriesDetails.Volume;
-            setSuccessAndFinish(details);
-          } else {
-            setFailAndFinish(R.string.err_add_comic_series);
-          }
-        });
-      }
-    });
+    // TODO: move to fragment
+//    mCollectorViewModel.getComicBookById(comicBook.ProductCode, comicBook.IssueCode).observe(this, comicBookDetails -> {
+//
+//      if (comicBookDetails != null) {
+//        setSuccessAndFinish(comicBookDetails);
+//      } else {
+//        mCollectorViewModel.getComicSeriesByProductCode(comicBook.ProductCode).observe(this, comicSeriesDetails -> {
+//
+//          if (comicSeriesDetails != null) { // add series details to comic book
+//            ComicBookDetails details = new ComicBookDetails(comicBook);
+//            details.PublisherName = comicSeriesDetails.PublisherName;
+//            details.SeriesTitle = comicSeriesDetails.Title;
+//            details.Volume = comicSeriesDetails.Volume;
+//            setSuccessAndFinish(details);
+//          } else {
+//            setFailAndFinish(R.string.err_add_comic_series);
+//          }
+//        });
+//      }
+//    });
   }
 
   @Override
@@ -393,32 +387,33 @@ public class AddActivity extends BaseActivity implements
   /*
     Public Method(s)
    */
-  public void retrieveComicSeriesComplete(ComicSeries comicSeries) {
+  public void retrieveComicSeriesComplete(SeriesEntity seriesEntity) {
 
-    Log.d(TAG, "++retrieveComicSeriesComplete(ComicSeries)");
-    if (comicSeries.isValid()) {
+    Log.d(TAG, "++retrieveComicSeriesComplete(SeriesEntity)");
+    if (seriesEntity.isValid()) {
       if (mProgress != null) {
         mProgress.setIndeterminate(false);
       }
 
-      mCollectorViewModel.getComicPublisherById(comicSeries.PublisherId).observe(this, comicPublisher -> {
-
-        if (comicPublisher.isValid()) {
-          ComicSeriesDetails seriesDetails = new ComicSeriesDetails();
-          seriesDetails.Id = comicSeries.Id;
-          seriesDetails.PublisherName = comicPublisher.Name;
-          seriesDetails.Title = comicSeries.Title;
-          replaceFragment(ComicSeriesFragment.newInstance(seriesDetails));
-        } else {
-          Crashlytics.logException(
-            new ComicCollectorException(
-              String.format(
-                Locale.US,
-                "%s requested an unknown comic publisher: %s",
-                mUser.Id,
-                comicSeries.toString())));
-        }
-      });
+      // TODO: move to fragment
+//      mCollectorViewModel.getComicPublisherById(comicSeries.PublisherId).observe(this, comicPublisher -> {
+//
+//        if (comicPublisher.isValid()) {
+//          ComicSeriesDetails seriesDetails = new ComicSeriesDetails();
+//          seriesDetails.Id = comicSeries.Id;
+//          seriesDetails.PublisherName = comicPublisher.Name;
+//          seriesDetails.Title = comicSeries.Title;
+//          replaceFragment(ComicSeriesFragment.newInstance(seriesDetails));
+//        } else {
+//          Crashlytics.logException(
+//            new ComicCollectorException(
+//              String.format(
+//                Locale.US,
+//                "%s requested an unknown comic publisher: %s",
+//                mUser.Id,
+//                comicSeries.toString())));
+//        }
+//      });
     } else {
       setFailAndFinish(R.string.err_unknown_series);
     }
@@ -473,14 +468,14 @@ public class AddActivity extends BaseActivity implements
     }
   }
 
-  private void getIssueIdFromUser(ComicBook comicBook) {
+  private void getIssueIdFromUser(ComicBookEntity comicBookEntity) {
 
     Log.d(TAG, "++getIssueIdFromUser(ComicBook)");
     if (mProgress != null) {
       mProgress.setIndeterminate(false);
     }
 
-    replaceFragment(ManualSearchFragment.newInstance(comicBook));
+    replaceFragment(ManualSearchFragment.newInstance(comicBookEntity));
   }
 
   private void replaceFragment(Fragment fragment) {
@@ -533,13 +528,13 @@ public class AddActivity extends BaseActivity implements
     finish();
   }
 
-  private void setSuccessAndFinish(ComicBookDetails comicBook) {
-
-    Intent resultIntent = new Intent();
-    resultIntent.putExtra(BaseActivity.ARG_COMIC_BOOK, comicBook);
-    setResult(BaseActivity.RESULT_ADD_SUCCESS, resultIntent);
-    finish();
-  }
+//  private void setSuccessAndFinish(ComicBookDetails comicBook) {
+//
+//    Intent resultIntent = new Intent();
+//    resultIntent.putExtra(BaseActivity.ARG_COMIC_BOOK, comicBook);
+//    setResult(BaseActivity.RESULT_ADD_SUCCESS, resultIntent);
+//    finish();
+//  }
 
   private void showPictureIntent() {
 
@@ -618,16 +613,16 @@ public class AddActivity extends BaseActivity implements
       .addOnCompleteListener(task -> {
 
         if (task.isSuccessful() && task.getResult() != null) {
-          ComicBook comicBook = null;
+          ComicBookEntity comicBookEntity = null;
           for (FirebaseVisionBarcode barcode : task.getResult()) {
             if (barcode.getValueType() == FirebaseVisionBarcode.TYPE_PRODUCT) {
               String barcodeValue = barcode.getDisplayValue();
               Log.d(TAG, "Found a bar code: " + barcodeValue);
-              comicBook = new ComicBook();
+              comicBookEntity = new ComicBookEntity();
               if (barcodeValue != null &&
                 !barcodeValue.equals(BaseActivity.DEFAULT_PRODUCT_CODE) &&
                 barcodeValue.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) {
-                comicBook.parseProductCode(barcodeValue);
+                comicBookEntity.parseProductCode(barcodeValue);
               } else {
                 Log.w(TAG, "Unexpected bar code: " + barcode.getDisplayValue());
               }
@@ -636,16 +631,17 @@ public class AddActivity extends BaseActivity implements
             }
           }
 
-          if (comicBook != null) { // we have a legit barcode
-            final ComicBook workableBook = new ComicBook(comicBook);
-            mCollectorViewModel.getComicSeriesByProductCode(workableBook.ProductCode).observe(this, comicSeries -> {
-
-              if (comicSeries != null) {
-                getIssueIdFromUser(workableBook);
-              } else {
-                new RetrieveComicSeriesDataTask(this, workableBook.ProductCode).execute();
-              }
-            });
+          if (comicBookEntity != null) { // we have a legit barcode
+            final ComicBookEntity workableBook = new ComicBookEntity(comicBookEntity);
+            // TODO: move to fragment
+//            mCollectorViewModel.getComicSeriesByProductCode(workableBook.ProductCode).observe(this, comicSeries -> {
+//
+//              if (comicSeries != null) {
+//                getIssueIdFromUser(workableBook);
+//              } else {
+//                new RetrieveComicSeriesDataTask(this, workableBook.ProductCode).execute();
+//              }
+//            });
           } else { // try rotating the image, escape after 3 attempts
             if (mRotationAttempts < 3) {
               mRotationAttempts++;
@@ -673,7 +669,7 @@ public class AddActivity extends BaseActivity implements
                 true);
               mRotationAttempts = 0;
               Log.w(TAG, "Rotated image completely and could not find a bar code.");
-              replaceFragment(ManualSearchFragment.newInstance(new ComicBook()));
+              replaceFragment(ManualSearchFragment.newInstance(new ComicBookEntity()));
             }
           }
         } else {

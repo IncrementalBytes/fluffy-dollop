@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.fragments;
 
 import android.content.Context;
@@ -32,7 +33,7 @@ import android.widget.TextView;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBook;
+import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 
 public class ManualSearchFragment extends Fragment {
 
@@ -40,7 +41,7 @@ public class ManualSearchFragment extends Fragment {
 
   public interface OnManualSearchListener {
 
-    void onManualSearchActionComplete(ComicBook comicBook);
+    void onManualSearchActionComplete(ComicBookEntity comicBookEntity);
 
     void onManualSearchRetry();
   }
@@ -51,14 +52,14 @@ public class ManualSearchFragment extends Fragment {
   private EditText mIssueCodeEdit;
   private EditText mProductCodeEdit;
 
-  private ComicBook mComicBook;
+  private ComicBookEntity mComicBookEntity;
 
-  public static ManualSearchFragment newInstance(ComicBook comicBook) {
+  public static ManualSearchFragment newInstance(ComicBookEntity comicBookEntity) {
 
     Log.d(TAG, "++newInstance(ComicBook)");
     ManualSearchFragment fragment = new ManualSearchFragment();
     Bundle args = new Bundle();
-    args.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicBook);
+    args.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicBookEntity);
     fragment.setArguments(args);
     return fragment;
   }
@@ -67,7 +68,7 @@ public class ManualSearchFragment extends Fragment {
       Fragment Override(s)
    */
   @Override
-  public void onAttach(Context context) {
+  public void onAttach(@NonNull Context context) {
     super.onAttach(context);
 
     Log.d(TAG, "++onAttach(Context)");
@@ -86,7 +87,7 @@ public class ManualSearchFragment extends Fragment {
     Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicBook = (ComicBook) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
+      mComicBookEntity = (ComicBookEntity) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
     } else {
       Log.e(TAG, "Arguments were null.");
     }
@@ -122,14 +123,14 @@ public class ManualSearchFragment extends Fragment {
     mContinueButton = view.findViewById(R.id.manual_search_button_continue);
     mContinueButton.setEnabled(false);
     mContinueButton.setOnClickListener(v -> {
-      mComicBook = new ComicBook();
-      mComicBook.parseProductCode(
+      mComicBookEntity = new ComicBookEntity();
+      mComicBookEntity.parseProductCode(
         String.format(
           Locale.US,
           "%s-%s",
           mProductCodeEdit.getText().toString(),
           mIssueCodeEdit.getText().toString()));
-      mCallback.onManualSearchActionComplete(mComicBook);
+      mCallback.onManualSearchActionComplete(mComicBookEntity);
     });
 
     TextView productCodeExampleText = view.findViewById(R.id.manual_search_text_product_example);
@@ -141,7 +142,7 @@ public class ManualSearchFragment extends Fragment {
     mIssueCodeEdit = view.findViewById(R.id.manual_search_edit_issue);
     TextView messageText = view.findViewById(R.id.manual_search_text_no_barcode);
 
-    if (mComicBook == null) {
+    if (mComicBookEntity == null) {
       // we need both ProductCode and IssueCode
       messageText.setVisibility(View.VISIBLE);
       productCodeExampleText.setVisibility(View.VISIBLE);
@@ -149,27 +150,27 @@ public class ManualSearchFragment extends Fragment {
       issueCodeExampleText.setVisibility(View.VISIBLE);
       issueCodeImage.setVisibility(View.VISIBLE);
     } else {
-      if (mComicBook.ProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) ||
-        mComicBook.ProductCode.length() != BaseActivity.DEFAULT_PRODUCT_CODE.length()) { // we need ProductCode
+      if (mComicBookEntity.ProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) ||
+        mComicBookEntity.ProductCode.length() != BaseActivity.DEFAULT_PRODUCT_CODE.length()) { // we need ProductCode
         productCodeExampleText.setVisibility(View.VISIBLE);
         productCodeImage.setVisibility(View.VISIBLE);
       } else {
         messageText.setVisibility(View.GONE);
         productCodeExampleText.setVisibility(View.GONE);
         productCodeImage.setVisibility(View.GONE);
-        mProductCodeEdit.setText(mComicBook.ProductCode);
+        mProductCodeEdit.setText(mComicBookEntity.ProductCode);
         mProductCodeEdit.setEnabled(false);
       }
 
-      if (mComicBook.IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) ||
-        mComicBook.IssueCode.length() != BaseActivity.DEFAULT_ISSUE_CODE.length()) {
+      if (mComicBookEntity.IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) ||
+        mComicBookEntity.IssueCode.length() != BaseActivity.DEFAULT_ISSUE_CODE.length()) {
         issueCodeText.setVisibility(View.VISIBLE);
         issueCodeImage.setVisibility(View.VISIBLE);
       } else {
         messageText.setVisibility(View.GONE);
         issueCodeExampleText.setVisibility(View.GONE);
         issueCodeImage.setVisibility(View.GONE);
-        mIssueCodeEdit.setText(mComicBook.IssueCode);
+        mIssueCodeEdit.setText(mComicBookEntity.IssueCode);
         mIssueCodeEdit.setEnabled(false);
       }
     }

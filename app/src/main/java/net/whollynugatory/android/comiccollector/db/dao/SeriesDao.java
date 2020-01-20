@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.db.dao;
 
 import androidx.lifecycle.LiveData;
@@ -20,24 +21,24 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 import java.util.List;
-import net.whollynugatory.android.comiccollector.db.entity.ComicSeries;
-import net.whollynugatory.android.comiccollector.db.views.ComicSeriesDetails;
+import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 
 @Dao
-public interface ComicSeriesDao {
+public interface SeriesDao {
 
-  @Query("DELETE FROM comic_series_table WHERE id == :productCode")
+  @Query("DELETE FROM series_table WHERE id == :productCode")
   void delete(String productCode);
 
-  @Query("SELECT * from ComicSeriesDetails WHERE id == :productCode")
-  LiveData<ComicSeriesDetails> get(String productCode);
+  @Query("SELECT * from series_table WHERE id == :productCode")
+  LiveData<SeriesEntity> get(String productCode);
 
-  @Query("SELECT * from ComicSeriesDetails ORDER BY title DESC")
-  LiveData<List<ComicSeriesDetails>> getAll();
+  @Query("SELECT * from series_table ORDER BY title DESC")
+  LiveData<List<SeriesEntity>> getAll();
 
   @Query(
-    "INSERT INTO comic_series_table (" +
+    "INSERT INTO series_table (" +
       "id, " +
       "publisher_id, " +
       "series_id, " +
@@ -47,5 +48,11 @@ public interface ComicSeriesDao {
   void insert(String productCode, String publisherId, String seriesId, String title, int volume);
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void insert(ComicSeries comicSeries);
+  void insert(SeriesEntity seriesEntity);
+
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  void insertAll(List<SeriesEntity> seriesEntityList);
+
+  @Update
+  void update(SeriesEntity seriesEntity);
 }

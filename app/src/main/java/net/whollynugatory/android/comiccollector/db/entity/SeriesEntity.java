@@ -30,12 +30,10 @@ import java.util.Locale;
 import net.whollynugatory.android.comiccollector.BaseActivity;
 
 @Entity(
-  tableName = "comic_series_table",
-  foreignKeys = @ForeignKey(entity = ComicPublisher.class, parentColumns = "id", childColumns = "publisher_id"),
+  tableName = "series_table",
+  foreignKeys = @ForeignKey(entity = PublisherEntity.class, parentColumns = "id", childColumns = "publisher_id"),
   indices = { @Index(value = {"publisher_id", "series_id"}, unique = true)})
-public class ComicSeries {
-
-  public static final String ROOT = "ComicSeries";
+public class SeriesEntity {
 
   @PrimaryKey()
   @NonNull
@@ -82,21 +80,21 @@ public class ComicSeries {
   @SerializedName("volume")
   public int Volume;
 
-  public ComicSeries() {
+  public SeriesEntity() {
 
     Id = BaseActivity.DEFAULT_PRODUCT_CODE;
     IsFlagged = false;
     OwnedIssues = new ArrayList<>();
     Published = "";
-    PublisherId = BaseActivity.DEFAULT_COMIC_PUBLISHER_ID;
-    SeriesId = BaseActivity.DEFAULT_COMIC_SERIES_ID;
+    PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
+    SeriesId = BaseActivity.DEFAULT_SERIES_ID;
     SubmissionDate = 0;
     SubmittedBy = "";
     Title = "";
     Volume = 0;
   }
 
-  public ComicSeries(@NonNull String id, @NonNull String publisherId, @NonNull String seriesId, @NonNull String title, int volume) {
+  public SeriesEntity(@NonNull String id, @NonNull String publisherId, @NonNull String seriesId, @NonNull String title, int volume) {
 
     Id = id;
     IsFlagged = false;
@@ -118,7 +116,7 @@ public class ComicSeries {
 
     return String.format(
       Locale.US,
-      "ComicSeries { Title=%s, PublisherId=%s, SeriesId=%s , Volume=%d }",
+      "Series { Title=%s, PublisherId=%s, SeriesId=%s , Volume=%d }",
       Title,
       PublisherId,
       SeriesId,
@@ -133,10 +131,10 @@ public class ComicSeries {
 
     return !Id.equals(BaseActivity.DEFAULT_PRODUCT_CODE) &&
       Id.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length() &&
-      !PublisherId.equals(BaseActivity.DEFAULT_COMIC_PUBLISHER_ID) &&
-      PublisherId.length() == BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length() &&
-      !SeriesId.equals(BaseActivity.DEFAULT_COMIC_SERIES_ID) &&
-      SeriesId.length() == BaseActivity.DEFAULT_COMIC_SERIES_ID.length() &&
+      !PublisherId.equals(BaseActivity.DEFAULT_PUBLISHER_ID) &&
+      PublisherId.length() == BaseActivity.DEFAULT_PUBLISHER_ID.length() &&
+      !SeriesId.equals(BaseActivity.DEFAULT_SERIES_ID) &&
+      SeriesId.length() == BaseActivity.DEFAULT_SERIES_ID.length() &&
       !Title.isEmpty();
   }
 
@@ -151,12 +149,12 @@ public class ComicSeries {
       !productCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
       try {
         Id = productCode;
-        PublisherId = productCode.substring(0, BaseActivity.DEFAULT_COMIC_PUBLISHER_ID.length());
-        SeriesId = productCode.substring(BaseActivity.DEFAULT_COMIC_SERIES_ID.length());
+        PublisherId = productCode.substring(0, BaseActivity.DEFAULT_PUBLISHER_ID.length());
+        SeriesId = productCode.substring(BaseActivity.DEFAULT_SERIES_ID.length());
       } catch (Exception e) {
         Id = BaseActivity.DEFAULT_PRODUCT_CODE;
-        PublisherId = BaseActivity.DEFAULT_COMIC_PUBLISHER_ID;
-        SeriesId = BaseActivity.DEFAULT_COMIC_SERIES_ID;
+        PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
+        SeriesId = BaseActivity.DEFAULT_SERIES_ID;
       }
     }
   }

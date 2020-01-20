@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.common;
 
 import android.os.AsyncTask;
@@ -27,12 +28,12 @@ import java.net.URL;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.AddActivity;
 import net.whollynugatory.android.comiccollector.BaseActivity;
-import net.whollynugatory.android.comiccollector.db.entity.ComicSeries;
+import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeries> {
+public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, SeriesEntity> {
 
   private static final String TAG = BaseActivity.BASE_TAG + "RetrieveComicSeriesDataTask";
 
@@ -45,10 +46,10 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
     mQueryForSeries = productCode;
   }
 
-  protected ComicSeries doInBackground(Void... params) {
+  protected SeriesEntity doInBackground(Void... params) {
 
-    ComicSeries comicSeries = new ComicSeries();
-    comicSeries.parseProductCode(mQueryForSeries);
+    SeriesEntity seriesEntity = new SeriesEntity();
+    seriesEntity.parseProductCode(mQueryForSeries);
     String urlString = String.format(Locale.US, "https://api.upcitemdb.com/prod/trial/lookup?upc=%s", mQueryForSeries);
 
 
@@ -66,7 +67,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
       if (responseCode != 200) {
         Log.e(TAG, "upcitemdb request failed. Response Code: " + responseCode);
         connection.disconnect();
-        return comicSeries;
+        return seriesEntity;
       }
 
       BufferedReader responseReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -80,7 +81,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
         connection.disconnect();
       }
 
-      return comicSeries;
+      return seriesEntity;
     }
 
     JSONArray items;
@@ -89,7 +90,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
       items = (JSONArray) responseJson.get("items");
     } catch (JSONException e) {
       connection.disconnect();
-      return comicSeries;
+      return seriesEntity;
     }
 
     if (items != null) {
@@ -97,7 +98,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
         try { // errors parsing items should not prevent further parsing
           JSONObject item = (JSONObject) items.get(index);
           if (item.has("title")) {
-            comicSeries.Title = item.getString("title");
+            seriesEntity.Title = item.getString("title");
           }
         } catch (JSONException e) {
           Log.d(TAG, "Failed to parse JSON object.");
@@ -109,18 +110,18 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, ComicSeri
     }
 
     connection.disconnect();
-    return comicSeries;
+    return seriesEntity;
   }
 
-  protected void onPostExecute(ComicSeries comicSeries) {
+  protected void onPostExecute(SeriesEntity seriesEntity) {
 
-    Log.d(TAG, "++onPostExecute(ComicSeries)");
+    Log.d(TAG, "++onPostExecute(SeriesEntity)");
     AddActivity activity = mActivityWeakReference.get();
     if (activity == null) {
       Log.e(TAG, "AddActivity is null or detached.");
       return;
     }
 
-    activity.retrieveComicSeriesComplete(comicSeries);
+    activity.retrieveComicSeriesComplete(seriesEntity);
   }
 }

@@ -31,8 +31,8 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String ARG_USER_NAME = "user_name";
 
     public static final String DEFAULT_COMIC_BOOK_ID = "000000000000-00000";
-    public static final String DEFAULT_COMIC_PUBLISHER_ID = "000000";
-    public static final String DEFAULT_COMIC_SERIES_ID = "000000";
+    public static final String DEFAULT_PUBLISHER_ID = "000000";
+    public static final String DEFAULT_SERIES_ID = "000000";
     public static final String DEFAULT_EXPORT_FILE = "exportedLibrary.json";
     public static final String DEFAULT_ISSUE_CODE = "00000";
     public static final String DEFAULT_LIBRARY_FILE = "localLibrary.json";

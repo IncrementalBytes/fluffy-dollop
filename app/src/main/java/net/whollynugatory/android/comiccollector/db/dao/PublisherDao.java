@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.db.dao;
 
 import androidx.lifecycle.LiveData;
@@ -20,17 +21,28 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import net.whollynugatory.android.comiccollector.db.entity.ComicPublisher;
+import androidx.room.Update;
+import java.util.List;
+import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
 
 @Dao
-public interface ComicPublisherDao {
+public interface PublisherDao {
 
-  @Query("DELETE FROM comic_publisher_table WHERE id == :publisherId")
+  @Query("DELETE FROM publisher_table WHERE id == :publisherId")
   void delete(String publisherId);
 
-  @Query("SELECT * from comic_publisher_table WHERE id == :publisherId")
-  LiveData<ComicPublisher> get(String publisherId);
+  @Query("SELECT * from publisher_table WHERE id == :publisherId")
+  LiveData<PublisherEntity> get(String publisherId);
+
+  @Query("SELECT * from publisher_table")
+  LiveData<List<PublisherEntity>> getAll();
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void insert(ComicPublisher publisher);
+  void insert(PublisherEntity publisherEntity);
+
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  void insertAll(List<PublisherEntity> publisherEntityList);
+
+  @Update
+  void update(PublisherEntity publisherEntity);
 }
