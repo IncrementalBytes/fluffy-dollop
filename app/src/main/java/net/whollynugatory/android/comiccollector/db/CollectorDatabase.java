@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import net.whollynugatory.android.comiccollector.BaseActivity;
+import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 import net.whollynugatory.android.comiccollector.db.dao.ComicBookDao;
 import net.whollynugatory.android.comiccollector.db.dao.PublisherDao;
 import net.whollynugatory.android.comiccollector.db.dao.SeriesDao;

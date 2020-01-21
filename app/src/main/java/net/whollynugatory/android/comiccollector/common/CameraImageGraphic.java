@@ -18,7 +18,8 @@ package net.whollynugatory.android.comiccollector.common;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import net.whollynugatory.android.comiccollector.common.GraphicOverlay.Graphic;
+import net.whollynugatory.android.comiccollector.camera.GraphicOverlay;
+import net.whollynugatory.android.comiccollector.camera.GraphicOverlay.Graphic;
 
 /**
  *  Draw camera image to background.

@@ -27,7 +27,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import net.whollynugatory.android.comiccollector.BaseActivity;
+import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 @Entity(
   tableName = "series_table",

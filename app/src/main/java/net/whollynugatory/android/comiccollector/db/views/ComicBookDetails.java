@@ -19,7 +19,7 @@ package net.whollynugatory.android.comiccollector.db.views;
 import androidx.room.DatabaseView;
 import java.io.Serializable;
 import java.util.Locale;
-import net.whollynugatory.android.comiccollector.BaseActivity;
+import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 
 @DatabaseView(
@@ -69,7 +69,7 @@ public class ComicBookDetails implements Serializable {
 
     Id = comicBookEntity.Id;
     IsOwned = comicBookEntity.IsOwned;
-    IsRead = comicBookEntity.IsRead;
+    IsRead = comicBookEntity.HasRead;
     IssueCode = comicBookEntity.IssueCode;
     IssueNumber = 0; // TODO: update
     Published = comicBookEntity.PublishedDate;

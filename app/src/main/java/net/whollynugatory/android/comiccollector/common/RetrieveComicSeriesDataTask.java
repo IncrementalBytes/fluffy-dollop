@@ -26,9 +26,9 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
-import net.whollynugatory.android.comiccollector.AddActivity;
-import net.whollynugatory.android.comiccollector.BaseActivity;
+import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
+import net.whollynugatory.android.comiccollector.ui.MainActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,10 +37,10 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, SeriesEnt
 
   private static final String TAG = BaseActivity.BASE_TAG + "RetrieveComicSeriesDataTask";
 
-  private WeakReference<AddActivity> mActivityWeakReference;
+  private WeakReference<MainActivity> mActivityWeakReference;
   private String mQueryForSeries;
 
-  public RetrieveComicSeriesDataTask(AddActivity context, String productCode) {
+  public RetrieveComicSeriesDataTask(MainActivity context, String productCode) {
 
     mActivityWeakReference = new WeakReference<>(context);
     mQueryForSeries = productCode;
@@ -116,9 +116,9 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, SeriesEnt
   protected void onPostExecute(SeriesEntity seriesEntity) {
 
     Log.d(TAG, "++onPostExecute(SeriesEntity)");
-    AddActivity activity = mActivityWeakReference.get();
+    MainActivity activity = mActivityWeakReference.get();
     if (activity == null) {
-      Log.e(TAG, "AddActivity is null or detached.");
+      Log.e(TAG, "MainActivity is null or detached.");
       return;
     }
 

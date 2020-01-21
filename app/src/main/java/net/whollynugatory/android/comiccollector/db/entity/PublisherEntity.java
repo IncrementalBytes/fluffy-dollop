@@ -21,7 +21,7 @@ import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
-import net.whollynugatory.android.comiccollector.BaseActivity;
+import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 @Entity(tableName = "publisher_table", indices = @Index(value = {"name"}))
 public class PublisherEntity {

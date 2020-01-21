@@ -19,7 +19,7 @@ package net.whollynugatory.android.comiccollector.db.repository;
 import android.util.Log;
 import androidx.lifecycle.LiveData;
 import java.util.List;
-import net.whollynugatory.android.comiccollector.BaseActivity;
+import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 import net.whollynugatory.android.comiccollector.db.CollectorDatabase;
 import net.whollynugatory.android.comiccollector.db.dao.SeriesDao;
 import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;

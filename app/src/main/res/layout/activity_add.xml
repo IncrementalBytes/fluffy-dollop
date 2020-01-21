@@ -6,7 +6,7 @@
   android:id="@+id/activity_add"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  tools:context="net.whollynugatory.android.comiccollector.AddActivity">
+  tools:context="net.whollynugatory.android.comiccollector.ui.AddActivity">
 
   <com.google.android.material.appbar.AppBarLayout
     android:id="@+id/add_app_bar"

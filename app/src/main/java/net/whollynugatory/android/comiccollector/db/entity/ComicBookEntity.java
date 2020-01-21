@@ -26,7 +26,7 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Locale;
-import net.whollynugatory.android.comiccollector.BaseActivity;
+import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 @Entity(
   tableName = "comic_book_table",
@@ -49,18 +49,18 @@ public class ComicBookEntity implements Serializable {
   @SerializedName("issue_code")
   public String IssueCode;
 
+  @NonNull
+  @ColumnInfo(name = "title")
+  @SerializedName("title")
+  public String Title;
+
   @ColumnInfo(name = "owned")
   @SerializedName("owned")
   public boolean IsOwned;
 
   @ColumnInfo(name = "read")
   @SerializedName("read")
-  public boolean IsRead;
-
-  @NonNull
-  @ColumnInfo(name = "title")
-  @SerializedName("title")
-  public String Title;
+  public boolean HasRead;
 
   @NonNull
   @ColumnInfo(name = "published_date")
@@ -80,7 +80,7 @@ public class ComicBookEntity implements Serializable {
     IsOwned = false;
     IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
     PublishedDate = "";
-    IsRead = false;
+    HasRead = false;
     Title = "";
 
     AddedDate = Calendar.getInstance().getTimeInMillis();
@@ -100,7 +100,7 @@ public class ComicBookEntity implements Serializable {
     ProductCode = productCode;
     IssueCode = issueCode;
     IsOwned = owned;
-    IsRead = read;
+    HasRead = read;
     Title = title;
     PublishedDate = publishedDate;
   }
@@ -111,7 +111,7 @@ public class ComicBookEntity implements Serializable {
     ProductCode = comicBookEntity.ProductCode;
     IssueCode = comicBookEntity.IssueCode;
     IsOwned = comicBookEntity.IsOwned;
-    IsRead = comicBookEntity.IsRead;
+    HasRead = comicBookEntity.HasRead;
     Title = comicBookEntity.Title;
     PublishedDate = comicBookEntity.PublishedDate;
 
