@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
     "Book.published_date AS Published, " +
     "Book.owned AS IsOwned, " +
     "Book.read AS IsRead, " +
-    "Series.title AS SeriesTitle, " +
+    "Series.name AS SeriesTitle, " +
     "Series.volume AS Volume, " +
     "Publishers.name AS PublisherName " +
   "FROM comic_book_table AS Book " +

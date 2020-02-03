@@ -63,7 +63,6 @@ public class BarcodeScanFragment extends Fragment implements View.OnClickListene
   private WorkflowModel.WorkflowState mCurrentWorkflowState;
   private View mFlashButton;
   private GraphicOverlay mGraphicOverlay;
-  private View mManualButton;
   private CameraSourcePreview mPreview;
   private Chip mPromptChip;
   private AnimatorSet mPromptChipAnimator;
@@ -110,7 +109,7 @@ public class BarcodeScanFragment extends Fragment implements View.OnClickListene
     View closeButton = view.findViewById(R.id.close_button);
     mFlashButton = view.findViewById(R.id.flash_button);
     mGraphicOverlay = view.findViewById(R.id.camera_preview_graphic_overlay);
-    mManualButton = view.findViewById(R.id.manual_button);
+    View manualButton = view.findViewById(R.id.manual_button);
     mPreview = view.findViewById(R.id.camera_preview);
     mPromptChip = view.findViewById(R.id.bottom_prompt_chip);
     mSettingsButton = view.findViewById(R.id.settings_button);
@@ -123,7 +122,7 @@ public class BarcodeScanFragment extends Fragment implements View.OnClickListene
 
     closeButton.setOnClickListener(this);
     mFlashButton.setOnClickListener(this);
-    mManualButton.setOnClickListener(this);
+    manualButton.setOnClickListener(this);
     mSettingsButton.setOnClickListener(this);
     return view;
   }

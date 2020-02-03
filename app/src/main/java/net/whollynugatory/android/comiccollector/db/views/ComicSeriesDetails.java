@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.db.views;
 
 import androidx.room.DatabaseView;
@@ -24,11 +25,11 @@ import java.util.Locale;
 
 @DatabaseView(
   "SELECT Series.id AS Id, " +
-    "Series.title AS Title, " +
+    "Series.name AS Title, " +
     "Series.volume AS Volume, " +
     "Publishers.name AS PublisherName " +
-  "FROM comic_series_table AS Series " +
-  "INNER JOIN comic_publisher_table As Publishers ON Series.publisher_id = Publishers.id " +
+  "FROM series_table AS Series " +
+  "INNER JOIN publisher_table As Publishers ON Series.publisher_id = Publishers.id " +
   "WHERE Series.id != -1")
 public class ComicSeriesDetails implements Serializable {
 

@@ -67,14 +67,12 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import net.whollynugatory.android.comiccollector.PreferenceUtils;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.common.PathUtils;
 import net.whollynugatory.android.comiccollector.common.RetrieveComicSeriesDataTask;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
-import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
 import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 import net.whollynugatory.android.comiccollector.db.entity.UserEntity;
 import net.whollynugatory.android.comiccollector.ui.fragments.BarcodeScanFragment;
@@ -271,7 +269,6 @@ public class MainActivity extends BaseActivity implements
     Log.d(TAG, "++onActivityResult(int, int, Intent)");
     switch (requestCode) {
       case BaseActivity.REQUEST_COMIC_ADD:
-        // TODO: pick up any change to tutorial?
         String message = null;
         ComicBookEntity comicBook = null;
         if (data != null) {
@@ -459,7 +456,6 @@ public class MainActivity extends BaseActivity implements
   public void onManualSearchBookFound(ComicBookEntity comicBookEntity) {
 
     Log.d(TAG, "++onManualSearchBookFound(ComicBookEntity)");
-    // TODO: replace with comic book editing fragment - ???
     replaceFragment(ItemListFragment.newInstance(comicBookEntity));
   }
 
@@ -467,8 +463,6 @@ public class MainActivity extends BaseActivity implements
   public void onManualSearchInputComplete(ComicBookEntity comicBookEntity) {
 
     Log.d(TAG, "++onManualSearchInputComplete(ComicBookEntity)");
-
-    // check publisher data first
     replaceFragment(PublisherFragment.newInstance(comicBookEntity));
   }
 
@@ -476,14 +470,14 @@ public class MainActivity extends BaseActivity implements
   public void onManualSearchRetry() {
 
     Log.d(TAG, "++onManualSearchRetry()");
-    // TODO: complete method
+    checkForPermission(Manifest.permission.CAMERA, BaseActivity.REQUEST_CAMERA_PERMISSIONS);
   }
 
   @Override
   public void onResultListActionComplete(String message) {
 
     Log.d(TAG, "++onResultListActionComplete(String)");
-    // TODO: complete method
+    showDismissableSnackbar(message);
   }
 
   @Override
@@ -504,7 +498,7 @@ public class MainActivity extends BaseActivity implements
   public void onResultListItemSelected(ComicBookEntity comicBookEntity) {
 
     Log.d(TAG, "++onResultListItemSelected(ComicBookEntity)");
-    // TODO: complete method
+    replaceFragment(ComicBookFragment.newInstance(comicBookEntity));
   }
 
   @Override
@@ -825,7 +819,6 @@ public class MainActivity extends BaseActivity implements
 
           if (barcodeValue != null && !barcodeValue.isEmpty()) {
             mRotationAttempts = 0;
-            // TODO: first look for this product code in known list, otherwise spin series search
             replaceFragment(ManualSearchFragment.newInstance(barcodeValue));
           } else if (mRotationAttempts < 3) {
             mRotationAttempts++;
