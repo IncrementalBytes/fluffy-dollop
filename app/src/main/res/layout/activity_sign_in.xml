@@ -6,7 +6,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:background="@color/primaryColor"
-  tools:context="net.frostedbytes.android.comiccollector.SignInActivity">
+  tools:context="net.whollynugatory.android.comiccollector.ui.SignInActivity">
 
   <ImageView
     android:id="@+id/sign_in_image_app"
@@ -14,19 +14,10 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:contentDescription="@string/app_name"
-    app:layout_constraintBottom_toTopOf="@id/sign_in_text_welcome"
+    app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:srcCompat="@mipmap/ic_launcher_foreground" />
-
-  <ProgressBar
-    android:id="@+id/sign_in_progress"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/default_view_margin"
-    app:layout_constraintBottom_toTopOf="@id/sign_in_text_sign_in"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent" />
 
   <TextView
     android:id="@+id/sign_in_text_welcome"
@@ -39,20 +30,18 @@
     android:textAllCaps="true"
     android:textColor="@color/primaryTextColor"
     android:textSize="30sp"
-    app:layout_constraintBottom_toTopOf="@id/sign_in_progress"
+    app:layout_constraintTop_toBottomOf="@id/sign_in_image_app"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent" />
 
-  <TextView
-    android:id="@+id/sign_in_text_sign_in"
+  <ProgressBar
+    android:id="@+id/sign_in_progress"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:text="@string/sign_in_with"
-    android:textColor="@color/primaryTextColor"
-    app:layout_constraintBottom_toTopOf="@id/sign_in_button_google"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent" />
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/sign_in_text_welcome" />
 
   <com.google.android.gms.common.SignInButton
     android:id="@+id/sign_in_button_google"
@@ -60,11 +49,10 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:elevation="2dp"
-    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    app:layout_constraintTop_toBottomOf="@id/sign_in_progress" />
 
   <TextView
     android:id="@+id/sign_in_text_beta"

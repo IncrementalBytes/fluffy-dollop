@@ -42,105 +42,112 @@
       "id": "-1",
       "publisher_id": "-1",
       "series_id": -1,
-      "title": "Unknown",
+      "name": "Unknown",
       "volume": 0
     },
     {
       "id": "759606088607",
       "publisher_id": "759606",
       "series_id": "088607",
-      "title": "Captain America",
+      "name": "Captain America",
       "volume": 9
     },
     {
       "id": "759606079902",
       "publisher_id": "759606",
       "series_id": "079902",
-      "title": "Captain Marvel",
+      "name": "Captain Marvel",
       "volume": 8
     },
     {
       "id": "759606092680",
       "publisher_id": "759606",
       "series_id": "092680",
-      "title": "Captain Marvel",
+      "name": "Captain Marvel",
       "volume": 10
     },
     {
       "id": "759606092635",
       "publisher_id": "759606",
       "series_id": "092635",
-      "title": "Friendly Neighborhood Spider-Man",
+      "name": "Friendly Neighborhood Spider-Man",
       "volume": 2
     },
     {
       "id": "759606086061",
       "publisher_id": "759606",
       "series_id": "086061",
-      "title": "Mighty Captain Marvel, The",
+      "name": "Mighty Captain Marvel, The",
       "volume": 1
     },
     {
       "id": "759606091218",
       "publisher_id": "759606",
       "series_id": "091218",
-      "title": "Spider-Gwen: Ghost-Spider",
+      "name": "Spider-Gwen: Ghost-Spider",
       "volume": 1
     },
     {
       "id": "759606089680",
       "publisher_id": "759606",
       "series_id": "089680",
-      "title": "Tony Stark: IronMan",
+      "name": "Tony Stark: IronMan",
       "volume": 12
     },
     {
       "id": "071486024590",
       "publisher_id": "071486",
       "series_id": "024590",
-      "title": "Daredevil",
+      "name": "Daredevil",
       "volume": 0
     },
     {
       "id": "759606089833",
       "publisher_id": "759606",
       "series_id": "089833",
-      "title": "Venom",
+      "name": "Venom",
       "volume": 1
     },
     {
       "id": "759606093298",
       "publisher_id": "759606",
       "series_id": "093298",
-      "title": "Spider-Man Life Story",
+      "name": "Spider-Man Life Story",
       "volume": 1
     },
     {
       "id": "759606093977",
       "publisher_id": "759606",
       "series_id": "093977",
-      "title": "Star Wars: TIE Fighter",
+      "name": "Star Wars: TIE Fighter",
       "volume": 1
     },
     {
       "id": "761941207032",
       "publisher_id": "761941",
       "series_id": "207032",
-      "title": "Alpha Centurion",
+      "name": "Alpha Centurion",
       "volume": 1
     },
     {
       "id": "761941305004",
       "publisher_id": "761941",
       "series_id": "305004",
-      "title": "Captain Atom",
+      "name": "Captain Atom",
       "volume": 1
     },
     {
       "id": "759606095025",
       "publisher_id": "759606",
       "series_id": "095025",
-      "title": "Ghost Spider",
+      "name": "Ghost Spider",
+      "volume": 1
+    },
+    {
+      "id": "759606011650",
+      "publisher_id": "759606",
+      "series_id": "011650",
+      "name": "Spider-Man 2099",
       "volume": 1
     }
   ]

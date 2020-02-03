@@ -1,24 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-  android:background="@color/background_item">
-  <SwitchPreference
-    android:defaultValue="false"
-    android:key="preference_is_geek"
-    android:summary="Show image captured by camera for scanning."
-    android:title="Enable geek interface"/>
-  <SwitchPreference
-    android:defaultValue="false"
-    android:key="preference_show_tutorial"
-    android:summary="Show tutorial about taking picture of comic book bar code."
-    android:title="Show tutorial"/>
-  <SwitchPreference
-    android:defaultValue="false"
-    android:key="preference_image_preview"
-    android:summary="Use realtime image capture instead of photo for bar code."
-    android:title="Image Capture (BETA)"/>
-  <SwitchPreference
-    android:defaultValue="false"
-    android:key="preference_force_exception"
-    android:summary="Force exception (Debug test)"
-    android:title="Force Exception (DEBUG)"/>
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+  <androidx.preference.PreferenceCategory android:title="@string/pref_category_camera">
+
+    <androidx.preference.SwitchPreference
+      android:title="@string/perf_title_use_camera"
+      android:defaultValue="true"
+      android:key="@string/perf_key_use_camera"
+      android:persistent="true"
+      android:summary="@string/perf_summary_use_camera"/>
+
+    <androidx.preference.ListPreference
+      android:key="@string/pref_key_rear_camera_preview_size"
+      android:persistent="true"
+      android:title="@string/pref_title_rear_camera_preview_size"/>
+
+  </androidx.preference.PreferenceCategory>
+
+  <androidx.preference.PreferenceCategory android:title="@string/pref_category_barcode_detection">
+
+    <androidx.preference.SeekBarPreference
+      android:defaultValue="80"
+      android:key="@string/pref_key_barcode_reticule_width"
+      android:max="95"
+      android:persistent="true"
+      android:summary="@string/pref_summary_barcode_reticule_width"
+      android:title="@string/pref_title_barcode_reticule_width"
+      app:min="50"
+      app:showSeekBarValue="true"/>
+
+    <androidx.preference.SeekBarPreference
+      android:defaultValue="35"
+      android:key="@string/pref_key_barcode_reticule_height"
+      android:max="80"
+      android:persistent="true"
+      android:summary="@string/pref_summary_barcode_reticule_height"
+      android:title="@string/pref_title_barcode_reticule_height"
+      app:min="20"
+      app:showSeekBarValue="true"/>
+
+    <androidx.preference.SwitchPreferenceCompat
+      android:defaultValue="false"
+      android:key="@string/pref_key_enable_barcode_size_check"
+      android:persistent="true"
+      android:summary="@string/pref_summary_enable_barcode_size_check"
+      android:title="@string/pref_title_enable_barcode_size_check"/>
+
+    <androidx.preference.SeekBarPreference
+      android:defaultValue="50"
+      android:key="@string/pref_key_minimum_barcode_width"
+      android:max="80"
+      android:persistent="true"
+      android:summary="@string/pref_summary_minimum_barcode_width"
+      android:title="@string/pref_title_minimum_barcode_width"
+      app:min="20"
+      app:showSeekBarValue="true"/>
+
+    <androidx.preference.SwitchPreferenceCompat
+      android:defaultValue="true"
+      android:key="@string/pref_key_delay_loading_barcode_result"
+      android:persistent="true"
+      android:summary="@string/pref_summary_delay_loading_barcode_result"
+      android:title="@string/pref_title_delay_loading_barcode_result"/>
+
+  </androidx.preference.PreferenceCategory>
+
+  <androidx.preference.PreferenceCategory android:title="@string/pref_category_debug">
+    <androidx.preference.SwitchPreference
+      android:defaultValue="false"
+      android:key="preference_is_geek"
+      android:summary="Show image captured by camera for scanning."
+      android:title="Enable geek interface"/>
+    <androidx.preference.SwitchPreference
+      android:defaultValue="false"
+      android:key="@string/pref_key_bypass"
+      android:summary="@string/pref_summary_bypass"
+      android:title="@string/pref_title_bypass"/>
+    <androidx.preference.SwitchPreference
+      android:defaultValue="false"
+      android:key="preference_force_exception"
+      android:summary="Force exception (Debug test)"
+      android:title="Force Exception (DEBUG)"/>
+  </androidx.preference.PreferenceCategory>
+
+  <androidx.preference.EditTextPreference
+    android:key="preference_app_version"
+    android:singleLine="true"
+    android:title="App Version"
+    android:summary=""
+    android:enabled="false"/>
+
 </PreferenceScreen>
