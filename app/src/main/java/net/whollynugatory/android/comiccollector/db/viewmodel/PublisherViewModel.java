@@ -41,7 +41,12 @@ public class PublisherViewModel extends AndroidViewModel {
     mRepository.delete(volumeId);
   }
 
-  public LiveData<List<PublisherEntity>> getAlll() {
+  public LiveData<PublisherEntity> find(String publisherId) {
+
+    return mRepository.find(publisherId);
+  }
+
+  public LiveData<List<PublisherEntity>> getAll() {
 
     return mAllPublishers;
   }

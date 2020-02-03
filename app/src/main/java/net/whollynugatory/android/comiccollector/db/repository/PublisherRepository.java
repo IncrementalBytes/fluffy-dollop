@@ -56,9 +56,9 @@ public class PublisherRepository {
     CollectorDatabase.databaseWriteExecutor.execute(() -> mPublisherDao.delete(publisherId));
   }
 
-  public LiveData<PublisherEntity> get(String publisherId) {
+  public LiveData<PublisherEntity> find(String publisherId) {
 
-    return mPublisherDao.get(publisherId);
+    return mPublisherDao.find(publisherId);
   }
 
   public LiveData<List<PublisherEntity>> getAll() {

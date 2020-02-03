@@ -11,9 +11,6 @@
   <color name="accent">@color/primaryLightColor</color>
   <color name="warningTextColor">#FF0000</color>
 
-  <color name="background">#EBEBEB</color>
-  <color name="background_item">#D2D2D2</color>
-
   <color name="transparent">#00000000</color>
   <color name="white">#FFFFFFFF</color>
   <color name="black">#FF000000</color>

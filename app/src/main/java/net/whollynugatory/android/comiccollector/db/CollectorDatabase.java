@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,8 +62,7 @@ public abstract class CollectorDatabase extends RoomDatabase {
   public abstract SeriesDao seriesDao();
 
   private static volatile CollectorDatabase INSTANCE;
-  private static volatile File sData;
-  private static volatile File sLibrary;
+  private static volatile File sDataFile;
   private static final int NUMBER_OF_THREADS = 4;
 
   public static final ExecutorService databaseWriteExecutor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
@@ -74,15 +72,13 @@ public abstract class CollectorDatabase extends RoomDatabase {
     if (INSTANCE == null) {
       synchronized (CollectorDatabase.class) {
         if (INSTANCE == null) {
-          sLibrary = new File(context.getFilesDir(), BaseActivity.DEFAULT_LIBRARY_FILE);
-          sData = new File(context.getCacheDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
-
-          File remoteData = new File(context.getFilesDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+          sDataFile = new File(context.getCacheDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+          File dataFile = new File(context.getFilesDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
           try {
-            if (!remoteData.exists()) {
+            if (!dataFile.exists()) {
               Log.d(TAG, "From assets: " + BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
               try (InputStream inputStream = context.getAssets().open(BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE)) {
-                try (FileOutputStream outputStream = new FileOutputStream(sData)) {
+                try (FileOutputStream outputStream = new FileOutputStream(sDataFile)) {
                   byte[] buf = new byte[1024];
                   int len;
                   while ((len = inputStream.read(buf)) > 0) {
@@ -92,8 +88,8 @@ public abstract class CollectorDatabase extends RoomDatabase {
               }
             } else {
               Log.d(TAG, "From remote: " + BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
-              try (InputStream inputStream = new FileInputStream(remoteData)) {
-                try (FileOutputStream outputStream = new FileOutputStream(sData)) {
+              try (InputStream inputStream = new FileInputStream(dataFile)) {
+                try (FileOutputStream outputStream = new FileOutputStream(sDataFile)) {
                   byte[] buf = new byte[1024];
                   int len;
                   while ((len = inputStream.read(buf)) > 0) {
@@ -105,7 +101,7 @@ public abstract class CollectorDatabase extends RoomDatabase {
           } catch (IOException ioe) {
             Log.w(TAG, "Could not get assets.", ioe);
           } finally {
-            if (remoteData.exists() && !remoteData.delete()) {
+            if (dataFile.exists() && !dataFile.delete()) {
               Log.w(TAG, "Could not remove local copy of remote " + BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
             }
           }
@@ -127,23 +123,19 @@ public abstract class CollectorDatabase extends RoomDatabase {
       super.onOpen(db);
 
       Log.d(TAG, "++onOpen(SupportSQLiteDatabase)");
-      new PopulateDbAsync(INSTANCE, sData, sLibrary).execute();
+      new PopulateDbAsync(INSTANCE, sDataFile).execute();
     }
   };
 
   private static class PopulateDbAsync extends AsyncTask<Void, Void, Void> {
 
-    private final ComicBookDao mComicBookDao;
-    private final File mData;
-    private final File mLibrary;
+    private final File mDataFile;
     private final PublisherDao mPublisherDao;
     private final SeriesDao mSeriesDao;
 
-    PopulateDbAsync(CollectorDatabase db, File data, File library) {
+    PopulateDbAsync(CollectorDatabase db, File dataFile) {
 
-      mComicBookDao = db.comicBookDao();
-      mData = data;
-      mLibrary = library;
+      mDataFile = dataFile;
       mPublisherDao = db.publisherDao();
       mSeriesDao = db.seriesDao();
     }
@@ -151,10 +143,10 @@ public abstract class CollectorDatabase extends RoomDatabase {
     @Override
     protected Void doInBackground(final Void... params) {
 
-      if (mData.exists() && mData.canRead()) {
-        Log.d(TAG, "Loading " + mData.getAbsolutePath());
+      if (mDataFile.exists() && mDataFile.canRead()) {
+        Log.d(TAG, "Loading " + mDataFile.getAbsolutePath());
         RemoteData remoteData = null;
-        try (Reader reader = new FileReader(mData.getAbsolutePath())) {
+        try (Reader reader = new FileReader(mDataFile.getAbsolutePath())) {
           Gson gson = new Gson();
           Type collectionType = new TypeToken<RemoteData>() {
           }.getType();
@@ -195,47 +187,7 @@ public abstract class CollectorDatabase extends RoomDatabase {
           Log.e(TAG, "Source data was incomplete.");
         }
       } else {
-        Log.e(TAG, "%s does not exist yet: " + sData.getAbsoluteFile());
-      }
-
-      if (mLibrary != null && mLibrary.exists()) {
-        Log.d(TAG, "Loading " + mLibrary.getAbsoluteFile());
-        try (Reader reader = new FileReader(mLibrary.getAbsolutePath())) {
-          Gson gson = new Gson();
-          Type collectionType = new TypeToken<ArrayList<ComicBookEntity>>() {}.getType();
-          ArrayList<ComicBookEntity> comicBookList = gson.fromJson(reader, collectionType);
-          Log.d(TAG, "Migrating ComicBook(s) to database: " + comicBookList.size());
-          for (ComicBookEntity comic : comicBookList) {
-            if (comic.IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length()) {
-              try {
-//                comic.ProductCode = String.format(Locale.US, "%s%s", comic.PublisherId, comic.SeriesId);
-                comic.Id = String.format(Locale.US, "%s-%s", comic.ProductCode, comic.IssueCode);
-              } catch (Exception e) {
-                comic.Id = BaseActivity.DEFAULT_COMIC_BOOK_ID;
-                comic.ProductCode = BaseActivity.DEFAULT_PRODUCT_CODE;
-                comic.IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
-//                comic.PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-//                comic.SeriesId = BaseActivity.DEFAULT_SERIES_ID;
-              }
-            } else {
-              comic.Id = BaseActivity.DEFAULT_COMIC_BOOK_ID;
-              comic.ProductCode = BaseActivity.DEFAULT_PRODUCT_CODE;
-              comic.IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
-//              comic.PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-//              comic.SeriesId = BaseActivity.DEFAULT_SERIES_ID;
-            }
-
-            mComicBookDao.insert(comic);
-          }
-        } catch (Exception e) {
-          Log.e(TAG, "Failed reading support data.", e);
-        }
-
-        if (mLibrary.delete()) {
-          Log.d(TAG, "Removing old library file.");
-        } else {
-          Log.w(TAG, "Could not remove old library file.");
-        }
+        Log.e(TAG, "%s does not exist yet: " + mDataFile.getAbsoluteFile());
       }
 
       return null;

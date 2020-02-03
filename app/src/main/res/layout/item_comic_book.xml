@@ -5,8 +5,7 @@
   android:layout_height="wrap_content"
   android:layout_marginTop="2dp"
   android:layout_marginStart="2dp"
-  android:layout_marginEnd="2dp"
-  android:background="@color/background_item">
+  android:layout_marginEnd="2dp">
 
   <TextView
     android:id="@+id/comic_item_text_title"
@@ -17,31 +16,45 @@
     android:ellipsize="end"
     android:text="@string/placeholder"
     android:textSize="14sp"
-    app:layout_constraintEnd_toStartOf="@id/comic_item_image_delete"
+    app:layout_constraintEnd_toStartOf="@id/comic_item_image_edit"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
 
   <TextView
     android:id="@+id/comic_item_text_series"
-    android:textStyle="bold"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="@color/primaryColor"
+    android:textColor="@color/primaryLightColor"
     android:textSize="14sp"
+    android:textStyle="bold"
+    app:layout_constraintEnd_toStartOf="@id/comic_item_image_edit"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_title"
-    app:layout_constraintEnd_toStartOf="@id/comic_item_image_delete"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_title" />
 
+  <ImageButton
+    android:id="@+id/comic_item_image_edit"
+    style="@android:style/Widget.Holo.Light.ImageButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:background="@color/transparent"
+    android:contentDescription="@string/hint_edit_comic"
+    android:padding="8dp"
+    android:src="@drawable/ic_edit_dark"
+    app:layout_constraintBottom_toBottomOf="@id/comic_item_text_series"
+    app:layout_constraintEnd_toStartOf="@id/comic_item_image_delete"
+    app:layout_constraintTop_toTopOf="@id/comic_item_text_title"/>
   <ImageButton
     android:id="@+id/comic_item_image_delete"
     style="@android:style/Widget.Holo.Light.ImageButton"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:padding="8dp"
+    android:background="@color/transparent"
     android:contentDescription="@string/hint_remove_comic"
+    android:padding="8dp"
     android:src="@drawable/ic_delete_dark"
     app:layout_constraintBottom_toBottomOf="@id/comic_item_text_series"
     app:layout_constraintEnd_toEndOf="parent"
@@ -86,9 +99,9 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="@color/primaryDarkColor"
+    android:textColor="@color/primaryLightColor"
     app:layout_constraintBottom_toBottomOf="@id/comic_item_text_issue"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="@id/comic_item_text_issue"/>
+    app:layout_constraintTop_toTopOf="@id/comic_item_text_issue" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

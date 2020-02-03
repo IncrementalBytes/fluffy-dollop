@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.Calendar;
-import java.util.Locale;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 @Entity(
@@ -34,6 +34,24 @@ import net.whollynugatory.android.comiccollector.ui.BaseActivity;
   indices = @Index(value = {"product_code", "issue_code"}, unique = true))
 public class ComicBookEntity implements Serializable {
 
+  @Ignore
+  private int mCoverVariant;
+
+  @Ignore
+  private int mIssueNumber;
+
+  @Ignore
+  private int mPrintRun;
+
+  @Ignore
+  private String mPublisherId;
+
+  @Ignore
+  private String mSeriesId;
+
+  /**
+   * Unique identifier for comic. A combination of the product code and issue code.
+   **/
   @NonNull
   @PrimaryKey
   @ColumnInfo(name = "id")
@@ -75,6 +93,12 @@ public class ComicBookEntity implements Serializable {
 
   public ComicBookEntity() {
 
+    mCoverVariant = 0;
+    mIssueNumber = 0;
+    mPrintRun = 0;
+    mPublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
+    mSeriesId = BaseActivity.DEFAULT_SERIES_ID;
+
     Id = BaseActivity.DEFAULT_COMIC_BOOK_ID;
     ProductCode = BaseActivity.DEFAULT_PRODUCT_CODE;
     IsOwned = false;
@@ -87,25 +111,34 @@ public class ComicBookEntity implements Serializable {
     UpdatedDate = Calendar.getInstance().getTimeInMillis();
   }
 
-  public ComicBookEntity(
-    @NonNull String id,
-    @NonNull String productCode,
-    @NonNull String issueCode,
-    boolean owned,
-    boolean read,
-    @NonNull String title,
-    @NonNull String publishedDate) {
+  public ComicBookEntity(String productCode, String issueCode) {
 
-    Id = id;
+    mCoverVariant = 0;
+    mIssueNumber = 0;
+    mPrintRun = 0;
+    mPublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
+    mSeriesId = BaseActivity.DEFAULT_SERIES_ID;
+
     ProductCode = productCode;
     IssueCode = issueCode;
-    IsOwned = owned;
-    HasRead = read;
-    Title = title;
-    PublishedDate = publishedDate;
+    Id = String.format("%s-%s", productCode, issueCode);
+
+    HasRead = false;
+    IsOwned = false;
+    PublishedDate = "";
+    Title = "";
+
+    AddedDate = Calendar.getInstance().getTimeInMillis();
+    UpdatedDate = Calendar.getInstance().getTimeInMillis();
   }
 
   public ComicBookEntity(ComicBookEntity comicBookEntity) {
+
+    mCoverVariant = comicBookEntity.getCoverVariant();
+    mIssueNumber = comicBookEntity.getIssueNumber();
+    mPrintRun = comicBookEntity.getPrintRun();
+    mPublisherId = comicBookEntity.getPublisherId();
+    mSeriesId = comicBookEntity.getSeriesId();
 
     Id = comicBookEntity.Id;
     ProductCode = comicBookEntity.ProductCode;
@@ -119,33 +152,81 @@ public class ComicBookEntity implements Serializable {
     UpdatedDate = comicBookEntity.UpdatedDate;
   }
 
- /*
-    Public Method(s)
-   */
-  /**
-   * Attempts to extract the Publisher, Series, and IssueCode identifiers from a product code.
-   * @param productCode 12-5 character string representing the full product code.
-   */
-  public void parseProductCode(String productCode) {
+  @Ignore
+  public int getCoverVariant() {
 
-    String[] segments = productCode.split("-");
-    ProductCode = segments[0];
-    if (ProductCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length() && !ProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
+    if (mCoverVariant == 0 &&
+      (!IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) && IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length())) {
       try {
-        Id = String.format(Locale.US, "%s-%s", ProductCode, BaseActivity.DEFAULT_ISSUE_CODE);
-//        PublisherId = ProductCode.substring(0, BaseActivity.DEFAULT_PUBLISHER_ID.length());
-//        SeriesId = ProductCode.substring(BaseActivity.DEFAULT_PUBLISHER_ID.length());
+        String temp = IssueCode.substring(IssueCode.length() - 2, IssueCode.length() - 1);
+        mCoverVariant = Integer.parseInt(temp);
       } catch (Exception e) {
-        Id = BaseActivity.DEFAULT_COMIC_BOOK_ID;
-        ProductCode = BaseActivity.DEFAULT_PRODUCT_CODE;
-//        PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-//        SeriesId = BaseActivity.DEFAULT_SERIES_ID;
+        mCoverVariant = -1;
       }
     }
 
-    if (segments.length > 1) { // grab issue number
-      Id = productCode;
-      IssueCode = segments[1];
+    return mCoverVariant;
+  }
+
+  @Ignore
+  public int getIssueNumber() {
+
+    if (mIssueNumber == 0 &&
+      (!IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) && IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length())) {
+      try {
+        String temp = IssueCode.substring(0, IssueCode.length() - 2);
+        mIssueNumber = Integer.parseInt(temp);
+      } catch (Exception e) {
+        mIssueNumber = -1;
+      }
     }
+
+    return mIssueNumber;
+  }
+
+  @Ignore
+  public int getPrintRun() {
+
+    if (mPrintRun == 0 &&
+      (!IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) && IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length())) {
+      try {
+        String temp = IssueCode.substring(IssueCode.length() - 1);
+        mPrintRun = Integer.parseInt(temp);
+      } catch (Exception e) {
+        mPrintRun = -1;
+      }
+    }
+
+    return mPrintRun;
+  }
+
+  @Ignore
+  public String getPublisherId() {
+
+    if ((!ProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) && ProductCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) &&
+      mPublisherId.equals(BaseActivity.DEFAULT_PUBLISHER_ID) || mPublisherId.length() != BaseActivity.DEFAULT_PUBLISHER_ID.length()) {
+      try {
+        mPublisherId = ProductCode.substring(0, BaseActivity.DEFAULT_PUBLISHER_ID.length());
+      } catch (Exception e) {
+        mPublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
+      }
+    }
+
+    return mPublisherId;
+  }
+
+  @Ignore
+  public String getSeriesId() {
+
+    if ((!ProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) && ProductCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) &&
+      mSeriesId.equals(BaseActivity.DEFAULT_SERIES_ID) || mSeriesId.length() != BaseActivity.DEFAULT_SERIES_ID.length()) {
+      try {
+        mSeriesId = ProductCode.substring(BaseActivity.DEFAULT_SERIES_ID.length());
+      } catch (Exception e) {
+        mSeriesId = BaseActivity.DEFAULT_SERIES_ID;
+      }
+    }
+
+    return mSeriesId;
   }
 }

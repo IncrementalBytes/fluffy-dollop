@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,11 +13,13 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.db.entity;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
@@ -25,6 +27,9 @@ import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 @Entity(tableName = "publisher_table", indices = @Index(value = {"name"}))
 public class PublisherEntity {
+
+  @Ignore
+  public static final String ROOT = "Publishers";
 
   @PrimaryKey()
   @NonNull
@@ -36,6 +41,19 @@ public class PublisherEntity {
   @ColumnInfo(name = "name")
   @SerializedName("name")
   public String Name;
+
+  @ColumnInfo(name = "added_date")
+  public long AddedDate;
+
+  @ColumnInfo(name = "updated_date")
+  public long UpdatedDate;
+
+  @Ignore
+  @SerializedName("needs_review")
+  public boolean NeedsReview;
+
+  @Ignore
+  public long SubmissionDate;
 
   public PublisherEntity() {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -46,28 +46,28 @@ public class BarcodeProcessor extends FrameProcessorBase<List<FirebaseVisionBarc
 
   private static final String TAG = BaseActivity.BASE_TAG + "BarcodeProcessor";
 
-  private final FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance().getVisionBarcodeDetector();
-  private final WorkflowModel workflowModel;
-  private final CameraReticuleAnimator cameraReticuleAnimator;
+  private final FirebaseVisionBarcodeDetector mDetector = FirebaseVision.getInstance().getVisionBarcodeDetector();
+  private final WorkflowModel mWorkflowModel;
+  private final CameraReticuleAnimator mCameraReticuleAnimator;
 
   public BarcodeProcessor(GraphicOverlay graphicOverlay, WorkflowModel workflowModel) {
 
     Log.d(TAG, "++BarcodeProcessor(GraphicOverlay, WorkflowModel)");
-    this.workflowModel = workflowModel;
-    this.cameraReticuleAnimator = new CameraReticuleAnimator(graphicOverlay);
+    mWorkflowModel = workflowModel;
+    mCameraReticuleAnimator = new CameraReticuleAnimator(graphicOverlay);
   }
 
   @Override
   protected Task<List<FirebaseVisionBarcode>> detectInImage(FirebaseVisionImage image) {
 
-    return detector.detectInImage(image);
+    return mDetector.detectInImage(image);
   }
 
   @MainThread
   @Override
   protected void onSuccess(FirebaseVisionImage image, List<FirebaseVisionBarcode> results, GraphicOverlay graphicOverlay) {
 
-    if (!workflowModel.isCameraLive()) {
+    if (!mWorkflowModel.isCameraLive()) {
       return;
     }
 
@@ -83,25 +83,25 @@ public class BarcodeProcessor extends FrameProcessorBase<List<FirebaseVisionBarc
 
     graphicOverlay.clear();
     if (barcodeInCenter == null) {
-      cameraReticuleAnimator.start();
-      graphicOverlay.add(new BarcodeReticuleGraphic(graphicOverlay, cameraReticuleAnimator));
-      workflowModel.setWorkflowState(WorkflowState.DETECTING);
+      mCameraReticuleAnimator.start();
+      graphicOverlay.add(new BarcodeReticuleGraphic(graphicOverlay, mCameraReticuleAnimator));
+      mWorkflowModel.setWorkflowState(WorkflowState.DETECTING);
     } else {
-      cameraReticuleAnimator.cancel();
+      mCameraReticuleAnimator.cancel();
       float sizeProgress =
         PreferenceUtils.getProgressToMeetBarcodeSizeRequirement(graphicOverlay, barcodeInCenter);
       if (sizeProgress < 1) { // Barcode in the camera view is too small, so prompt user to move camera closer.
         graphicOverlay.add(new BarcodeConfirmingGraphic(graphicOverlay, barcodeInCenter));
-        workflowModel.setWorkflowState(WorkflowState.CONFIRMING);
+        mWorkflowModel.setWorkflowState(WorkflowState.CONFIRMING);
       } else { // Barcode size in the camera view is sufficient.
         if (PreferenceUtils.getDelayLoadingBarcodeResult(graphicOverlay.getContext())) {
           ValueAnimator loadingAnimator = createLoadingAnimator(graphicOverlay, barcodeInCenter);
           loadingAnimator.start();
           graphicOverlay.add(new BarcodeLoadingGraphic(graphicOverlay, loadingAnimator));
-          workflowModel.setWorkflowState(WorkflowState.SEARCHING);
+          mWorkflowModel.setWorkflowState(WorkflowState.SEARCHING);
         } else {
-          workflowModel.setWorkflowState(WorkflowState.DETECTED);
-          workflowModel.detectedBarcode.setValue(barcodeInCenter);
+          mWorkflowModel.setWorkflowState(WorkflowState.DETECTED);
+          mWorkflowModel.detectedBarcode.setValue(barcodeInCenter);
         }
       }
     }
@@ -119,8 +119,8 @@ public class BarcodeProcessor extends FrameProcessorBase<List<FirebaseVisionBarc
       animation -> {
         if (Float.compare((float) loadingAnimator.getAnimatedValue(), endProgress) >= 0) {
           graphicOverlay.clear();
-          workflowModel.setWorkflowState(WorkflowState.SEARCHED);
-          workflowModel.detectedBarcode.setValue(barcode);
+          mWorkflowModel.setWorkflowState(WorkflowState.SEARCHED);
+          mWorkflowModel.detectedBarcode.setValue(barcode);
         } else {
           graphicOverlay.invalidate();
         }
@@ -140,7 +140,7 @@ public class BarcodeProcessor extends FrameProcessorBase<List<FirebaseVisionBarc
 
     Log.d(TAG, "++stop()");
     try {
-      detector.close();
+      mDetector.close();
     } catch (IOException e) {
       Log.e(TAG, "Failed to close barcode detector!", e);
     }

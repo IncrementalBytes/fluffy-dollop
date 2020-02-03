@@ -37,12 +37,12 @@
   <string name="hint_search_issue">5 digit Issue UPC</string>
   <string name="title_comic_book">Comic Book</string>
   <string name="published_date">Published:</string>
-  <string name="hint_series_name">E.g. Captain Marvel, Daredevil, Friendly Neighborhood Spider-Man, X-Men</string>
   <string name="hint_publisher">Publishing house name</string>
   <string name="series_id">Series Id:</string>
-  <string name="series_name">Character or story arc for series name:</string>
-  <string name="volume_number">Optional: Volume sequence for series:</string>
+  <string name="series_hint">E.g. Captain Marvel, Daredevil, Friendly Neighborhood Spider-Man, X-Men</string>
+  <string name="volume_number">(Optional) Volume identifier for Series:</string>
   <string name="publisher_name">Publisher:</string>
+  <string name="series_name">Character or story arc for Series:</string>
   <string name="err_add_comic_series">Could not create new comic series, please try again later.</string>
   <string name="err_unknown_user">Unknown user, please try again or with a different sign-in.</string>
   <string name="series_upc">Enter Series UPC:</string>
@@ -171,6 +171,13 @@
   <string name="perf_key_use_camera">camera_use</string>
   <string name="unread">Unread</string>
   <string name="not_owned">Not Owned</string>
+  <string name="permission_default">Permission needed for application to function properly.</string>
+  <string name="add_to_library">Add to Library?</string>
+  <string name="issue_format">Issue: %d</string>
+  <string name="published_date_format">Published: %s</string>
+  <string name="publisher_format">Publisher: %s</string>
+  <string name="publisher_id">Publisher Id:</string>
+  <string name="hint_edit_comic">Edit properties of comic book.</string>
 
   <plurals name="navigation_book_format">
     <item quantity="one">You have 1 book).</item>

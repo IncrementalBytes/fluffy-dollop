@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package net.whollynugatory.android.comiccollector.ui.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import android.text.Editable;
@@ -29,8 +28,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import androidx.lifecycle.ViewModelProviders;
 import java.util.Locale;
+import net.whollynugatory.android.comiccollector.db.viewmodel.ComicBookViewModel;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
@@ -41,7 +41,9 @@ public class ManualSearchFragment extends Fragment {
 
   public interface OnManualSearchListener {
 
-    void onManualSearchActionComplete(ComicBookEntity comicBookEntity);
+    void onManualSearchBookFound(ComicBookEntity comicBookEntity);
+
+    void onManualSearchInputComplete(ComicBookEntity comicBookEntity);
 
     void onManualSearchRetry();
   }
@@ -52,15 +54,23 @@ public class ManualSearchFragment extends Fragment {
   private EditText mIssueCodeEdit;
   private EditText mProductCodeEdit;
 
-  private ComicBookEntity mComicBookEntity;
+  private ComicBookViewModel mComicBookViewModel;
 
-  public static ManualSearchFragment newInstance(ComicBookEntity comicBookEntity) {
+  private String mProductCode;
 
-    Log.d(TAG, "++newInstance(ComicBook)");
+  public static ManualSearchFragment newInstance() {
+
+    Log.d(TAG, "++newInstance()");
+    return new ManualSearchFragment();
+  }
+
+  public static ManualSearchFragment newInstance(String productCode) {
+
+    Log.d(TAG, "++newInstance(String)");
     ManualSearchFragment fragment = new ManualSearchFragment();
-    Bundle args = new Bundle();
-    args.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicBookEntity);
-    fragment.setArguments(args);
+    Bundle arguments = new Bundle();
+    arguments.putString(BaseActivity.ARG_PRODUCT_CODE, productCode);
+    fragment.setArguments(arguments);
     return fragment;
   }
 
@@ -87,10 +97,12 @@ public class ManualSearchFragment extends Fragment {
     Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicBookEntity = (ComicBookEntity) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
+      mProductCode = arguments.getString(BaseActivity.ARG_PRODUCT_CODE);
     } else {
       Log.e(TAG, "Arguments were null.");
     }
+
+    mComicBookViewModel = ViewModelProviders.of(this).get(ComicBookViewModel.class);
   }
 
   @Override
@@ -114,7 +126,7 @@ public class ManualSearchFragment extends Fragment {
 
     Log.d(TAG, "++onViewCreated(View, Bundle)");
 
-    // 2 Scenarios:
+    // 2 Possible Scenarios:
     //   1) Product Code (Publisher & Series) is known, we need the IssueCode
     //   2) We need Product Code (Publisher & Series), & IssueCode
 
@@ -123,56 +135,25 @@ public class ManualSearchFragment extends Fragment {
     mContinueButton = view.findViewById(R.id.manual_search_button_continue);
     mContinueButton.setEnabled(false);
     mContinueButton.setOnClickListener(v -> {
-      mComicBookEntity = new ComicBookEntity();
-      mComicBookEntity.parseProductCode(
-        String.format(
-          Locale.US,
-          "%s-%s",
-          mProductCodeEdit.getText().toString(),
-          mIssueCodeEdit.getText().toString()));
-      mCallback.onManualSearchActionComplete(mComicBookEntity);
+
+      String productCode = mProductCodeEdit.getText().toString();
+      String issueCode = mIssueCodeEdit.getText().toString();
+      mComicBookViewModel.find(productCode, issueCode).observe(this, comicBookEntity -> {
+
+        if (comicBookEntity == null) { // not found, new comic entry
+          comicBookEntity = new ComicBookEntity(productCode, issueCode);
+          mCallback.onManualSearchInputComplete(comicBookEntity);
+        } else {
+          mCallback.onManualSearchBookFound(comicBookEntity);
+        }
+      });
     });
 
-    TextView productCodeExampleText = view.findViewById(R.id.manual_search_text_product_example);
-    ImageView productCodeImage = view.findViewById(R.id.manual_search_image_product);
     mProductCodeEdit = view.findViewById(R.id.manual_search_edit_product);
-    TextView issueCodeText = view.findViewById(R.id.manual_search_text_issue);
-    TextView issueCodeExampleText = view.findViewById(R.id.manual_search_text_issue_example);
-    ImageView issueCodeImage = view.findViewById(R.id.manual_search_image_issue);
     mIssueCodeEdit = view.findViewById(R.id.manual_search_edit_issue);
-    TextView messageText = view.findViewById(R.id.manual_search_text_no_barcode);
 
-    if (mComicBookEntity == null) {
-      // we need both ProductCode and IssueCode
-      messageText.setVisibility(View.VISIBLE);
-      productCodeExampleText.setVisibility(View.VISIBLE);
-      productCodeImage.setVisibility(View.VISIBLE);
-      issueCodeExampleText.setVisibility(View.VISIBLE);
-      issueCodeImage.setVisibility(View.VISIBLE);
-    } else {
-      if (mComicBookEntity.ProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) ||
-        mComicBookEntity.ProductCode.length() != BaseActivity.DEFAULT_PRODUCT_CODE.length()) { // we need ProductCode
-        productCodeExampleText.setVisibility(View.VISIBLE);
-        productCodeImage.setVisibility(View.VISIBLE);
-      } else {
-        messageText.setVisibility(View.GONE);
-        productCodeExampleText.setVisibility(View.GONE);
-        productCodeImage.setVisibility(View.GONE);
-        mProductCodeEdit.setText(mComicBookEntity.ProductCode);
-        mProductCodeEdit.setEnabled(false);
-      }
-
-      if (mComicBookEntity.IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) ||
-        mComicBookEntity.IssueCode.length() != BaseActivity.DEFAULT_ISSUE_CODE.length()) {
-        issueCodeText.setVisibility(View.VISIBLE);
-        issueCodeImage.setVisibility(View.VISIBLE);
-      } else {
-        messageText.setVisibility(View.GONE);
-        issueCodeExampleText.setVisibility(View.GONE);
-        issueCodeImage.setVisibility(View.GONE);
-        mIssueCodeEdit.setText(mComicBookEntity.IssueCode);
-        mIssueCodeEdit.setEnabled(false);
-      }
+    if (mProductCode != null && !mProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
+      mProductCodeEdit.setText(mProductCode);
     }
 
     // setup text change watchers

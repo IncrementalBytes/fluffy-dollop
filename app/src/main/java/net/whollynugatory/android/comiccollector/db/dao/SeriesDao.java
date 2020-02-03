@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,18 +34,8 @@ public interface SeriesDao {
   @Query("SELECT * from series_table WHERE id == :productCode")
   LiveData<SeriesEntity> get(String productCode);
 
-  @Query("SELECT * from series_table ORDER BY title DESC")
+  @Query("SELECT * from series_table ORDER BY name DESC")
   LiveData<List<SeriesEntity>> getAll();
-
-  @Query(
-    "INSERT INTO series_table (" +
-      "id, " +
-      "publisher_id, " +
-      "series_id, " +
-      "title, " +
-      "volume) " +
-      "VALUES (:productCode,:publisherId,:seriesId,:title,:volume)")
-  void insert(String productCode, String publisherId, String seriesId, String title, int volume);
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   void insert(SeriesEntity seriesEntity);

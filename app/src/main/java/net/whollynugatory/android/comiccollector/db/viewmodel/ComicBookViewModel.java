@@ -46,9 +46,14 @@ public class ComicBookViewModel extends AndroidViewModel {
     return mRepository.exportable();
   }
 
-  public LiveData<ComicBookEntity> find(String barcodeValue) {
+  public LiveData<List<ComicBookEntity>> find(String productCode) {
 
-    return mRepository.find(barcodeValue);
+    return mRepository.find(productCode);
+  }
+
+  public LiveData<ComicBookEntity> find(String productCode, String issueCode) {
+
+    return mRepository.find(productCode, issueCode);
   }
 
   public LiveData<List<ComicBookEntity>> getRecent() {

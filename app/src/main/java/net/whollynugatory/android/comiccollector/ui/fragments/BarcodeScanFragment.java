@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import com.google.android.material.chip.Chip;
 import com.google.common.base.Objects;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.barcodedetection.BarcodeProcessor;
@@ -51,7 +52,7 @@ public class BarcodeScanFragment extends Fragment implements View.OnClickListene
 
     void onBarcodeManual();
     void onBarcodeScanClose();
-    void onBarcodeScanned(ComicBookEntity comicBookEntity);
+    void onBarcodeScanned(List<ComicBookEntity> comicBookEntityList);
     void onBarcodeScanned(String barcodeValue);
     void onBarcodeScanSettings();
   }
@@ -280,11 +281,11 @@ public class BarcodeScanFragment extends Fragment implements View.OnClickListene
       this,
       barcode -> {
         if (barcode != null) {
-          if (barcode.getValueType() == FirebaseVisionBarcode.TYPE_ISBN) {
-            mBookListViewModel.find(barcode.getDisplayValue()).observe(this, bookEntity -> {
+          if (barcode.getValueType() == FirebaseVisionBarcode.TYPE_PRODUCT) {
+            mBookListViewModel.find(barcode.getDisplayValue()).observe(this, comicBookEntityList -> {
 
-              if (bookEntity != null) {
-                mCallback.onBarcodeScanned(bookEntity);
+              if (comicBookEntityList != null && comicBookEntityList.size() > 0) {
+                mCallback.onBarcodeScanned(comicBookEntityList);
               } else {
                 mCallback.onBarcodeScanned(barcode.getDisplayValue());
               }

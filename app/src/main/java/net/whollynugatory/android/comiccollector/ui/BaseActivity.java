@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,14 +21,13 @@ import androidx.appcompat.app.AppCompatActivity;
 public class BaseActivity  extends AppCompatActivity {
 
     public static final String ARG_COMIC_BOOK = "comic_book";
-    public static final String ARG_COMIC_SERIES = "comic_series";
     public static final String ARG_DEBUG_FILE_NAME = "debug_file_name";
     public static final String ARG_EMAIL = "email";
     public static final String ARG_FIREBASE_USER_ID = "firebase_user_id";
     public static final String ARG_ITEM_NAME = "item_name";
+    public static final String ARG_LIST_BOOK = "list_book";
     public static final String ARG_LIST_TYPE = "list_type";
     public static final String ARG_MESSAGE = "message";
-    public static final String ARG_MESSAGE_ID = "message_id";
     public static final String ARG_PRODUCT_CODE = "product_code";
     public static final String ARG_USER = "user";
     public static final String ARG_USER_NAME = "user_name";
@@ -50,7 +50,7 @@ public class BaseActivity  extends AppCompatActivity {
     public static final int REQUEST_COMIC_ADD = 4202;
 
     public static final int REQUEST_CAMERA_PERMISSIONS = 4701;
-    public static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSIONS = 4702;
+    public static final int REQUEST_STORAGE_PERMISSIONS = 4702;
 
     public static final int RESULT_ADD_SUCCESS = 4900;
     public static final int RESULT_ADD_FAILED = 4901;

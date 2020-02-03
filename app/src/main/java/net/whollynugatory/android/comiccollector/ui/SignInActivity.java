@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.ui;
 
 import android.content.Intent;
@@ -58,7 +59,6 @@ public class SignInActivity extends BaseActivity {
   private ProgressBar mProgressBar;
   private SignInButton mSignInWithGoogleButton;
   private Snackbar mSnackbar;
-  private TextView mSignInText;
 
   private GoogleSignInAccount mAccount;
   private FirebaseAuth mAuth;
@@ -84,7 +84,6 @@ public class SignInActivity extends BaseActivity {
       betaText.setText(String.format(Locale.US, "%s - %s", getString(R.string.beta), BuildConfig.VERSION_NAME));
     }
 
-    mSignInText = findViewById(R.id.sign_in_text_sign_in);
     mSignInWithGoogleButton = findViewById(R.id.sign_in_button_google);
     if (mSignInWithGoogleButton != null) {
       mSignInWithGoogleButton.setOnClickListener(v -> {
@@ -136,7 +135,6 @@ public class SignInActivity extends BaseActivity {
 
     Log.d(TAG, "++onStart()");
     if (mAuth.getCurrentUser() != null && mAccount != null) {
-      mSignInText.setText(getString(R.string.signing_in));
       mSignInWithGoogleButton.setVisibility(View.GONE);
       mProgressBar.setVisibility(View.VISIBLE);
       mProgressBar.setIndeterminate(true);

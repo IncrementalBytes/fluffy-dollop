@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public interface PublisherDao {
   void delete(String publisherId);
 
   @Query("SELECT * from publisher_table WHERE id == :publisherId")
-  LiveData<PublisherEntity> get(String publisherId);
+  LiveData<PublisherEntity> find(String publisherId);
 
   @Query("SELECT * from publisher_table")
   LiveData<List<PublisherEntity>> getAll();

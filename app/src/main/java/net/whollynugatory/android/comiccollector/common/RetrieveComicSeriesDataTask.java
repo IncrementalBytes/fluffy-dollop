@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, SeriesEnt
 
   protected SeriesEntity doInBackground(Void... params) {
 
-    SeriesEntity seriesEntity = new SeriesEntity();
-    seriesEntity.parseProductCode(mQueryForSeries);
+    SeriesEntity seriesEntity = SeriesEntity.parseProductCode(mQueryForSeries);
+    // TODO: check for validity
     String urlString = String.format(Locale.US, "https://api.upcitemdb.com/prod/trial/lookup?upc=%s", mQueryForSeries);
 
 
@@ -98,7 +98,7 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, SeriesEnt
         try { // errors parsing items should not prevent further parsing
           JSONObject item = (JSONObject) items.get(index);
           if (item.has("title")) {
-            seriesEntity.Title = item.getString("title");
+            seriesEntity.Name = item.getString("name");
           }
         } catch (JSONException e) {
           Log.d(TAG, "Failed to parse JSON object.");

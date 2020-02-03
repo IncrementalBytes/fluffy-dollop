@@ -61,9 +61,14 @@ public class ComicBookRepository {
     return mComicBookDao.exportable();
   }
 
-  public LiveData<ComicBookEntity> find(String barcodeValue) {
+  public LiveData<List<ComicBookEntity>> find(String productCode) {
 
-    return mComicBookDao.find(barcodeValue);
+    return mComicBookDao.find(productCode);
+  }
+
+  public LiveData<ComicBookEntity> find(String productCode, String issueCode) {
+
+    return mComicBookDao.find(productCode, issueCode);
   }
 
   public LiveData<List<ComicBookEntity>> getRecent() {

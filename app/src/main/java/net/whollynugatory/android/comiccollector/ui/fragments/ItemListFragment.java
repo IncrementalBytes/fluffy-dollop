@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Ryan Ward
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package net.whollynugatory.android.comiccollector.ui.fragments;
 
 import android.content.Context;
@@ -23,7 +39,6 @@ import java.util.List;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
-import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 import net.whollynugatory.android.comiccollector.db.viewmodel.ComicBookViewModel;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
@@ -33,8 +48,7 @@ public class ItemListFragment extends Fragment {
 
   public enum ItemType {
     Comics,
-    Series,
-    Categories
+    Series
   }
 
   public interface OnItemListListener {
@@ -124,19 +138,6 @@ public class ItemListFragment extends Fragment {
 //        }
 
         break;
-      case Categories:
-        // TODO: update
-//        if (mItemName != null && mItemName.length() > 0) {
-//          ComicBookEntityAdapter specificCategoryAdapter = new ComicBookEntityAdapter(getContext());
-//          mRecyclerView.setAdapter(specificCategoryAdapter);
-//          mComicBookViewModel.getAllByCategory(mItemName).observe(this, specificCategoryAdapter::setComicBookEntityList);
-//        } else {
-//          BookCategoryAdapter bookCategoryAdapter = new BookCategoryAdapter(getContext());
-//          mRecyclerView.setAdapter(bookCategoryAdapter);
-//          mComicBookViewModel.getSummaryByCategories().observe(this, bookCategoryAdapter::setCategoryList);
-//        }
-
-        break;
     }
 
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -204,93 +205,6 @@ public class ItemListFragment extends Fragment {
 
     Log.d(TAG, "++onResume()");
   }
-
-  /*
-  Adapter class for BookCategory objects
-*/
-//  private class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryHolder> {
-//
-//    /*
-//      Holder class for Category objects
-//     */
-//    class CategoryHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-//
-//      private final TextView mCategoryTextView;
-//      private final TextView mBookCountTextView;
-//
-//      private BookCategory mBookCategory;
-//
-//      BookCategoryHolder(View itemView) {
-//        super(itemView);
-//
-//        mCategoryTextView = itemView.findViewById(R.id.category_item_name);
-//        mBookCountTextView = itemView.findViewById(R.id.category_item_count);
-//
-//        itemView.setOnClickListener(this);
-//      }
-//
-//      void bind(BookCategory bookCategory) {
-//
-//        mBookCategory = bookCategory;
-//
-//        if (mBookCategory != null) {
-//          mCategoryTextView.setText(mBookCategory.CategoryName);
-//          mBookCountTextView.setText(String.format(getString(R.string.books_within_category), mBookCategory.BookCount));
-//        }
-//      }
-//
-//      @Override
-//      public void onClick(View view) {
-//
-//        Log.d(TAG, "++BookCategoryHolder::onClick(View)");
-//        mCallback.onItemListCategorySelected(mBookCategory.CategoryName);
-//      }
-//    }
-//
-//    private final LayoutInflater mInflater;
-//    private List<BookCategory> mBookCategoryList;
-//
-//    BookCategoryAdapter(Context context) {
-//
-//      mInflater = LayoutInflater.from(context);
-//    }
-//
-//    @NonNull
-//    @Override
-//    public BookCategoryHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//
-//      View itemView = mInflater.inflate(R.layout.item_category, parent, false);
-//      return new BookCategoryHolder(itemView);
-//    }
-//
-//    @Override
-//    public void onBindViewHolder(@NonNull BookCategoryHolder holder, int position) {
-//
-//      if (mBookCategoryList != null) {
-//        BookCategory bookCategory = mBookCategoryList.get(position);
-//        holder.bind(bookCategory);
-//      } else {
-//        // No books!
-//      }
-//    }
-//
-//    @Override
-//    public int getItemCount() {
-//
-//      if (mBookCategoryList != null) {
-//        return mBookCategoryList.size();
-//      } else {
-//        return 0;
-//      }
-//    }
-//
-//    void setBookCategoryList(List<BookCategory> bookCategoryList) {
-//
-//      Log.d(TAG, "++setBookCategoryList(List<BookCategory>)");
-//      mBookCategoryList = bookCategoryList;
-//      notifyDataSetChanged();
-//    }
-//  }
 
   /*
   Adapter class for ComicBookEntity objects
@@ -364,7 +278,7 @@ public class ItemListFragment extends Fragment {
 
 //      mSeriesNameTextView.setText(mComicBook.SeriesTitle);
           mTitleTextView.setText(mComicBook.Title);
-//      mIssueTextView.setText(String.valueOf(mComicBook.IssueNumber));
+          mIssueTextView.setText(String.valueOf(mComicBook.getIssueNumber()));
         }
       }
     }
@@ -381,7 +295,7 @@ public class ItemListFragment extends Fragment {
     @Override
     public ComicBookEntityHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-      View itemView = mInflater.inflate(R.layout.comic_book_item, parent, false);
+      View itemView = mInflater.inflate(R.layout.item_comic_book, parent, false);
       return new ComicBookEntityHolder(itemView);
     }
 

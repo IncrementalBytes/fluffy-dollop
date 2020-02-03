@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.db.entity;
 
 import androidx.annotation.NonNull;
@@ -24,8 +25,7 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import com.google.firebase.firestore.Exclude;
 import com.google.gson.annotations.SerializedName;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
@@ -35,23 +35,18 @@ import net.whollynugatory.android.comiccollector.ui.BaseActivity;
   indices = { @Index(value = {"publisher_id", "series_id"}, unique = true)})
 public class SeriesEntity {
 
+  @Ignore
+  public static final String ROOT = "Series";
+
+  /**
+   * Unique identifier for series (also known as the productCode). A combination of the publisher identifier and series identifier.
+   **/
   @PrimaryKey()
   @NonNull
   @ColumnInfo(name = "id")
   @SerializedName("id")
   @Exclude
   public String Id;
-
-  @Ignore
-  public boolean IsFlagged;
-
-  @Ignore
-  @Exclude
-  public List<String> OwnedIssues;
-
-  @Ignore
-  @Exclude
-  public String Published;
 
   @NonNull
   @ColumnInfo(name = "publisher_id")
@@ -65,47 +60,45 @@ public class SeriesEntity {
   @Exclude
   public String SeriesId;
 
+  @NonNull
+  @ColumnInfo(name = "name")
+  @SerializedName("name")
+  public String Name;
+
+  @ColumnInfo(name = "volume")
+  @SerializedName("volume")
+  public int Volume;
+
+  @ColumnInfo(name = "added_date")
+  public long AddedDate;
+
+  @ColumnInfo(name = "updated_date")
+  public long UpdatedDate;
+
+  @Ignore
+  @SerializedName("needs_review")
+  public boolean NeedsReview;
+
   @Ignore
   public long SubmissionDate;
 
   @Ignore
   public String SubmittedBy;
 
-  @NonNull
-  @ColumnInfo(name = "title")
-  @SerializedName("title")
-  public String Title;
-
-  @ColumnInfo(name = "volume")
-  @SerializedName("volume")
-  public int Volume;
-
   public SeriesEntity() {
 
     Id = BaseActivity.DEFAULT_PRODUCT_CODE;
-    IsFlagged = false;
-    OwnedIssues = new ArrayList<>();
-    Published = "";
     PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
     SeriesId = BaseActivity.DEFAULT_SERIES_ID;
-    SubmissionDate = 0;
-    SubmittedBy = "";
-    Title = "";
+    Name = "";
     Volume = 0;
-  }
+    AddedDate = Calendar.getInstance().getTimeInMillis();
+    UpdatedDate = Calendar.getInstance().getTimeInMillis();
 
-  public SeriesEntity(@NonNull String id, @NonNull String publisherId, @NonNull String seriesId, @NonNull String title, int volume) {
+    NeedsReview = false;
 
-    Id = id;
-    IsFlagged = false;
-    OwnedIssues = new ArrayList<>();
-    Published = "";
-    PublisherId = publisherId;
-    SeriesId = seriesId;
     SubmissionDate = 0;
     SubmittedBy = "";
-    Title = title;
-    Volume = volume;
   }
 
   /*
@@ -116,8 +109,8 @@ public class SeriesEntity {
 
     return String.format(
       Locale.US,
-      "Series { Title=%s, PublisherId=%s, SeriesId=%s , Volume=%d }",
-      Title,
+      "Series { Name=%s, PublisherId=%s, SeriesId=%s , Volume=%d }",
+      Name,
       PublisherId,
       SeriesId,
       Volume);
@@ -135,27 +128,30 @@ public class SeriesEntity {
       PublisherId.length() == BaseActivity.DEFAULT_PUBLISHER_ID.length() &&
       !SeriesId.equals(BaseActivity.DEFAULT_SERIES_ID) &&
       SeriesId.length() == BaseActivity.DEFAULT_SERIES_ID.length() &&
-      !Title.isEmpty();
+      !Name.isEmpty();
   }
 
   /**
    * Attempts to extract the Publisher and Series identifiers from the product code.
    * @param productCode 12 character string representing the product code.
    */
-  public void parseProductCode(String productCode) {
+  public static SeriesEntity parseProductCode(String productCode) {
 
+    SeriesEntity seriesEntity = new SeriesEntity();
     if (productCode != null &&
       productCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length() &&
       !productCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
       try {
-        Id = productCode;
-        PublisherId = productCode.substring(0, BaseActivity.DEFAULT_PUBLISHER_ID.length());
-        SeriesId = productCode.substring(BaseActivity.DEFAULT_SERIES_ID.length());
+        seriesEntity.Id = productCode;
+        seriesEntity.PublisherId = productCode.substring(0, BaseActivity.DEFAULT_PUBLISHER_ID.length());
+        seriesEntity.SeriesId = productCode.substring(BaseActivity.DEFAULT_SERIES_ID.length());
       } catch (Exception e) {
-        Id = BaseActivity.DEFAULT_PRODUCT_CODE;
-        PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-        SeriesId = BaseActivity.DEFAULT_SERIES_ID;
+        seriesEntity.Id = BaseActivity.DEFAULT_PRODUCT_CODE;
+        seriesEntity.PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
+        seriesEntity.SeriesId = BaseActivity.DEFAULT_SERIES_ID;
       }
     }
+
+    return  seriesEntity;
   }
 }

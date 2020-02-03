@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -34,8 +34,11 @@ public interface ComicBookDao {
   @Query("SELECT * from comic_book_table")
   LiveData<List<ComicBookEntity>> exportable();
 
-  @Query("SELECT * from comic_book_table WHERE Id == :comicBookId")
-  LiveData<ComicBookEntity> find(String comicBookId);
+  @Query("SELECT * from comic_book_table WHERE product_code == :productCode")
+  LiveData<List<ComicBookEntity>> find(String productCode);
+
+  @Query("SELECT * from comic_book_table WHERE product_code == :productCode AND issue_code == :issueCode")
+  LiveData<ComicBookEntity> find(String productCode, String issueCode);
 
   @Query("SELECT * FROM comic_book_table ORDER BY added_date DESC LIMIT 50")
   LiveData<List<ComicBookEntity>> getAllByRecent();
