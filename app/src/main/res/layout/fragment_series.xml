@@ -6,19 +6,19 @@
   android:layout_height="match_parent">
 
   <TextView
-    android:id="@+id/series_text_id"
+    android:id="@+id/series_text_product_code"
     android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:labelFor="@id/series_edit_id"
-    android:text="@string/series_id"
+    android:labelFor="@id/series_edit_product_code_value"
+    android:text="@string/product_code"
     android:textSize="18sp"
-    app:layout_constraintBottom_toBottomOf="@id/series_edit_id"
+    app:layout_constraintBottom_toBottomOf="@id/series_edit_product_code_value"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@id/series_edit_id"/>
+    app:layout_constraintTop_toTopOf="@id/series_edit_product_code_value"/>
   <EditText
-    android:id="@+id/series_edit_id"
+    android:id="@+id/series_edit_product_code_value"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
@@ -32,18 +32,43 @@
     app:layout_constraintTop_toTopOf="parent" />
 
   <TextView
+    android:id="@+id/series_text_publisher_name"
+    android:textStyle="bold"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:labelFor="@id/series_edit_publisher_name_value"
+    android:text="@string/publisher_name"
+    android:textSize="18sp"
+    app:layout_constraintBottom_toBottomOf="@id/series_edit_publisher_name_value"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@id/series_edit_publisher_name_value"/>
+  <EditText
+    android:id="@+id/series_edit_publisher_name_value"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:autofillHints="@string/hint_publisher"
+    android:inputType="textPersonName|textNoSuggestions"
+    android:text="@string/placeholder"
+    android:textAlignment="textEnd"
+    android:textColor="@color/primaryLightColor"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/series_edit_product_code_value" />
+
+  <TextView
     android:id="@+id/series_text_name"
     android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:labelFor="@id/series_edit_name"
+    android:labelFor="@id/series_edit_name_value"
     android:text="@string/series_name"
     android:textSize="18sp"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/series_edit_id"/>
+    app:layout_constraintTop_toBottomOf="@id/series_edit_publisher_name_value"/>
   <EditText
-    android:id="@+id/series_edit_name"
+    android:id="@+id/series_edit_name_value"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
@@ -60,12 +85,12 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:labelFor="@id/series_edit_name"
+    android:labelFor="@id/series_edit_name_value"
     android:text="@string/series_hint"
     android:textSize="14sp"
     android:textStyle="italic"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/series_edit_name" />
+    app:layout_constraintTop_toBottomOf="@id/series_edit_name_value" />
 
   <TextView
     android:id="@+id/series_text_volume"
@@ -93,6 +118,27 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toBottomOf="@id/series_text_hint" />
 
+  <ProgressBar
+    android:id="@+id/series_progress_wait"
+    style="?android:attr/progressBarStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/image_height_thumbnail"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/series_edit_volume"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintStart_toEndOf="parent" />
+  <TextView
+    android:id="@+id/series_text_wait"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:text="@string/please_wait"
+    android:textAlignment="center"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/series_progress_wait" />
+
   <TextView
     android:id="@+id/series_text_disclaimer"
     android:textStyle="italic"
@@ -103,7 +149,6 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintBottom_toTopOf="@id/series_button_continue"/>
-
   <Button
     android:id="@+id/series_button_continue"
     style="@style/Widget.AppCompat.Button.Colored"

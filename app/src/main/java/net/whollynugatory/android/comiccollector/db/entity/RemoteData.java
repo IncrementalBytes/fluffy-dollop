@@ -21,15 +21,11 @@ import java.util.ArrayList;
 
 public class RemoteData {
 
-  @SerializedName("publishers")
-  public ArrayList<PublisherEntity> ComicPublishers;
-
   @SerializedName("series")
   public ArrayList<SeriesEntity> ComicSeries;
 
   public RemoteData() {
 
-    ComicPublishers = new ArrayList<>();
     ComicSeries = new ArrayList<>();
   }
 }

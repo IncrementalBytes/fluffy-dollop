@@ -52,7 +52,7 @@
       android:textColor="@color/black"
       android:textSize="@dimen/search_button_text_size"
       android:visibility="gone"
-      app:icon="@drawable/ic_image_search_vd_black_24"
+      app:icon="@drawable/ic_search_dark"
       app:iconTint="@color/black"/>
   </FrameLayout>
 

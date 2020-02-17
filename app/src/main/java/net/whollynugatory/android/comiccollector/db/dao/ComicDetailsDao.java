@@ -18,31 +18,22 @@ package net.whollynugatory.android.comiccollector.db.dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Update;
 import java.util.List;
-import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
+import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
 
 @Dao
-public interface PublisherDao {
+public interface ComicDetailsDao {
 
-  @Query("DELETE FROM publisher_table WHERE id == :publisherId")
-  void delete(String publisherId);
+  @Query("DELETE from comic_book_table WHERE Id == :comicBookId")
+  void deleteById(String comicBookId);
 
-  @Query("SELECT * from publisher_table WHERE id == :publisherId")
-  LiveData<PublisherEntity> find(String publisherId);
+  @Query("SELECT * from ComicDetails WHERE ProductCode == :productCode AND IssueCode == :issueCode")
+  LiveData<ComicDetails> find(String productCode, String issueCode);
 
-  @Query("SELECT * from publisher_table")
-  LiveData<List<PublisherEntity>> getAll();
+  @Query("SELECT * from ComicDetails WHERE ProductCode == :productCode")
+  LiveData<List<ComicDetails>> findByProductCode(String productCode);
 
-  @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void insert(PublisherEntity publisherEntity);
-
-  @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void insertAll(List<PublisherEntity> publisherEntityList);
-
-  @Update
-  void update(PublisherEntity publisherEntity);
+  @Query("SELECT * FROM ComicDetails ORDER BY AddedDate DESC LIMIT 50")
+  LiveData<List<ComicDetails>> getRecent();
 }

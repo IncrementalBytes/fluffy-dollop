@@ -14,7 +14,7 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
-    tools:listitem="@layout/item_comic_series"/>
+    tools:listitem="@layout/item_series"/>
 
   <com.google.android.material.floatingactionbutton.FloatingActionButton
     android:id="@+id/series_fab_add"

@@ -14,7 +14,7 @@
      app:layout_constraintEnd_toEndOf="parent"
      app:layout_constraintStart_toStartOf="parent"
      app:layout_constraintTop_toTopOf="parent"
-     app:srcCompat="@drawable/ic_image_search_vd_black_24"
+     app:srcCompat="@drawable/ic_search_dark"
      android:contentDescription="@string/hint_image_description"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

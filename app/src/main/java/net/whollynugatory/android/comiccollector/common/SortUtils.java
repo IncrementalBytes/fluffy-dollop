@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,26 +13,26 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package net.whollynugatory.android.comiccollector.common;
 
-import net.whollynugatory.android.comiccollector.db.views.ComicBookDetails;
-import net.whollynugatory.android.comiccollector.db.views.ComicSeriesDetails;
+import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
 
 import java.util.Comparator;
 
 public class SortUtils {
 
-  public static class ByNumberOfIssues implements Comparator<ComicSeriesDetails> {
+//  public static class ByNumberOfIssues implements Comparator<SeriesDetails> {
+//
+//    public int compare(SeriesDetails a, SeriesDetails b) {
+//
+//      return Long.compare(b.OwnedIssues.size(), a.OwnedIssues.size());
+//    }
+//  }
 
-    public int compare(ComicSeriesDetails a, ComicSeriesDetails b) {
+  public static class ByIssueNumber implements Comparator<ComicDetails> {
 
-      return Long.compare(b.OwnedIssues.size(), a.OwnedIssues.size());
-    }
-  }
-
-  public static class ByIssueNumber implements Comparator<ComicBookDetails> {
-
-    public int compare(ComicBookDetails a, ComicBookDetails b) {
+    public int compare(ComicDetails a, ComicDetails b) {
 
       return Long.compare(a.IssueNumber, b.IssueNumber);
     }

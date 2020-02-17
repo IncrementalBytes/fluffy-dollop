@@ -38,17 +38,18 @@ import java.lang.reflect.Type;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 import net.whollynugatory.android.comiccollector.db.dao.ComicBookDao;
-import net.whollynugatory.android.comiccollector.db.dao.PublisherDao;
+import net.whollynugatory.android.comiccollector.db.dao.ComicDetailsDao;
 import net.whollynugatory.android.comiccollector.db.dao.SeriesDao;
+import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
+import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
-import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
 import net.whollynugatory.android.comiccollector.db.entity.RemoteData;
 import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 
 @Database(
-  entities = {ComicBookEntity.class, PublisherEntity.class, SeriesEntity.class},
+  entities = {ComicBookEntity.class, SeriesEntity.class},
+  views = ComicDetails.class,
   version = 1,
   exportSchema = false)
 public abstract class CollectorDatabase extends RoomDatabase {
@@ -57,7 +58,7 @@ public abstract class CollectorDatabase extends RoomDatabase {
 
   public abstract ComicBookDao comicBookDao();
 
-  public abstract PublisherDao publisherDao();
+  public abstract ComicDetailsDao comicDetailsDao();
 
   public abstract SeriesDao seriesDao();
 
@@ -72,12 +73,12 @@ public abstract class CollectorDatabase extends RoomDatabase {
     if (INSTANCE == null) {
       synchronized (CollectorDatabase.class) {
         if (INSTANCE == null) {
-          sDataFile = new File(context.getCacheDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
-          File dataFile = new File(context.getFilesDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+          sDataFile = new File(context.getCacheDir(), BaseActivity.DEFAULT_SERIES_FILE);
+          File dataFile = new File(context.getFilesDir(), BaseActivity.DEFAULT_SERIES_FILE);
           try {
             if (!dataFile.exists()) {
-              Log.d(TAG, "From assets: " + BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
-              try (InputStream inputStream = context.getAssets().open(BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE)) {
+              Log.d(TAG, "From assets: " + BaseActivity.DEFAULT_SERIES_FILE);
+              try (InputStream inputStream = context.getAssets().open(BaseActivity.DEFAULT_SERIES_FILE)) {
                 try (FileOutputStream outputStream = new FileOutputStream(sDataFile)) {
                   byte[] buf = new byte[1024];
                   int len;
@@ -87,7 +88,7 @@ public abstract class CollectorDatabase extends RoomDatabase {
                 }
               }
             } else {
-              Log.d(TAG, "From remote: " + BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+              Log.d(TAG, "From remote: " + BaseActivity.DEFAULT_SERIES_FILE);
               try (InputStream inputStream = new FileInputStream(dataFile)) {
                 try (FileOutputStream outputStream = new FileOutputStream(sDataFile)) {
                   byte[] buf = new byte[1024];
@@ -102,7 +103,7 @@ public abstract class CollectorDatabase extends RoomDatabase {
             Log.w(TAG, "Could not get assets.", ioe);
           } finally {
             if (dataFile.exists() && !dataFile.delete()) {
-              Log.w(TAG, "Could not remove local copy of remote " + BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+              Log.w(TAG, "Could not remove local copy of remote " + BaseActivity.DEFAULT_SERIES_FILE);
             }
           }
 
@@ -130,13 +131,11 @@ public abstract class CollectorDatabase extends RoomDatabase {
   private static class PopulateDbAsync extends AsyncTask<Void, Void, Void> {
 
     private final File mDataFile;
-    private final PublisherDao mPublisherDao;
     private final SeriesDao mSeriesDao;
 
     PopulateDbAsync(CollectorDatabase db, File dataFile) {
 
       mDataFile = dataFile;
-      mPublisherDao = db.publisherDao();
       mSeriesDao = db.seriesDao();
     }
 
@@ -158,21 +157,8 @@ public abstract class CollectorDatabase extends RoomDatabase {
         }
 
         if (remoteData != null) {
-          String message = "Publisher data processed:";
+          String message = "Series data processed:";
           int count = 0;
-          try {
-            for (PublisherEntity publisher : remoteData.ComicPublishers) {
-              mPublisherDao.insert(publisher);
-              message = String.format(Locale.US, "%s %d...", message, ++count);
-            }
-          } catch (Exception e) {
-            Log.w(TAG, "Could not process publisher data.", e);
-          } finally {
-            Log.d(TAG, message);
-          }
-
-          message = "Series data processed:";
-          count = 0;
           try {
             for (SeriesEntity series : remoteData.ComicSeries) {
               mSeriesDao.insert(series);

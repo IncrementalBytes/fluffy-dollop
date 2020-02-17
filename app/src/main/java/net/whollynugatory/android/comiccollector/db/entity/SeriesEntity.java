@@ -19,21 +19,20 @@ package net.whollynugatory.android.comiccollector.db.entity;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import com.google.firebase.firestore.Exclude;
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 @Entity(
   tableName = "series_table",
-  foreignKeys = @ForeignKey(entity = PublisherEntity.class, parentColumns = "id", childColumns = "publisher_id"),
-  indices = { @Index(value = {"publisher_id", "series_id"}, unique = true)})
-public class SeriesEntity {
+  indices = { @Index(value = {"id"})})
+public class SeriesEntity implements Serializable {
 
   @Ignore
   public static final String ROOT = "Series";
@@ -49,16 +48,10 @@ public class SeriesEntity {
   public String Id;
 
   @NonNull
-  @ColumnInfo(name = "publisher_id")
-  @SerializedName("publisher_id")
+  @ColumnInfo(name = "publisher")
+  @SerializedName("publisher")
   @Exclude
-  public String PublisherId;
-
-  @NonNull
-  @ColumnInfo(name = "series_id")
-  @SerializedName("series_id")
-  @Exclude
-  public String SeriesId;
+  public String Publisher;
 
   @NonNull
   @ColumnInfo(name = "name")
@@ -88,8 +81,7 @@ public class SeriesEntity {
   public SeriesEntity() {
 
     Id = BaseActivity.DEFAULT_PRODUCT_CODE;
-    PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-    SeriesId = BaseActivity.DEFAULT_SERIES_ID;
+    Publisher = "";
     Name = "";
     Volume = 0;
     AddedDate = Calendar.getInstance().getTimeInMillis();
@@ -109,10 +101,10 @@ public class SeriesEntity {
 
     return String.format(
       Locale.US,
-      "Series { Name=%s, PublisherId=%s, SeriesId=%s , Volume=%d }",
+      "Series { Name=%s, Publisher=%s, Id=%s , Volume=%d }",
       Name,
-      PublisherId,
-      SeriesId,
+      Publisher,
+      Id,
       Volume);
   }
 
@@ -123,35 +115,8 @@ public class SeriesEntity {
   public boolean isValid() {
 
     return !Id.equals(BaseActivity.DEFAULT_PRODUCT_CODE) &&
-      Id.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length() &&
-      !PublisherId.equals(BaseActivity.DEFAULT_PUBLISHER_ID) &&
-      PublisherId.length() == BaseActivity.DEFAULT_PUBLISHER_ID.length() &&
-      !SeriesId.equals(BaseActivity.DEFAULT_SERIES_ID) &&
-      SeriesId.length() == BaseActivity.DEFAULT_SERIES_ID.length() &&
-      !Name.isEmpty();
-  }
-
-  /**
-   * Attempts to extract the Publisher and Series identifiers from the product code.
-   * @param productCode 12 character string representing the product code.
-   */
-  public static SeriesEntity parseProductCode(String productCode) {
-
-    SeriesEntity seriesEntity = new SeriesEntity();
-    if (productCode != null &&
-      productCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length() &&
-      !productCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
-      try {
-        seriesEntity.Id = productCode;
-        seriesEntity.PublisherId = productCode.substring(0, BaseActivity.DEFAULT_PUBLISHER_ID.length());
-        seriesEntity.SeriesId = productCode.substring(BaseActivity.DEFAULT_SERIES_ID.length());
-      } catch (Exception e) {
-        seriesEntity.Id = BaseActivity.DEFAULT_PRODUCT_CODE;
-        seriesEntity.PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-        seriesEntity.SeriesId = BaseActivity.DEFAULT_SERIES_ID;
-      }
-    }
-
-    return  seriesEntity;
+      Id.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()&&
+      !Name.isEmpty() &&
+      !Publisher.isEmpty();
   }
 }

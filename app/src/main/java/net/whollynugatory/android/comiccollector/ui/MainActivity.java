@@ -18,6 +18,7 @@ package net.whollynugatory.android.comiccollector.ui;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -71,29 +72,28 @@ import java.util.List;
 import net.whollynugatory.android.comiccollector.PreferenceUtils;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.common.PathUtils;
-import net.whollynugatory.android.comiccollector.common.RetrieveComicSeriesDataTask;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 import net.whollynugatory.android.comiccollector.db.entity.UserEntity;
+import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
 import net.whollynugatory.android.comiccollector.ui.fragments.BarcodeScanFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.ComicBookFragment;
-import net.whollynugatory.android.comiccollector.ui.fragments.ItemListFragment;
-import net.whollynugatory.android.comiccollector.ui.fragments.ItemListFragment.ItemType;
+import net.whollynugatory.android.comiccollector.ui.fragments.ComicListFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.ManualSearchFragment;
-import net.whollynugatory.android.comiccollector.ui.fragments.PublisherFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.ResultListFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.SeriesFragment;
+import net.whollynugatory.android.comiccollector.ui.fragments.SeriesListFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.SyncFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.UserPreferenceFragment;
 
 public class MainActivity extends BaseActivity implements
   ComicBookFragment.OnComicBookListener,
+  ComicListFragment.OnComicListListener,
   BarcodeScanFragment.OnBarcodeScanListener,
-  ItemListFragment.OnItemListListener,
   ManualSearchFragment.OnManualSearchListener,
-  PublisherFragment.OnPublisherListener,
   ResultListFragment.OnResultListListener,
   SeriesFragment.OnSeriesListener,
+  SeriesListFragment.OnSeriesListListener,
   SyncFragment.OnSyncListener {
 
   private static final String TAG = BaseActivity.BASE_TAG + "MainActivity";
@@ -145,10 +145,10 @@ public class MainActivity extends BaseActivity implements
       Log.d(TAG, "++onNavigationItemSelectedListener(MenuItem)");
       switch (menuItem.getItemId()) {
         case R.id.navigation_recent:
-          replaceFragment(ItemListFragment.newInstance());
+          replaceFragment(ComicListFragment.newInstance());
           return true;
         case R.id.navigation_series:
-          replaceFragment(ItemListFragment.newInstance(ItemType.Series));
+          replaceFragment(SeriesListFragment.newInstance());
           return true;
         case R.id.navigation_settings:
           replaceFragment(UserPreferenceFragment.newInstance());
@@ -198,7 +198,7 @@ public class MainActivity extends BaseActivity implements
     Log.d(TAG, "++onOptionsItemSelected(MenuItem)");
     switch (item.getItemId()) {
       case R.id.action_home:
-        replaceFragment(ItemListFragment.newInstance());
+        replaceFragment(ComicListFragment.newInstance());
         break;
       case R.id.action_add:
         addComicBook();
@@ -267,94 +267,47 @@ public class MainActivity extends BaseActivity implements
     super.onActivityResult(requestCode, resultCode, data);
 
     Log.d(TAG, "++onActivityResult(int, int, Intent)");
-    switch (requestCode) {
-      case BaseActivity.REQUEST_COMIC_ADD:
-        String message = null;
-        ComicBookEntity comicBook = null;
-        if (data != null) {
-          if (data.hasExtra(BaseActivity.ARG_MESSAGE)) {
-            message = data.getStringExtra(BaseActivity.ARG_MESSAGE);
-          }
-
-          if (data.hasExtra(BaseActivity.ARG_COMIC_BOOK)) {
-            comicBook = (ComicBookEntity) data.getSerializableExtra(BaseActivity.ARG_COMIC_BOOK);
-          }
+    if (requestCode == BaseActivity.REQUEST_IMAGE_CAPTURE) {
+      if (resultCode != RESULT_OK) {
+        Log.d(TAG, "User canceled camera intent.");
+      } else {
+        File f = new File(getString(R.string.debug_path), data.getStringExtra(BaseActivity.ARG_DEBUG_FILE_NAME));
+        Log.d(TAG, "Using " + f.getAbsolutePath());
+        try {
+          mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
+        } catch (FileNotFoundException e) {
+          Crashlytics.logException(e);
         }
 
-        switch (resultCode) {
-          case RESULT_ADD_SUCCESS:
-            if (comicBook != null) {
-              replaceFragment(ItemListFragment.newInstance(comicBook));
-            } else {
-              showDismissableSnackbar(getString(R.string.err_add_comic_book));
-            }
+        if (mImageBitmap != null) {
+          Bitmap emptyBitmap = Bitmap.createBitmap(
+            mImageBitmap.getWidth(),
+            mImageBitmap.getHeight(),
+            mImageBitmap.getConfig());
+          if (!mImageBitmap.sameAs(emptyBitmap)) {
+            LayoutInflater layoutInflater = LayoutInflater.from(this);
+            View promptView = layoutInflater.inflate(R.layout.dialog_debug_image, null);
+            ImageView imageView = promptView.findViewById(R.id.debug_dialog_image);
+            BitmapDrawable bmd = new BitmapDrawable(this.getResources(), mImageBitmap);
+            imageView.setImageDrawable(bmd);
+            Builder alertDialogBuilder = new Builder(this);
+            alertDialogBuilder.setView(promptView);
+            alertDialogBuilder.setCancelable(false)
+              .setPositiveButton("OK", (dialog, id) -> useFirebaseBarcodeScanning())
+              .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel());
 
-            break;
-          case RESULT_ADD_FAILED:
-            if (message != null && message.length() > 0) {
-              showDismissableSnackbar(message);
-              mNavigationView.setSelectedItemId(R.id.navigation_series);
-            } else {
-              Log.e(TAG, "Activity return with incomplete data or no message was sent.");
-              showDismissableSnackbar(getString(R.string.message_unknown_activity_result));
-              mNavigationView.setSelectedItemId(R.id.navigation_series);
-            }
-
-            break;
-          case RESULT_CANCELED:
-            if (message != null && message.length() > 0) {
-              showDismissableSnackbar(message);
-              mNavigationView.setSelectedItemId(R.id.navigation_series);
-            }
-
-            break;
-        }
-
-        break;
-      case BaseActivity.REQUEST_IMAGE_CAPTURE:
-        if (resultCode != RESULT_OK) {
-          Log.d(TAG, "User canceled camera intent.");
-        } else {
-          File f = new File(getString(R.string.debug_path), data.getStringExtra(BaseActivity.ARG_DEBUG_FILE_NAME));
-          Log.d(TAG, "Using " + f.getAbsolutePath());
-          try {
-            mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
-          } catch (FileNotFoundException e) {
-            Crashlytics.logException(e);
-          }
-
-          if (mImageBitmap != null) {
-            Bitmap emptyBitmap = Bitmap.createBitmap(
-              mImageBitmap.getWidth(),
-              mImageBitmap.getHeight(),
-              mImageBitmap.getConfig());
-            if (!mImageBitmap.sameAs(emptyBitmap)) {
-              LayoutInflater layoutInflater = LayoutInflater.from(this);
-              View promptView = layoutInflater.inflate(R.layout.dialog_debug_image, null);
-              ImageView imageView = promptView.findViewById(R.id.debug_dialog_image);
-              BitmapDrawable bmd = new BitmapDrawable(this.getResources(), mImageBitmap);
-              imageView.setImageDrawable(bmd);
-              android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(this);
-              alertDialogBuilder.setView(promptView);
-              alertDialogBuilder.setCancelable(false)
-                .setPositiveButton("OK", (dialog, id) -> useFirebaseBarcodeScanning())
-                .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel());
-
-              android.app.AlertDialog alert = alertDialogBuilder.create();
-              alert.show();
-            } else {
-              Log.w(TAG, getString(R.string.err_image_empty));
-            }
+            android.app.AlertDialog alert = alertDialogBuilder.create();
+            alert.show();
           } else {
-            Log.w(TAG, getString(R.string.err_image_not_found));
+            Log.w(TAG, getString(R.string.err_image_empty));
           }
+        } else {
+          Log.w(TAG, getString(R.string.err_image_not_found));
         }
-
-        break;
-      default:
-        Log.w(TAG, "Unexpected activity request: " + requestCode);
-        mNavigationView.setSelectedItemId(R.id.navigation_series);
-        break;
+      }
+    } else {
+      Log.w(TAG, "Unexpected activity request: " + requestCode);
+      mNavigationView.setSelectedItemId(R.id.navigation_series);
     }
   }
 
@@ -376,20 +329,6 @@ public class MainActivity extends BaseActivity implements
       Fragment Callback(s)
    */
   @Override
-  public void onComicBookCancel() {
-
-    Log.d(TAG, "++onComicBookCancel()");
-    replaceFragment(ItemListFragment.newInstance());
-  }
-
-  @Override
-  public void onComicBookSaved(ComicBookEntity comicBookEntity) {
-
-    Log.d(TAG, "++onComicBookSaved(ComicBookEntity)");
-    replaceFragment(ItemListFragment.newInstance());
-  }
-
-  @Override
   public void onBarcodeManual() {
 
     Log.d(TAG, "++onBarcodeManual()");
@@ -400,21 +339,14 @@ public class MainActivity extends BaseActivity implements
   public void onBarcodeScanClose() {
 
     Log.d(TAG, "++onBarcodeScanClose()");
-    replaceFragment(ItemListFragment.newInstance());
-  }
-
-  @Override
-  public void onBarcodeScanned(List<ComicBookEntity> comicBookEntityList) {
-
-    Log.d(TAG, "++onBarcodeScanned(ComicBookEntity)");
-    replaceFragment(ResultListFragment.newInstance(new ArrayList<>(comicBookEntityList)));
+    replaceFragment(ComicListFragment.newInstance());
   }
 
   @Override
   public void onBarcodeScanned(String barcodeValue) {
 
     Log.d(TAG, "++onBarcodeScanned(String)");
-    lookupProductCode(barcodeValue);
+    replaceFragment(SeriesFragment.newInstance(barcodeValue));
   }
 
   @Override
@@ -425,45 +357,45 @@ public class MainActivity extends BaseActivity implements
   }
 
   @Override
-  public void onItemListAddComicBook() {
+  public void onComicBookCancel() {
 
-    Log.d(TAG, "++onItemListAddComicBook()");
+    Log.d(TAG, "++onComicBookCancel()");
+    replaceFragment(ComicListFragment.newInstance());
+  }
+
+  @Override
+  public void onComicBookSaved(ComicDetails comicDetails) {
+
+    Log.d(TAG, "++onComicBookSaved(onComicBookSaved)");
+    replaceFragment(ComicListFragment.newInstance());
+  }
+
+  @Override
+  public void onComicListAddComicBook() {
+
+    Log.d(TAG, "++onComicListAddComicBook()");
     addComicBook();
   }
 
   @Override
-  public void onItemListSeriesSelected(String series) {
+  public void onComicListPopulated(int size) {
 
-    Log.d(TAG, "onItemListSeriesSelected()");
-    // TODO: complete method
-  }
-
-  @Override
-  public void onItemListCategorySelected(String category) {
-
-    Log.d(TAG, "++onItemListCategorySelected(ComicBookEntity)");
-    // TODO: complete method
-  }
-
-  @Override
-  public void onItemListPopulated(int size) {
-
-    Log.d(TAG, "++onItemListPopulated(int)");
+    Log.d(TAG, "++onComicListPopulated(int)");
     listPopulated(size);
   }
 
   @Override
-  public void onManualSearchBookFound(ComicBookEntity comicBookEntity) {
+  public void onManualSearchBookFound(ComicDetails comicDetails) {
 
-    Log.d(TAG, "++onManualSearchBookFound(ComicBookEntity)");
-    replaceFragment(ItemListFragment.newInstance(comicBookEntity));
+    Log.d(TAG, "++onManualSearchBookFound(ComicDetails)");
+    replaceFragment(ComicListFragment.newInstance(comicDetails));
   }
 
   @Override
-  public void onManualSearchInputComplete(ComicBookEntity comicBookEntity) {
+  public void onManualSearchInputComplete(ComicDetails comicDetails) {
 
-    Log.d(TAG, "++onManualSearchInputComplete(ComicBookEntity)");
-    replaceFragment(PublisherFragment.newInstance(comicBookEntity));
+    Log.d(TAG, "++onManualSearchInputComplete(ComicDetails)");
+    replaceFragment(ComicBookFragment.newInstance(comicDetails));
   }
 
   @Override
@@ -481,38 +413,44 @@ public class MainActivity extends BaseActivity implements
   }
 
   @Override
-  public void onPublisherFound(ComicBookEntity comicBookEntity) {
+  public void onResultListItemSelected(ComicDetails comicDetails) {
 
-    Log.d(TAG, "++onPublisherFound(ComicBookEntity)");
-    replaceFragment(SeriesFragment.newInstance(comicBookEntity));
-  }
-
-  @Override
-  public void onPublisherCancel() {
-
-    Log.d(TAG, "++onPublisherCancel()");
-    replaceFragment(ItemListFragment.newInstance());
-  }
-
-  @Override
-  public void onResultListItemSelected(ComicBookEntity comicBookEntity) {
-
-    Log.d(TAG, "++onResultListItemSelected(ComicBookEntity)");
-    replaceFragment(ComicBookFragment.newInstance(comicBookEntity));
-  }
-
-  @Override
-  public void onSeriesFound(ComicBookEntity comicBookEntity) {
-
-    Log.d(TAG, "++onSeriesFound(ComicBookEntity)");
-    replaceFragment(ComicBookFragment.newInstance(comicBookEntity));
+    Log.d(TAG, "++onResultListItemSelected(ComicDetails)");
+    replaceFragment(ComicBookFragment.newInstance(comicDetails));
   }
 
   @Override
   public void onSeriesCancel() {
 
     Log.d(TAG, "++onSeriesCancel()");
-    replaceFragment(ItemListFragment.newInstance());
+    replaceFragment(ComicListFragment.newInstance());
+  }
+
+  @Override
+  public void onSeriesSearched(SeriesEntity seriesEntity) {
+
+    Log.d(TAG, "++onSeriesSearched(SeriesEntity)");
+    replaceFragment(ManualSearchFragment.newInstance(seriesEntity));
+  }
+
+  @Override
+  public void onSeriesListAddComicBook() {
+
+    Log.d(TAG, "++onSeriesListAddComicBook()");
+    addComicBook();
+  }
+
+  @Override
+  public void onSeriesListSelected(String seriesId) {
+
+    Log.d(TAG, "++onSeriesListSelected(String)");
+    // TODO:
+  }
+
+  @Override
+  public void onSeriesListPopulated(int size) {
+
+    Log.d(TAG, "++onSeriesListPopulated(int)");
   }
 
   // TODO: add comparison
@@ -641,7 +579,7 @@ public class MainActivity extends BaseActivity implements
   public void retrieveComicSeriesComplete(SeriesEntity seriesEntity) {
 
     Log.d(TAG, "++retrieveComicSeriesComplete(SeriesEntry)");
-    // TODO: send to ItemList for review/updating?
+    replaceFragment(SeriesFragment.newInstance(seriesEntity));
   }
 
   /*
@@ -712,7 +650,7 @@ public class MainActivity extends BaseActivity implements
 
           break;
         case BaseActivity.REQUEST_STORAGE_PERMISSIONS:
-          replaceFragment(ItemListFragment.newInstance());
+          replaceFragment(ComicListFragment.newInstance());
           break;
       }
     }
@@ -765,13 +703,6 @@ public class MainActivity extends BaseActivity implements
     }
   }
 
-  private void lookupProductCode(String productCodeValue) {
-
-    Log.d(TAG, "++lookupProductCode(String)");
-    hideKeyboard();
-    new RetrieveComicSeriesDataTask(MainActivity.this, productCodeValue).execute();
-  }
-
   private void replaceFragment(Fragment fragment) {
 
     Log.d(TAG, "++replaceFragment(Fragment)");
@@ -819,7 +750,7 @@ public class MainActivity extends BaseActivity implements
 
           if (barcodeValue != null && !barcodeValue.isEmpty()) {
             mRotationAttempts = 0;
-            replaceFragment(ManualSearchFragment.newInstance(barcodeValue));
+            replaceFragment(SeriesFragment.newInstance(barcodeValue));
           } else if (mRotationAttempts < 3) {
             mRotationAttempts++;
             Matrix matrix = new Matrix();

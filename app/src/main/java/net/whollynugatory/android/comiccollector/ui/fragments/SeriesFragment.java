@@ -26,18 +26,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.common.ComicCollectorException;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
-import net.whollynugatory.android.comiccollector.db.viewmodel.SeriesViewModel;
+import net.whollynugatory.android.comiccollector.db.viewmodel.CollectorViewModel;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 public class SeriesFragment extends Fragment {
@@ -46,28 +47,42 @@ public class SeriesFragment extends Fragment {
 
   public interface OnSeriesListener {
 
-    void onSeriesFound(ComicBookEntity comicBookEntity);
-
     void onSeriesCancel();
+
+    void onSeriesSearched(SeriesEntity seriesEntity);
   }
 
   private OnSeriesListener mCallback;
 
   private Button mContinueButton;
-  private EditText mIdEdit;
-  private EditText mNameEdit;
+  private EditText mProductCodeEdit;
+  private EditText mPublisherNameEdit;
+  private EditText mSeriesNameEdit;
   private EditText mVolumeEdit;
+  private ProgressBar mWaitProgress;
+  private TextView mWaitText;
 
-  private SeriesViewModel mSeriesViewModel;
+  private CollectorViewModel mCollectorViewModel;
 
-  private ComicBookEntity mComicBookEntity;
+  private String mProductCode;
+  private SeriesEntity mSeriesEntity;
 
-  public static SeriesFragment newInstance(ComicBookEntity comicBookEntity) {
+  public static SeriesFragment newInstance(String productCode) {
 
     Log.d(TAG, "++newInstance(ComicBookEntry)");
     SeriesFragment fragment = new SeriesFragment();
     Bundle arguments = new Bundle();
-    arguments.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicBookEntity);
+    arguments.putSerializable(BaseActivity.ARG_PRODUCT_CODE, productCode);
+    fragment.setArguments(arguments);
+    return fragment;
+  }
+
+  public static SeriesFragment newInstance(SeriesEntity seriesEntity) {
+
+    Log.d(TAG, "++newInstance(ComicBookEntry)");
+    SeriesFragment fragment = new SeriesFragment();
+    Bundle arguments = new Bundle();
+    arguments.putSerializable(BaseActivity.ARG_SERIES, seriesEntity);
     fragment.setArguments(arguments);
     return fragment;
   }
@@ -95,12 +110,22 @@ public class SeriesFragment extends Fragment {
     Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicBookEntity = (ComicBookEntity) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
+      if (arguments.containsKey(BaseActivity.ARG_SERIES)) {
+        mSeriesEntity = (SeriesEntity) arguments.getSerializable(BaseActivity.ARG_SERIES);
+      } else {
+        mSeriesEntity = null;
+      }
+
+      if (arguments.containsKey(BaseActivity.ARG_PRODUCT_CODE)) {
+        mProductCode = arguments.getString(BaseActivity.ARG_PRODUCT_CODE);
+      } else {
+        mProductCode = null;
+      }
     } else {
       Log.e(TAG, "Arguments were null.");
     }
 
-    mSeriesViewModel = ViewModelProviders.of(this).get(SeriesViewModel.class);
+    mCollectorViewModel = new ViewModelProvider(this).get(CollectorViewModel.class);
   }
 
   @Override
@@ -125,29 +150,55 @@ public class SeriesFragment extends Fragment {
     Log.d(TAG, "++onViewCreated(View, Bundle)");
     Button cancelButton = view.findViewById(R.id.series_button_cancel);
     mContinueButton = view.findViewById(R.id.series_button_continue);
-    mIdEdit = view.findViewById(R.id.series_edit_id);
-    mNameEdit = view.findViewById(R.id.series_edit_name);
+    mProductCodeEdit = view.findViewById(R.id.series_edit_product_code_value);
+    mPublisherNameEdit = view.findViewById(R.id.series_edit_publisher_name_value);
+    mSeriesNameEdit = view.findViewById(R.id.series_edit_name_value);
     mVolumeEdit = view.findViewById(R.id.series_edit_volume);
+    mWaitProgress = view.findViewById(R.id.series_progress_wait);
+    mWaitText = view.findViewById(R.id.series_text_wait);
 
-    mSeriesViewModel.getAll().observe(this, seriesEntityList -> {
+    // 2 Acceptable Scenarios:
+    //   1) ProductCode - search for series
+    //   2) SeriesEntity - edit series
 
-      boolean foundSeries = false;
-      for (SeriesEntity seriesEntity : seriesEntityList) {
-        if (seriesEntity.Id.equals(mComicBookEntity.ProductCode)) {
-          foundSeries = true;
-          break;
+    if (mSeriesEntity == null) {
+      mContinueButton.setVisibility(View.INVISIBLE);
+      mProductCodeEdit.setVisibility(View.INVISIBLE);
+      mPublisherNameEdit.setVisibility(View.INVISIBLE);
+      mSeriesNameEdit.setVisibility(View.INVISIBLE);
+      mVolumeEdit.setVisibility(View.INVISIBLE);
+      mWaitProgress.setIndeterminate(true);
+      mCollectorViewModel.findSeries(mProductCode).observe(getViewLifecycleOwner(), seriesEntity -> {
+
+        if (seriesEntity != null) {
+          mCallback.onSeriesSearched(seriesEntity);
+        } else { // gather more information about the series from the user
+          updateUI();
         }
+      });
+    } else { // gather more information about the series from the user
+      updateUI();
+    }
+
+    cancelButton.setOnClickListener(v -> mCallback.onSeriesCancel());
+    mPublisherNameEdit.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
       }
 
-      if (foundSeries) {
-        mCallback.onSeriesFound(mComicBookEntity);
-      } else {
-        updateUI();
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) {
+        validateAll();
       }
     });
 
-    cancelButton.setOnClickListener(v -> mCallback.onSeriesCancel());
-    mNameEdit.addTextChangedListener(new TextWatcher() {
+    mSeriesNameEdit.addTextChangedListener(new TextWatcher() {
 
       @Override
       public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -167,16 +218,16 @@ public class SeriesFragment extends Fragment {
 
       Log.d(TAG, "++onClick()");
       SeriesEntity seriesEntity = new SeriesEntity();
-      seriesEntity.Id = mComicBookEntity.ProductCode;
-      seriesEntity.SeriesId = mIdEdit.getText().toString();
-      seriesEntity.PublisherId = mComicBookEntity.getPublisherId();
-      seriesEntity.Name = mNameEdit.getText().toString();
+      seriesEntity.Id = mProductCode;
+      seriesEntity.Publisher = mPublisherNameEdit.getText().toString();
+      seriesEntity.Name = mSeriesNameEdit.getText().toString();
       String volume = mVolumeEdit.getText().toString();
       if (!volume.isEmpty()) {
         seriesEntity.Volume = Integer.parseInt(volume);
       }
 
-      mSeriesViewModel.insert(seriesEntity);
+      mCollectorViewModel.insertSeries(seriesEntity);
+
       seriesEntity.NeedsReview = true;
       FirebaseFirestore.getInstance().document(SeriesEntity.ROOT).set(seriesEntity, SetOptions.merge())
         .addOnCompleteListener(task -> {
@@ -190,7 +241,7 @@ public class SeriesFragment extends Fragment {
                   seriesEntity.toString())));
           }
 
-          mCallback.onSeriesFound(mComicBookEntity);
+          mCallback.onSeriesSearched(seriesEntity);
         });
     });
   }
@@ -199,12 +250,21 @@ public class SeriesFragment extends Fragment {
   private void updateUI() {
 
     Log.d(TAG, "++updateUI()");
-    mIdEdit.setText(mComicBookEntity.getSeriesId());
+    mContinueButton.setVisibility(View.VISIBLE);
+    mProductCodeEdit.setVisibility(View.VISIBLE);
+    mPublisherNameEdit.setVisibility(View.VISIBLE);
+    mSeriesNameEdit.setVisibility(View.VISIBLE);
+    mVolumeEdit.setVisibility(View.VISIBLE);
+    mWaitProgress.setVisibility(View.INVISIBLE);
+    mWaitText.setVisibility(View.INVISIBLE);
+
+    mProductCodeEdit.setText(mProductCode);
   }
 
   private void validateAll() {
 
-    if (mNameEdit.getText().toString().length() > 0) {
+    if ((mSeriesNameEdit.getText().toString().length() > 0) &&
+      (mPublisherNameEdit.getText().toString().length() > 0)) {
       mContinueButton.setEnabled(true);
     } else {
       mContinueButton.setEnabled(false);

@@ -14,7 +14,7 @@
     android:layout_gravity="start"
     android:padding="@dimen/top_action_button_padding"
     android:contentDescription="@string/cd_close_button"
-    app:srcCompat="@drawable/ic_close_vd_white_24"/>
+    app:srcCompat="@drawable/ic_close_dark"/>
 
   <ImageView
     android:id="@+id/settings_button"
@@ -23,7 +23,7 @@
     android:layout_alignParentEnd="true"
     android:padding="@dimen/top_action_button_padding"
     android:contentDescription="@string/cd_settings_button"
-    app:srcCompat="@drawable/ic_settings_vd_white_24"/>
+    app:srcCompat="@drawable/ic_settings_dark"/>
 
   <ImageView
     android:id="@+id/flash_button"

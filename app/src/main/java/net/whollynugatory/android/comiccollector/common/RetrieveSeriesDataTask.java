@@ -33,14 +33,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, SeriesEntity> {
+public class RetrieveSeriesDataTask extends AsyncTask<Void, Void, SeriesEntity> {
 
-  private static final String TAG = BaseActivity.BASE_TAG + "RetrieveComicSeriesDataTask";
+  private static final String TAG = BaseActivity.BASE_TAG + "RetrieveSeriesDataTask";
 
   private WeakReference<MainActivity> mActivityWeakReference;
   private String mQueryForSeries;
 
-  public RetrieveComicSeriesDataTask(MainActivity context, String productCode) {
+  public RetrieveSeriesDataTask(MainActivity context, String productCode) {
 
     mActivityWeakReference = new WeakReference<>(context);
     mQueryForSeries = productCode;
@@ -48,11 +48,8 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, SeriesEnt
 
   protected SeriesEntity doInBackground(Void... params) {
 
-    SeriesEntity seriesEntity = SeriesEntity.parseProductCode(mQueryForSeries);
-    // TODO: check for validity
+    SeriesEntity seriesEntity = new SeriesEntity();
     String urlString = String.format(Locale.US, "https://api.upcitemdb.com/prod/trial/lookup?upc=%s", mQueryForSeries);
-
-
     Log.d(TAG, "Query: " + urlString);
     HttpURLConnection connection = null;
     StringBuilder builder = new StringBuilder();
@@ -97,8 +94,22 @@ public class RetrieveComicSeriesDataTask extends AsyncTask<Void, Void, SeriesEnt
       for (int index = 0; index < items.length(); index++) {
         try { // errors parsing items should not prevent further parsing
           JSONObject item = (JSONObject) items.get(index);
+          if (item.has("upc")) {
+            String upc = item.getString("upc");
+            if (!mQueryForSeries.equals(upc)) {
+              Log.e(TAG, "UPC code returned not expected: " + upc);
+              continue;
+            } else {
+              seriesEntity.Id = upc;
+            }
+          }
+
           if (item.has("title")) {
             seriesEntity.Name = item.getString("name");
+          }
+
+          if (item.has("brand")) {
+            seriesEntity.Publisher = item.getString("brand").toUpperCase();
           }
         } catch (JSONException e) {
           Log.d(TAG, "Failed to parse JSON object.");

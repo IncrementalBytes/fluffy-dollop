@@ -30,7 +30,6 @@
     android:singleLine="true"
     android:textAlignment="gravity"
     android:textColor="@color/primaryLightColor"
-    android:text="@{user.firstName, default=my_default}"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/comic_book_text_product_code"
     app:layout_constraintTop_toTopOf="parent" />

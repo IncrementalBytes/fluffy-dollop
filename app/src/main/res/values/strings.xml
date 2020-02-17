@@ -102,7 +102,7 @@
   <string name="debug_prompt">Select image file to use:</string>
   <string name="err_unknown_series">Unknown Comic Series was returned by the service.</string>
   <string name="hint_date_format">MM/YYYY</string>
-  <string name="hint_title_of_issue">(Optional) Title of issue.</string>
+  <string name="hint_title_of_issue">(Optional) Title of issue</string>
   <string name="hint_remove_comic">Remove comic from library.</string>
   <string name="err_comic_book_details">Could not display comic book details at this time.</string>
   <string name="hint_example">Example:</string>
@@ -178,6 +178,8 @@
   <string name="publisher_format">Publisher: %s</string>
   <string name="publisher_id">Publisher Id:</string>
   <string name="hint_edit_comic">Edit properties of comic book.</string>
+  <string name="pending">Pending</string>
+  <string name="please_wait">Please wait…</string>
 
   <plurals name="navigation_book_format">
     <item quantity="one">You have 1 book).</item>

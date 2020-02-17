@@ -28,11 +28,12 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
-import net.whollynugatory.android.comiccollector.db.viewmodel.ComicBookViewModel;
+import net.whollynugatory.android.comiccollector.db.viewmodel.CollectorViewModel;
+import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 public class ComicBookFragment extends Fragment {
@@ -41,23 +42,23 @@ public class ComicBookFragment extends Fragment {
 
   public interface OnComicBookListener {
 
-    void onComicBookSaved(ComicBookEntity comicBookEntity);
-
     void onComicBookCancel();
+
+    void onComicBookSaved(ComicDetails comicDetails);
   }
 
   private OnComicBookListener mCallback;
 
-  private ComicBookViewModel mComicBookViewModel;
+  private CollectorViewModel mCollectorViewModel;
 
-  private ComicBookEntity mComicBookEntity;
+  private ComicDetails mComicDetails;
 
-  public static ComicBookFragment newInstance(ComicBookEntity comicBookEntity) {
+  public static ComicBookFragment newInstance(ComicDetails comicDetails) {
 
     Log.d(TAG, "++newInstance(ComicBookEntry)");
     ComicBookFragment fragment = new ComicBookFragment();
     Bundle arguments = new Bundle();
-    arguments.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicBookEntity);
+    arguments.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicDetails);
     fragment.setArguments(arguments);
     return fragment;
   }
@@ -85,12 +86,12 @@ public class ComicBookFragment extends Fragment {
     Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicBookEntity = (ComicBookEntity) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
+      mComicDetails = (ComicDetails) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
     } else {
       Log.e(TAG, "Arguments were null.");
     }
 
-    mComicBookViewModel = ViewModelProviders.of(this).get(ComicBookViewModel.class);
+    mCollectorViewModel = new ViewModelProvider(this).get(CollectorViewModel.class);
   }
 
   @Override
@@ -127,29 +128,39 @@ public class ComicBookFragment extends Fragment {
     ToggleButton readButton = view.findViewById(R.id.comic_book_toggle_read);
     Button saveButton = view.findViewById(R.id.comic_book_button_save);
 
-    nameEdit.setText(mComicBookEntity.Title);
-    publishEdit.setText(mComicBookEntity.PublishedDate);
-    seriesText.setText("From other object");
-    publisherText.setText("From other object");
-    volumeText.setText("From other object");
-    issueText.setText(String.valueOf(mComicBookEntity.getIssueNumber()));
-    productCodeText.setText(mComicBookEntity.Id);
+    mCollectorViewModel.findComic(mComicDetails.ProductCode, mComicDetails.IssueCode).observe(getViewLifecycleOwner(), comicDetails -> {
 
-    ownedButton.setChecked(mComicBookEntity.IsOwned);
-    readButton.setChecked(mComicBookEntity.HasRead);
+      if (comicDetails != null) {
+        mComicDetails = comicDetails;
+      }
+
+      nameEdit.setText(mComicDetails.Title);
+      publishEdit.setText(mComicDetails.Published);
+      seriesText.setText(mComicDetails.SeriesTitle);
+      publisherText.setText(mComicDetails.PublisherName);
+      volumeText.setText(String.valueOf(mComicDetails.Volume));
+      issueText.setText(String.valueOf(mComicDetails.IssueNumber));
+      productCodeText.setText(mComicDetails.ProductCode);
+
+      ownedButton.setChecked(mComicDetails.IsOwned);
+      readButton.setChecked(mComicDetails.HasRead);
+    });
+
+    ownedButton.setChecked(false);
+    readButton.setChecked(false);
 
     cancelButton.setOnClickListener(v -> mCallback.onComicBookCancel());
     saveButton.setOnClickListener(v -> {
 
       Log.d(TAG, "++onClick()");
-      ComicBookEntity comicBookEntity = new ComicBookEntity(mComicBookEntity);
+      ComicBookEntity comicBookEntity = mComicDetails.toEntity();
       comicBookEntity.Title = nameEdit.getText().toString();
       comicBookEntity.IsOwned = ownedButton.isChecked();
       comicBookEntity.HasRead = readButton.isChecked();
       comicBookEntity.PublishedDate = publishEdit.getText().toString();
 
-      mComicBookViewModel.insert(comicBookEntity);
-      mCallback.onComicBookSaved(comicBookEntity);
+      mCollectorViewModel.insertComicBook(comicBookEntity);
+      mCallback.onComicBookSaved(mComicDetails);
     });
   }
 }

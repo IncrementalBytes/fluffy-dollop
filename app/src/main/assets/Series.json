@@ -1,0 +1,59 @@
+{
+  "series": [
+    {
+      "id": "-1",
+      "publisher": "UNKNOWN",
+      "series_id": -1,
+      "name": "Unknown",
+      "volume": 0
+    },
+    {
+      "id": "759606088607",
+      "publisher": "MARVEL",
+      "name": "Captain America",
+      "volume": 9
+    },
+    {
+      "id": "759606079902",
+      "publisher": "MARVEL",
+      "name": "Captain Marvel",
+      "volume": 8
+    },
+    {
+      "id": "759606092680",
+      "publisher": "MARVEL",
+      "name": "Captain Marvel",
+      "volume": 10
+    },
+    {
+      "id": "759606092635",
+      "publisher": "MARVEL",
+      "name": "Friendly Neighborhood Spider-Man",
+      "volume": 2
+    },
+    {
+      "id": "759606086061",
+      "publisher": "MARVEL",
+      "name": "The Mighty Captain Marvel",
+      "volume": 1
+    },
+    {
+      "id": "759606091218",
+      "publisher": "MARVEL",
+      "name": "Spider-Gwen: Ghost-Spider",
+      "volume": 1
+    },
+    {
+      "id": "759606089680",
+      "publisher": "MARVEL",
+      "name": "Tony Stark: IronMan",
+      "volume": 12
+    },
+    {
+      "id": "759606095025",
+      "publisher": "MARVEL",
+      "name": "Ghost Spider",
+      "volume": 1
+    }
+  ]
+}
