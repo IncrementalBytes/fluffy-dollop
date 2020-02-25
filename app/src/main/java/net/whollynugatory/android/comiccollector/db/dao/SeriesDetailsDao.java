@@ -18,31 +18,19 @@ package net.whollynugatory.android.comiccollector.db.dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Update;
 import java.util.List;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
+import net.whollynugatory.android.comiccollector.db.views.SeriesDetails;
 
 @Dao
-public interface ComicBookDao {
+public interface SeriesDetailsDao {
 
-  @Query("DELETE from comic_book_table WHERE id == :id")
-  void delete(String id);
+  @Query("SELECT * from SeriesDetails WHERE PublisherCode == :publisherCode AND SeriesCode == :seriesCode")
+  LiveData<SeriesDetails> get(String publisherCode, String seriesCode);
 
-  @Query("SELECT * from comic_book_table")
-  LiveData<List<ComicBookEntity>> exportable();
+  @Query("SELECT * from SeriesDetails")
+  LiveData<List<SeriesDetails>> getAll();
 
-  @Query("SELECT * FROM comic_book_table ORDER BY added_date DESC LIMIT 50")
-  LiveData<List<ComicBookEntity>> getRecent();
-
-  @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void insert(ComicBookEntity comicBookEntity);
-
-  @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void insertAll(List<ComicBookEntity> comicBookEntityList);
-
-  @Update
-  void update(ComicBookEntity comicBookEntity);
+  @Query("SELECT * FROM SeriesDetails WHERE PublisherCode == :publisherCode")
+  LiveData<List<SeriesDetails>> getAllByPublisher(String publisherCode);
 }

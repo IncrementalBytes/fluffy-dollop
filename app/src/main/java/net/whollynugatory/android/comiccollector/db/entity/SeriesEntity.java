@@ -25,40 +25,39 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import com.google.firebase.firestore.Exclude;
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.UUID;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 @Entity(
   tableName = "series_table",
   foreignKeys = @ForeignKey(entity = PublisherEntity.class, parentColumns = "id", childColumns = "publisher_id"),
-  indices = { @Index(value = {"publisher_id", "series_id"}, unique = true)})
-public class SeriesEntity {
+  indices = {
+    @Index(value = "id"),
+    @Index(value = "publisher_id")
+  })
+public class SeriesEntity implements Serializable {
 
   @Ignore
   public static final String ROOT = "Series";
 
-  /**
-   * Unique identifier for series (also known as the productCode). A combination of the publisher identifier and series identifier.
-   **/
   @PrimaryKey()
   @NonNull
   @ColumnInfo(name = "id")
   @SerializedName("id")
-  @Exclude
   public String Id;
+
+  @NonNull
+  @ColumnInfo(name = "series_code")
+  @SerializedName("series_code")
+  public String SeriesCode;
 
   @NonNull
   @ColumnInfo(name = "publisher_id")
   @SerializedName("publisher_id")
-  @Exclude
   public String PublisherId;
-
-  @NonNull
-  @ColumnInfo(name = "series_id")
-  @SerializedName("series_id")
-  @Exclude
-  public String SeriesId;
 
   @NonNull
   @ColumnInfo(name = "name")
@@ -68,6 +67,10 @@ public class SeriesEntity {
   @ColumnInfo(name = "volume")
   @SerializedName("volume")
   public int Volume;
+
+  @ColumnInfo(name = "active")
+  @SerializedName("active")
+  public boolean IsActive;
 
   @ColumnInfo(name = "added_date")
   public long AddedDate;
@@ -87,16 +90,16 @@ public class SeriesEntity {
 
   public SeriesEntity() {
 
-    Id = BaseActivity.DEFAULT_PRODUCT_CODE;
+    Id = UUID.randomUUID().toString();
+    SeriesCode = BaseActivity.DEFAULT_SERIES_CODE;
     PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-    SeriesId = BaseActivity.DEFAULT_SERIES_ID;
+
     Name = "";
     Volume = 0;
-    AddedDate = Calendar.getInstance().getTimeInMillis();
-    UpdatedDate = Calendar.getInstance().getTimeInMillis();
+    AddedDate = UpdatedDate = Calendar.getInstance().getTimeInMillis();
 
+    IsActive = true;
     NeedsReview = false;
-
     SubmissionDate = 0;
     SubmittedBy = "";
   }
@@ -109,10 +112,9 @@ public class SeriesEntity {
 
     return String.format(
       Locale.US,
-      "Series { Name=%s, PublisherId=%s, SeriesId=%s , Volume=%d }",
+      "Series { Name=%s, Code=%s , Volume=%d }",
       Name,
-      PublisherId,
-      SeriesId,
+      SeriesCode,
       Volume);
   }
 
@@ -122,36 +124,18 @@ public class SeriesEntity {
   @Exclude
   public boolean isValid() {
 
-    return !Id.equals(BaseActivity.DEFAULT_PRODUCT_CODE) &&
-      Id.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length() &&
-      !PublisherId.equals(BaseActivity.DEFAULT_PUBLISHER_ID) &&
-      PublisherId.length() == BaseActivity.DEFAULT_PUBLISHER_ID.length() &&
-      !SeriesId.equals(BaseActivity.DEFAULT_SERIES_ID) &&
-      SeriesId.length() == BaseActivity.DEFAULT_SERIES_ID.length() &&
-      !Name.isEmpty();
+    return !SeriesCode.equals(BaseActivity.DEFAULT_SERIES_CODE) &&
+      SeriesCode.length() == BaseActivity.DEFAULT_SERIES_CODE.length() &&
+      !Name.isEmpty() &&
+      Volume > 0;
   }
 
-  /**
-   * Attempts to extract the Publisher and Series identifiers from the product code.
-   * @param productCode 12 character string representing the product code.
-   */
-  public static SeriesEntity parseProductCode(String productCode) {
+  public static String getSeriesCode(String productCode) {
 
-    SeriesEntity seriesEntity = new SeriesEntity();
-    if (productCode != null &&
-      productCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length() &&
-      !productCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
-      try {
-        seriesEntity.Id = productCode;
-        seriesEntity.PublisherId = productCode.substring(0, BaseActivity.DEFAULT_PUBLISHER_ID.length());
-        seriesEntity.SeriesId = productCode.substring(BaseActivity.DEFAULT_SERIES_ID.length());
-      } catch (Exception e) {
-        seriesEntity.Id = BaseActivity.DEFAULT_PRODUCT_CODE;
-        seriesEntity.PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-        seriesEntity.SeriesId = BaseActivity.DEFAULT_SERIES_ID;
-      }
+    if (productCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) {
+      return productCode.substring(BaseActivity.DEFAULT_SERIES_CODE.length());
     }
 
-    return  seriesEntity;
+    return BaseActivity.DEFAULT_SERIES_CODE;
   }
 }

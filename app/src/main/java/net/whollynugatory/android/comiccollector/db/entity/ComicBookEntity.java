@@ -20,47 +20,42 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
-import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.UUID;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 @Entity(
   tableName = "comic_book_table",
-  foreignKeys = @ForeignKey(entity = SeriesEntity.class, parentColumns = "id", childColumns = "product_code"),
-  indices = @Index(value = {"product_code", "issue_code"}, unique = true))
+  foreignKeys = {
+    @ForeignKey(entity = PublisherEntity.class, parentColumns = "id", childColumns = "publisher_id"),
+    @ForeignKey(entity = SeriesEntity.class, parentColumns = "id", childColumns = "series_id")
+  },
+  indices = {
+    @Index(value = "id"),
+    @Index(value = "publisher_id"),
+    @Index(value = "series_id")
+  })
 public class ComicBookEntity implements Serializable {
 
-  @Ignore
-  private int mCoverVariant;
-
-  @Ignore
-  private int mIssueNumber;
-
-  @Ignore
-  private int mPrintRun;
-
-  @Ignore
-  private String mPublisherId;
-
-  @Ignore
-  private String mSeriesId;
-
-  /**
-   * Unique identifier for comic. A combination of the product code and issue code.
-   **/
   @NonNull
   @PrimaryKey
   @ColumnInfo(name = "id")
   @SerializedName("id")
   public String Id;
 
-  @ColumnInfo(name = "product_code")
-  @SerializedName("product_code")
-  public String ProductCode;
+  @NonNull
+  @ColumnInfo(name = "publisher_id")
+  @SerializedName("publisher_id")
+  public String PublisherId;
+
+  @NonNull
+  @ColumnInfo(name = "series_id")
+  @SerializedName("series_id")
+  public String SeriesId;
 
   @NonNull
   @ColumnInfo(name = "issue_code")
@@ -71,6 +66,10 @@ public class ComicBookEntity implements Serializable {
   @ColumnInfo(name = "title")
   @SerializedName("title")
   public String Title;
+
+  @ColumnInfo(name = "active")
+  @SerializedName("active")
+  public boolean IsActive;
 
   @ColumnInfo(name = "owned")
   @SerializedName("owned")
@@ -93,37 +92,12 @@ public class ComicBookEntity implements Serializable {
 
   public ComicBookEntity() {
 
-    mCoverVariant = 0;
-    mIssueNumber = 0;
-    mPrintRun = 0;
-    mPublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-    mSeriesId = BaseActivity.DEFAULT_SERIES_ID;
-
-    Id = BaseActivity.DEFAULT_COMIC_BOOK_ID;
-    ProductCode = BaseActivity.DEFAULT_PRODUCT_CODE;
-    IsOwned = false;
+    Id = UUID.randomUUID().toString();
+    PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
+    SeriesId = BaseActivity.DEFAULT_SERIES_ID;
     IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
-    PublishedDate = "";
     HasRead = false;
-    Title = "";
-
-    AddedDate = Calendar.getInstance().getTimeInMillis();
-    UpdatedDate = Calendar.getInstance().getTimeInMillis();
-  }
-
-  public ComicBookEntity(String productCode, String issueCode) {
-
-    mCoverVariant = 0;
-    mIssueNumber = 0;
-    mPrintRun = 0;
-    mPublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-    mSeriesId = BaseActivity.DEFAULT_SERIES_ID;
-
-    ProductCode = productCode;
-    IssueCode = issueCode;
-    Id = String.format("%s-%s", productCode, issueCode);
-
-    HasRead = false;
+    IsActive = true;
     IsOwned = false;
     PublishedDate = "";
     Title = "";
@@ -132,101 +106,14 @@ public class ComicBookEntity implements Serializable {
     UpdatedDate = Calendar.getInstance().getTimeInMillis();
   }
 
-  public ComicBookEntity(ComicBookEntity comicBookEntity) {
-
-    mCoverVariant = comicBookEntity.getCoverVariant();
-    mIssueNumber = comicBookEntity.getIssueNumber();
-    mPrintRun = comicBookEntity.getPrintRun();
-    mPublisherId = comicBookEntity.getPublisherId();
-    mSeriesId = comicBookEntity.getSeriesId();
-
-    Id = comicBookEntity.Id;
-    ProductCode = comicBookEntity.ProductCode;
-    IssueCode = comicBookEntity.IssueCode;
-    IsOwned = comicBookEntity.IsOwned;
-    HasRead = comicBookEntity.HasRead;
-    Title = comicBookEntity.Title;
-    PublishedDate = comicBookEntity.PublishedDate;
-
-    AddedDate = comicBookEntity.AddedDate;
-    UpdatedDate = comicBookEntity.UpdatedDate;
-  }
-
-  @Ignore
-  public int getCoverVariant() {
-
-    if (mCoverVariant == 0 &&
-      (!IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) && IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length())) {
-      try {
-        String temp = IssueCode.substring(IssueCode.length() - 2, IssueCode.length() - 1);
-        mCoverVariant = Integer.parseInt(temp);
-      } catch (Exception e) {
-        mCoverVariant = -1;
-      }
-    }
-
-    return mCoverVariant;
-  }
-
-  @Ignore
-  public int getIssueNumber() {
-
-    if (mIssueNumber == 0 &&
-      (!IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) && IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length())) {
-      try {
-        String temp = IssueCode.substring(0, IssueCode.length() - 2);
-        mIssueNumber = Integer.parseInt(temp);
-      } catch (Exception e) {
-        mIssueNumber = -1;
-      }
-    }
-
-    return mIssueNumber;
-  }
-
-  @Ignore
-  public int getPrintRun() {
-
-    if (mPrintRun == 0 &&
-      (!IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) && IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length())) {
-      try {
-        String temp = IssueCode.substring(IssueCode.length() - 1);
-        mPrintRun = Integer.parseInt(temp);
-      } catch (Exception e) {
-        mPrintRun = -1;
-      }
-    }
-
-    return mPrintRun;
-  }
-
-  @Ignore
-  public String getPublisherId() {
-
-    if ((!ProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) && ProductCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) &&
-      mPublisherId.equals(BaseActivity.DEFAULT_PUBLISHER_ID) || mPublisherId.length() != BaseActivity.DEFAULT_PUBLISHER_ID.length()) {
-      try {
-        mPublisherId = ProductCode.substring(0, BaseActivity.DEFAULT_PUBLISHER_ID.length());
-      } catch (Exception e) {
-        mPublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-      }
-    }
-
-    return mPublisherId;
-  }
-
-  @Ignore
-  public String getSeriesId() {
-
-    if ((!ProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE) && ProductCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) &&
-      mSeriesId.equals(BaseActivity.DEFAULT_SERIES_ID) || mSeriesId.length() != BaseActivity.DEFAULT_SERIES_ID.length()) {
-      try {
-        mSeriesId = ProductCode.substring(BaseActivity.DEFAULT_SERIES_ID.length());
-      } catch (Exception e) {
-        mSeriesId = BaseActivity.DEFAULT_SERIES_ID;
-      }
-    }
-
-    return mSeriesId;
+  public boolean isValid() {
+    return !Id.equals(BaseActivity.DEFAULT_ID) &&
+      Id.length() == BaseActivity.DEFAULT_ID.length() &&
+      !PublisherId.equals(BaseActivity.DEFAULT_PUBLISHER_ID) &&
+      PublisherId.length() == BaseActivity.DEFAULT_PUBLISHER_ID.length() &&
+      !SeriesId.equals(BaseActivity.DEFAULT_SERIES_ID) &&
+      SeriesId.length() == BaseActivity.DEFAULT_SERIES_ID.length() &&
+      !IssueCode.equals(BaseActivity.DEFAULT_ISSUE_CODE) &&
+      IssueCode.length() == BaseActivity.DEFAULT_ISSUE_CODE.length();
   }
 }

@@ -28,48 +28,49 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import java.util.Locale;
-import net.whollynugatory.android.comiccollector.db.viewmodel.ComicBookViewModel;
+import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
+import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
+import net.whollynugatory.android.comiccollector.db.viewmodel.CollectorViewModel;
+import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 
-public class ManualSearchFragment extends Fragment {
+public class UserInputFragment extends Fragment {
 
-  private static final String TAG = BaseActivity.BASE_TAG + "ManualSearchFragment";
+  private static final String TAG = BaseActivity.BASE_TAG + "UserInputFragment";
 
-  public interface OnManualSearchListener {
+  public interface OnUserInputListener {
 
-    void onManualSearchBookFound(ComicBookEntity comicBookEntity);
+    void onUserInputBookFound(ComicDetails comicDetails);
 
-    void onManualSearchInputComplete(ComicBookEntity comicBookEntity);
+    void onUserInputComplete(ComicDetails comicDetails);
 
-    void onManualSearchRetry();
+    void onUserInputRetry();
   }
 
-  private OnManualSearchListener mCallback;
+  private OnUserInputListener mCallback;
 
   private Button mContinueButton;
   private EditText mIssueCodeEdit;
   private EditText mProductCodeEdit;
 
-  private ComicBookViewModel mComicBookViewModel;
+  private CollectorViewModel mCollectorViewModel;
+  private ComicDetails mComicDetails;
 
-  private String mProductCode;
-
-  public static ManualSearchFragment newInstance() {
+  public static UserInputFragment newInstance() {
 
     Log.d(TAG, "++newInstance()");
-    return new ManualSearchFragment();
+    return new UserInputFragment();
   }
 
-  public static ManualSearchFragment newInstance(String productCode) {
+  public static UserInputFragment newInstance(ComicDetails comicDetails) {
 
-    Log.d(TAG, "++newInstance(String)");
-    ManualSearchFragment fragment = new ManualSearchFragment();
+    Log.d(TAG, "++newInstance(SeriesEntity)");
+    UserInputFragment fragment = new UserInputFragment();
     Bundle arguments = new Bundle();
-    arguments.putString(BaseActivity.ARG_PRODUCT_CODE, productCode);
+    arguments.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicDetails);
     fragment.setArguments(arguments);
     return fragment;
   }
@@ -83,7 +84,7 @@ public class ManualSearchFragment extends Fragment {
 
     Log.d(TAG, "++onAttach(Context)");
     try {
-      mCallback = (OnManualSearchListener) context;
+      mCallback = (OnUserInputListener) context;
     } catch (ClassCastException e) {
       throw new ClassCastException(
         String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
@@ -97,19 +98,19 @@ public class ManualSearchFragment extends Fragment {
     Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mProductCode = arguments.getString(BaseActivity.ARG_PRODUCT_CODE);
-    } else {
-      Log.e(TAG, "Arguments were null.");
+      if (arguments.containsKey(BaseActivity.ARG_COMIC_BOOK)) {
+        mComicDetails = (ComicDetails) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
+      }
     }
 
-    mComicBookViewModel = ViewModelProviders.of(this).get(ComicBookViewModel.class);
+    mCollectorViewModel = new ViewModelProvider(this).get(CollectorViewModel.class);
   }
 
   @Override
   public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     Log.d(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
-    return inflater.inflate(R.layout.fragment_manual_search, container, false);
+    return inflater.inflate(R.layout.fragment_user_input, container, false);
   }
 
   @Override
@@ -126,52 +127,48 @@ public class ManualSearchFragment extends Fragment {
 
     Log.d(TAG, "++onViewCreated(View, Bundle)");
 
-    // 2 Possible Scenarios:
-    //   1) Product Code (Publisher & Series) is known, we need the IssueCode
-    //   2) We need Product Code (Publisher & Series), & IssueCode
-
-    Button retryButton = view.findViewById(R.id.manual_search_button_retry);
-    retryButton.setOnClickListener(v -> mCallback.onManualSearchRetry());
-    mContinueButton = view.findViewById(R.id.manual_search_button_continue);
+    Button retryButton = view.findViewById(R.id.user_input_button_retry);
+    retryButton.setOnClickListener(v -> mCallback.onUserInputRetry());
+    mContinueButton = view.findViewById(R.id.user_input_button_continue);
     mContinueButton.setEnabled(false);
     mContinueButton.setOnClickListener(v -> {
 
-      String productCode = mProductCodeEdit.getText().toString();
+      String publisherId = PublisherEntity.getPublisherCode(mProductCodeEdit.getText().toString());
+      String seriesId = SeriesEntity.getSeriesCode(mProductCodeEdit.getText().toString());
       String issueCode = mIssueCodeEdit.getText().toString();
-      mComicBookViewModel.find(productCode, issueCode).observe(this, comicBookEntity -> {
+      mCollectorViewModel.getComic(publisherId, seriesId, issueCode).observe(getViewLifecycleOwner(), comicDetails -> {
 
-        if (comicBookEntity == null) { // not found, new comic entry
-          comicBookEntity = new ComicBookEntity(productCode, issueCode);
-          mCallback.onManualSearchInputComplete(comicBookEntity);
+        if (comicDetails == null) { // not found, new comic entry
+          mComicDetails.setIssueCode(issueCode);
+          mCallback.onUserInputComplete(mComicDetails);
         } else {
-          mCallback.onManualSearchBookFound(comicBookEntity);
+          mCallback.onUserInputBookFound(mComicDetails);
         }
       });
     });
 
-    mProductCodeEdit = view.findViewById(R.id.manual_search_edit_product);
-    mIssueCodeEdit = view.findViewById(R.id.manual_search_edit_issue);
+    mProductCodeEdit = view.findViewById(R.id.user_input_edit_product);
+    mIssueCodeEdit = view.findViewById(R.id.user_input_edit_issue);
+    if (mComicDetails != null) {
+      mProductCodeEdit.setText(mComicDetails.getProductCode());
+      mProductCodeEdit.setEnabled(false);
+    } else { // setup text change watcher
+      mProductCodeEdit.addTextChangedListener(new TextWatcher() {
 
-    if (mProductCode != null && !mProductCode.equals(BaseActivity.DEFAULT_PRODUCT_CODE)) {
-      mProductCodeEdit.setText(mProductCode);
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+          validateAll();
+        }
+      });
     }
-
-    // setup text change watchers
-    mProductCodeEdit.addTextChangedListener(new TextWatcher() {
-
-      @Override
-      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-      }
-
-      @Override
-      public void onTextChanged(CharSequence s, int start, int before, int count) {
-      }
-
-      @Override
-      public void afterTextChanged(Editable s) {
-        validateAll();
-      }
-    });
 
     mIssueCodeEdit.addTextChangedListener(new TextWatcher() {
 

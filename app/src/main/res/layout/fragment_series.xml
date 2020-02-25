@@ -6,113 +6,140 @@
   android:layout_height="match_parent">
 
   <TextView
-    android:id="@+id/series_text_id"
-    android:textStyle="bold"
+    android:id="@+id/series_text_publisher_code"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:labelFor="@id/series_edit_id"
-    android:text="@string/series_id"
+    android:text="@string/publisher_code"
     android:textSize="18sp"
-    app:layout_constraintBottom_toBottomOf="@id/series_edit_id"
+    android:textStyle="bold"
+    app:layout_constraintBottom_toBottomOf="@id/series_edit_publisher_code"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@id/series_edit_id"/>
+    app:layout_constraintTop_toTopOf="@id/series_edit_publisher_code"/>
   <EditText
-    android:id="@+id/series_edit_id"
+    android:id="@+id/series_edit_publisher_code"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:autofillHints="@string/hint_publisher"
     android:enabled="false"
+    android:hint="@string/hint_publisher_code"
     android:inputType="textPersonName|textNoSuggestions"
-    android:text="@string/placeholder"
     android:textAlignment="textEnd"
     android:textColor="@color/primaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
 
   <TextView
-    android:id="@+id/series_text_name"
-    android:textStyle="bold"
+    android:id="@+id/series_text_publisher_name"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:labelFor="@id/series_edit_name"
+    android:text="@string/publisher_name"
+    android:textSize="18sp"
+    android:textStyle="bold"
+    app:layout_constraintBottom_toBottomOf="@id/series_edit_publisher_name"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@id/series_edit_publisher_name"/>
+  <EditText
+    android:id="@+id/series_edit_publisher_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:autofillHints="@string/hint_publisher"
+    android:enabled="false"
+    android:hint="@string/hint_publisher"
+    android:inputType="textPersonName|textNoSuggestions"
+    android:textAlignment="textEnd"
+    android:textColor="@color/primaryLightColor"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/series_edit_publisher_code" />
+
+  <TextView
+    android:id="@+id/series_text_product_code"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:text="@string/series_code"
+    android:textSize="18sp"
+    android:textStyle="bold"
+    app:layout_constraintBottom_toBottomOf="@id/series_edit_product_code"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@id/series_edit_product_code" />
+  <EditText
+    android:id="@+id/series_edit_product_code"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
+    android:autofillHints="@string/hint_publisher_code"
+    android:inputType="textPersonName|textNoSuggestions"
+    android:hint="@string/hint_publisher_code"
+    android:textAlignment="textEnd"
+    android:textColor="@color/primaryLightColor"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/series_edit_publisher_name" />
+
+  <TextView
+    android:id="@+id/series_text_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_view_margin"
     android:text="@string/series_name"
     android:textSize="18sp"
+    android:textStyle="bold"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/series_edit_id"/>
+    app:layout_constraintTop_toBottomOf="@id/series_edit_product_code" />
   <EditText
     android:id="@+id/series_edit_name"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:autofillHints=""
-    android:enabled="false"
-    android:inputType="number|textNoSuggestions"
-    android:text="@string/placeholder"
+    android:autofillHints="@string/series_hint"
+    android:enabled="true"
+    android:hint="@string/series_hint"
+    android:inputType="text"
     android:textAlignment="textEnd"
     android:textColor="@color/primaryLightColor"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/series_text_name" />
-  <TextView
-    android:id="@+id/series_text_hint"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/default_view_margin"
-    android:labelFor="@id/series_edit_name"
-    android:text="@string/series_hint"
-    android:textSize="14sp"
-    android:textStyle="italic"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/series_edit_name" />
 
   <TextView
     android:id="@+id/series_text_volume"
-    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:labelFor="@id/series_edit_volume"
     android:text="@string/volume_number"
     android:textSize="18sp"
+    android:textStyle="bold"
     app:layout_constraintBottom_toBottomOf="@id/series_edit_volume"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@id/series_edit_volume"/>
+    app:layout_constraintTop_toTopOf="@id/series_edit_volume" />
   <EditText
     android:id="@+id/series_edit_volume"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:autofillHints=""
-    android:ems="3"
+    android:autofillHints="@string/hint_volume"
+    android:ems="5"
+    android:enabled="true"
+    android:hint="@string/hint_volume"
     android:inputType="number|textNoSuggestions"
-    android:text="@string/placeholder"
-    android:textAlignment="center"
+    android:textAlignment="textEnd"
     android:textColor="@color/primaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/series_text_hint" />
+    app:layout_constraintTop_toBottomOf="@id/series_edit_name" />
 
   <TextView
     android:id="@+id/series_text_disclaimer"
-    android:textStyle="italic"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/disclaimer_comic_series"
+    android:textSize="14sp"
+    android:textStyle="italic"
+    app:layout_constraintTop_toBottomOf="@id/series_edit_volume"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintBottom_toTopOf="@id/series_button_continue"/>
-
-  <Button
-    android:id="@+id/series_button_continue"
-    style="@style/Widget.AppCompat.Button.Colored"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:text="@string/continue_button"
-    app:layout_constraintEnd_toStartOf="@+id/series_button_cancel"
-    app:layout_constraintBottom_toBottomOf="parent"/>
+    app:layout_constraintStart_toStartOf="parent"/>
   <Button
     android:id="@+id/series_button_cancel"
     style="@style/Widget.AppCompat.Button.Colored"
@@ -120,7 +147,16 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:text="@string/cancel_button"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintBottom_toBottomOf="parent" />
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/series_text_disclaimer" />
+  <Button
+    android:id="@+id/series_button_continue"
+    style="@style/Widget.AppCompat.Button.Colored"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:text="@string/continue_button"
+    app:layout_constraintTop_toBottomOf="@id/series_text_disclaimer"
+    app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

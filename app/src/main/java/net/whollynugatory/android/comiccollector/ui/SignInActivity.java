@@ -190,8 +190,8 @@ public class SignInActivity extends BaseActivity {
       bundle.putString(FirebaseAnalytics.Param.METHOD, "onAuthenticateSuccess");
       mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle);
 
-      File localFile = new File(getFilesDir(), BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
-      String appDataPath = PathUtils.combine(BaseActivity.REMOTE_PATH, BaseActivity.DEFAULT_PUBLISHER_SERIES_FILE);
+      File localFile = new File(getFilesDir(), BaseActivity.DEFAULT_DATA_FILE);
+      String appDataPath = PathUtils.combine(BaseActivity.REMOTE_PATH, BaseActivity.DEFAULT_DATA_FILE);
       FirebaseStorage.getInstance().getReference().child(appDataPath).getFile(localFile).addOnCompleteListener(task -> {
 
         if (!task.isSuccessful()) {

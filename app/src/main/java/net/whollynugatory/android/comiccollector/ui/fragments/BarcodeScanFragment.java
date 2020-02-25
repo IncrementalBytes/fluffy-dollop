@@ -27,12 +27,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import com.google.android.material.chip.Chip;
 import com.google.common.base.Objects;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
 import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.barcodedetection.BarcodeProcessor;
@@ -40,8 +39,6 @@ import net.whollynugatory.android.comiccollector.camera.CameraSource;
 import net.whollynugatory.android.comiccollector.camera.CameraSourcePreview;
 import net.whollynugatory.android.comiccollector.camera.GraphicOverlay;
 import net.whollynugatory.android.comiccollector.camera.WorkflowModel;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
-import net.whollynugatory.android.comiccollector.db.viewmodel.ComicBookViewModel;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 public class BarcodeScanFragment extends Fragment implements View.OnClickListener {
@@ -52,7 +49,6 @@ public class BarcodeScanFragment extends Fragment implements View.OnClickListene
 
     void onBarcodeManual();
     void onBarcodeScanClose();
-    void onBarcodeScanned(List<ComicBookEntity> comicBookEntityList);
     void onBarcodeScanned(String barcodeValue);
     void onBarcodeScanSettings();
   }
@@ -68,8 +64,6 @@ public class BarcodeScanFragment extends Fragment implements View.OnClickListene
   private AnimatorSet mPromptChipAnimator;
   private View mSettingsButton;
   private WorkflowModel mWorkflowModel;
-
-  private ComicBookViewModel mBookListViewModel;
 
   public static BarcodeScanFragment newInstance() {
 
@@ -91,14 +85,6 @@ public class BarcodeScanFragment extends Fragment implements View.OnClickListene
       throw new ClassCastException(
         String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
     }
-  }
-
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    Log.d(TAG, "++onCreate(Bundle)");
-    mBookListViewModel = ViewModelProviders.of(this).get(ComicBookViewModel.class);
   }
 
   @Override
@@ -230,10 +216,10 @@ public class BarcodeScanFragment extends Fragment implements View.OnClickListene
   private void setUpWorkflowModel() {
 
     Log.d(TAG, "++setUpWorkflowModel()");
-    mWorkflowModel = ViewModelProviders.of(this).get(WorkflowModel.class);
+    mWorkflowModel = new ViewModelProvider(this).get(WorkflowModel.class);
 
-    // Observes the workflow state changes, if happens, update the overlay view indicators and camera preview state.
-    mWorkflowModel.workflowState.observe(this, workflowState -> {
+    // observes the workflow state changes, if happens, update the overlay view indicators and camera preview state.
+    mWorkflowModel.workflowState.observe(getViewLifecycleOwner(), workflowState -> {
 
       if (workflowState == null || Objects.equal(mCurrentWorkflowState, workflowState)) {
         return;
@@ -277,18 +263,11 @@ public class BarcodeScanFragment extends Fragment implements View.OnClickListene
     });
 
     mWorkflowModel.detectedBarcode.observe(
-      this,
+      getViewLifecycleOwner(),
       barcode -> {
         if (barcode != null) {
           if (barcode.getValueType() == FirebaseVisionBarcode.TYPE_PRODUCT) {
-            mBookListViewModel.find(barcode.getDisplayValue()).observe(this, comicBookEntityList -> {
-
-              if (comicBookEntityList != null && comicBookEntityList.size() > 0) {
-                mCallback.onBarcodeScanned(comicBookEntityList);
-              } else {
-                mCallback.onBarcodeScanned(barcode.getDisplayValue());
-              }
-            });
+            mCallback.onBarcodeScanned(barcode.getDisplayValue());
           } else {
             Log.w(TAG, "Unexpected bar code: " + barcode.getDisplayValue());
           }

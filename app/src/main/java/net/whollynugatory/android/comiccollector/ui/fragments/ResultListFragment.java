@@ -34,8 +34,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
-import net.whollynugatory.android.comiccollector.db.viewmodel.ComicBookViewModel;
+import net.whollynugatory.android.comiccollector.db.viewmodel.CollectorViewModel;
+import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 public class ResultListFragment extends Fragment {
@@ -46,22 +46,22 @@ public class ResultListFragment extends Fragment {
 
     void onResultListActionComplete(String message);
 
-    void onResultListItemSelected(ComicBookEntity comicBookEntity);
+    void onResultListItemSelected(ComicDetails comicDetails);
   }
 
   private OnResultListListener mCallback;
 
   private RecyclerView mRecyclerView;
 
-  private ComicBookViewModel mComicBookViewModel;
-  private ArrayList<ComicBookEntity> mComicBookEntityList;
+  private CollectorViewModel mCollectorViewModel;
+  private ArrayList<ComicDetails> mComicDetailsList;
 
-  public static ResultListFragment newInstance(ArrayList<ComicBookEntity> comicBookEntityList) {
+  public static ResultListFragment newInstance(ArrayList<ComicDetails> comicDetailsList) {
 
     Log.d(TAG, "++newInstance(ArrayList<ComicBookEntity>)");
     ResultListFragment fragment = new ResultListFragment();
     Bundle args = new Bundle();
-    args.putSerializable(BaseActivity.ARG_LIST_BOOK, comicBookEntityList);
+    args.putSerializable(BaseActivity.ARG_LIST_BOOK, comicDetailsList);
     fragment.setArguments(args);
     return fragment;
   }
@@ -74,7 +74,7 @@ public class ResultListFragment extends Fragment {
     super.onActivityCreated(savedInstanceState);
 
     Log.d(TAG, "++onActivityCreated()");
-    mComicBookViewModel = ViewModelProviders.of(this).get(ComicBookViewModel.class);
+    mCollectorViewModel = ViewModelProviders.of(this).get(CollectorViewModel.class);
   }
 
   @Override
@@ -91,7 +91,7 @@ public class ResultListFragment extends Fragment {
 
     Bundle arguments = getArguments();
     if (arguments != null) {
-      mComicBookEntityList = (ArrayList<ComicBookEntity>)arguments.getSerializable(BaseActivity.ARG_LIST_BOOK);
+      mComicDetailsList = (ArrayList<ComicDetails>)arguments.getSerializable(BaseActivity.ARG_LIST_BOOK);
     } else {
       String message = "Arguments were null.";
       Log.e(TAG, message);
@@ -119,7 +119,7 @@ public class ResultListFragment extends Fragment {
     super.onDestroy();
 
     Log.d(TAG, "++onDestroy()");
-    mComicBookEntityList = null;
+    mComicDetailsList = null;
   }
 
   /*
@@ -127,11 +127,11 @@ public class ResultListFragment extends Fragment {
    */
   private void updateUI() {
 
-    if (mComicBookEntityList == null || mComicBookEntityList.size() == 0) {
+    if (mComicDetailsList == null || mComicDetailsList.size() == 0) {
       Log.w(TAG, "No results found.");
     } else {
       Log.d(TAG, "++updateUI()");
-      ResultAdapter resultAdapter = new ResultAdapter(mComicBookEntityList);
+      ResultAdapter resultAdapter = new ResultAdapter(mComicDetailsList);
       mRecyclerView.setAdapter(resultAdapter);
     }
   }
@@ -141,11 +141,11 @@ public class ResultListFragment extends Fragment {
    */
   private class ResultAdapter extends RecyclerView.Adapter<ResultHolder> {
 
-    private final List<ComicBookEntity> mComicBookEntityList;
+    private final List<ComicDetails> mComicDetailsList;
 
-    ResultAdapter(List<ComicBookEntity> comicBookEntityList) {
+    ResultAdapter(List<ComicDetails> comicDetailsList) {
 
-      mComicBookEntityList = comicBookEntityList;
+      mComicDetailsList = comicDetailsList;
     }
 
     @NonNull
@@ -159,13 +159,13 @@ public class ResultListFragment extends Fragment {
     @Override
     public void onBindViewHolder(@NonNull ResultHolder holder, int position) {
 
-      ComicBookEntity comicBookEntity = mComicBookEntityList.get(position);
-      holder.bind(comicBookEntity);
+      ComicDetails comicDetails = mComicDetailsList.get(position);
+      holder.bind(comicDetails);
     }
 
     @Override
     public int getItemCount() {
-      return mComicBookEntityList.size();
+      return mComicDetailsList.size();
     }
   }
 
@@ -180,7 +180,7 @@ public class ResultListFragment extends Fragment {
     private final TextView mSeriesTextView;
     private final TextView mTitleTextView;
 
-    private ComicBookEntity mComicBookEntity;
+    private ComicDetails mComicDetails;
 
     ResultHolder(LayoutInflater inflater, ViewGroup parent) {
       super(inflater.inflate(R.layout.item_result, parent, false));
@@ -195,21 +195,22 @@ public class ResultListFragment extends Fragment {
       addButton.setOnClickListener(v -> {
 
         Log.d(TAG, "++ResultHolder::onClick(View)");
-        mComicBookEntity.AddedDate = mComicBookEntity.UpdatedDate = Calendar.getInstance().getTimeInMillis();
-        mComicBookViewModel.insert(mComicBookEntity);
-        mCallback.onResultListItemSelected(mComicBookEntity);
+        mComicDetails.AddedDate = mComicDetails.UpdatedDate = Calendar.getInstance().getTimeInMillis();
+
+        mCollectorViewModel.insertComicBook(mComicDetails.toEntity());
+        mCallback.onResultListItemSelected(mComicDetails);
       });
     }
 
-    void bind(ComicBookEntity comicBookEntity) {
+    void bind(ComicDetails comicDetails) {
 
-      mComicBookEntity = comicBookEntity;
+      mComicDetails = comicDetails;
 
-      // TODO: mSeriesTextView.setText(mComicBookEntity.Series);
-      mIssueTextView.setText(mComicBookEntity.IssueCode);
-      mPublishedTextView.setText(String.format(Locale.US, getString(R.string.published_date_format), mComicBookEntity.PublishedDate));
-      // TODO: mPublisherTextView.setText(String.format(Locale.US, getString(R.string.publisher_format), mComicBookEntity.Publisher));
-      mTitleTextView.setText(mComicBookEntity.Title);
+      mSeriesTextView.setText(mComicDetails.SeriesTitle);
+      mIssueTextView.setText(mComicDetails.IssueCode);
+      mPublishedTextView.setText(String.format(Locale.US, getString(R.string.published_date_format), mComicDetails.Published));
+      mPublisherTextView.setText(String.format(Locale.US, getString(R.string.publisher_format), mComicDetails.Publisher));
+      mTitleTextView.setText(mComicDetails.Title);
     }
   }
 }

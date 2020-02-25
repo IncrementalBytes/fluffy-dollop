@@ -30,7 +30,6 @@
     android:singleLine="true"
     android:textAlignment="gravity"
     android:textColor="@color/primaryLightColor"
-    android:text="@{user.firstName, default=my_default}"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toEndOf="@id/comic_book_text_product_code"
     app:layout_constraintTop_toTopOf="parent" />
@@ -235,7 +234,7 @@
     android:layout_marginEnd="8dp"
     android:text="@string/cancel_button"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintBottom_toBottomOf="parent"/>
+    app:layout_constraintTop_toBottomOf="@id/comic_book_toggle_owned"/>
 
   <Button
     android:id="@+id/comic_book_button_save"
@@ -246,6 +245,6 @@
     android:layout_marginEnd="8dp"
     android:text="@string/save_comic_book"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintBottom_toBottomOf="parent" />
+    app:layout_constraintTop_toBottomOf="@id/comic_book_toggle_read" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

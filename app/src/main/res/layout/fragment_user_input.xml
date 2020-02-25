@@ -6,19 +6,19 @@
   android:orientation="vertical">
 
   <TextView
-    android:id="@+id/manual_search_text_product"
+    android:id="@+id/user_input_text_product"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
-    android:text="@string/series_upc"
+    android:text="@string/comic_upc"
     android:textAppearance="?android:attr/textAppearanceMedium"
     android:textSize="18sp"
     android:textStyle="bold"
-    app:layout_constraintBottom_toBottomOf="@id/manual_search_edit_product"
+    app:layout_constraintBottom_toBottomOf="@id/user_input_edit_product"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@id/manual_search_edit_product" />
+    app:layout_constraintTop_toTopOf="@id/user_input_edit_product" />
   <EditText
-    android:id="@+id/manual_search_edit_product"
+    android:id="@+id/user_input_edit_product"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
@@ -31,28 +31,28 @@
     app:layout_constraintTop_toTopOf="parent" />
 
   <TextView
-    android:id="@+id/manual_search_text_product_example"
+    android:id="@+id/user_input_text_product_example"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/hint_example"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toStartOf="@id/manual_search_image_product"
-    app:layout_constraintTop_toTopOf="@id/manual_search_image_product"
-    app:layout_constraintBottom_toBottomOf="@id/manual_search_image_product"/>
+    app:layout_constraintEnd_toStartOf="@id/user_input_image_product"
+    app:layout_constraintTop_toTopOf="@id/user_input_image_product"
+    app:layout_constraintBottom_toBottomOf="@id/user_input_image_product"/>
   <ImageView
-    android:id="@+id/manual_search_image_product"
+    android:id="@+id/user_input_image_product"
     android:layout_width="@android:dimen/thumbnail_width"
     android:layout_height="@android:dimen/notification_large_icon_width"
     android:layout_margin="@dimen/default_view_margin"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/manual_search_text_product_example"
-    app:layout_constraintTop_toBottomOf="@id/manual_search_edit_product"
+    app:layout_constraintStart_toEndOf="@id/user_input_text_product_example"
+    app:layout_constraintTop_toBottomOf="@id/user_input_edit_product"
     app:srcCompat="@drawable/barcode_product"
     android:contentDescription="@string/hint_img_product_code"/>
 
   <TextView
-    android:id="@+id/manual_search_text_issue"
+    android:id="@+id/user_input_text_issue"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
@@ -60,11 +60,11 @@
     android:textAppearance="?android:attr/textAppearanceMedium"
     android:textSize="18sp"
     android:textStyle="bold"
-    app:layout_constraintBottom_toBottomOf="@id/manual_search_edit_issue"
+    app:layout_constraintBottom_toBottomOf="@id/user_input_edit_issue"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@id/manual_search_edit_issue" />
+    app:layout_constraintTop_toTopOf="@id/user_input_edit_issue" />
   <EditText
-    android:id="@+id/manual_search_edit_issue"
+    android:id="@+id/user_input_edit_issue"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
@@ -74,46 +74,46 @@
     android:inputType="number|textNoSuggestions"
     android:textColor="@color/primaryLightColor"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/manual_search_image_product" />
+    app:layout_constraintTop_toBottomOf="@+id/user_input_image_product" />
 
   <TextView
-    android:id="@+id/manual_search_text_issue_example"
+    android:id="@+id/user_input_text_issue_example"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/hint_example"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toStartOf="@id/manual_search_image_issue"
-    app:layout_constraintTop_toTopOf="@id/manual_search_image_issue"
-    app:layout_constraintBottom_toBottomOf="@id/manual_search_image_issue"/>
+    app:layout_constraintEnd_toStartOf="@id/user_input_image_issue"
+    app:layout_constraintTop_toTopOf="@id/user_input_image_issue"
+    app:layout_constraintBottom_toBottomOf="@id/user_input_image_issue"/>
   <ImageView
-    android:id="@+id/manual_search_image_issue"
+    android:id="@+id/user_input_image_issue"
     android:layout_width="@android:dimen/thumbnail_width"
     android:layout_height="@android:dimen/notification_large_icon_height"
     android:layout_margin="@dimen/default_view_margin"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/manual_search_text_issue_example"
-    app:layout_constraintTop_toBottomOf="@id/manual_search_edit_issue"
+    app:layout_constraintStart_toEndOf="@id/user_input_text_issue_example"
+    app:layout_constraintTop_toBottomOf="@id/user_input_edit_issue"
     app:srcCompat="@drawable/barcode_issue"
     android:contentDescription="@string/hint_img_issue_code"/>
 
   <Button
-    android:id="@+id/manual_search_button_retry"
+    android:id="@+id/user_input_button_retry"
     style="@style/Widget.AppCompat.Button.Borderless"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/retry"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/manual_search_image_issue" />
+    app:layout_constraintTop_toBottomOf="@id/user_input_image_issue" />
   <Button
-    android:id="@+id/manual_search_button_continue"
+    android:id="@+id/user_input_button_continue"
     style="@style/Widget.AppCompat.Button.Borderless"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/continue_button"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/manual_search_image_issue" />
+    app:layout_constraintTop_toBottomOf="@id/user_input_image_issue" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

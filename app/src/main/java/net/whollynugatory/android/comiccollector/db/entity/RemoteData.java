@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Ryan Ward
+ * Copyright 2020 Ryan Ward
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,15 +21,15 @@ import java.util.ArrayList;
 
 public class RemoteData {
 
-  @SerializedName("publishers")
-  public ArrayList<PublisherEntity> ComicPublishers;
-
   @SerializedName("series")
-  public ArrayList<SeriesEntity> ComicSeries;
+  public ArrayList<SeriesEntity> Series;
+
+  @SerializedName("publishers")
+  public ArrayList<PublisherEntity> Publishers;
 
   public RemoteData() {
 
-    ComicPublishers = new ArrayList<>();
-    ComicSeries = new ArrayList<>();
+    Series = new ArrayList<>();
+    Publishers = new ArrayList<>();
   }
 }

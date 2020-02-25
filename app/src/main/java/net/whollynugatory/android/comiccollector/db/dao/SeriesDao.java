@@ -28,11 +28,11 @@ import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 @Dao
 public interface SeriesDao {
 
-  @Query("DELETE FROM series_table WHERE id == :productCode")
-  void delete(String productCode);
+  @Query("DELETE FROM series_table WHERE series_code == :seriesCode")
+  void delete(String seriesCode);
 
-  @Query("SELECT * from series_table WHERE id == :productCode")
-  LiveData<SeriesEntity> get(String productCode);
+  @Query("SELECT * from series_table WHERE publisher_id == :publisherId AND series_code == :seriesCode")
+  LiveData<SeriesEntity> get(String publisherId, String seriesCode);
 
   @Query("SELECT * from series_table ORDER BY name DESC")
   LiveData<List<SeriesEntity>> getAll();

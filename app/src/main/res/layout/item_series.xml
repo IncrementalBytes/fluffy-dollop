@@ -9,7 +9,7 @@
   android:layout_marginEnd="2dp">
 
   <TextView
-    android:id="@+id/series_item_text_series"
+    android:id="@+id/series_item_text_title"
     android:textStyle="bold"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
@@ -28,11 +28,11 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="@color/primaryDarkColor"
+    android:textColor="@color/primaryColor"
     android:textSize="12sp"
-    app:layout_constraintBottom_toBottomOf="@id/series_item_text_series"
+    app:layout_constraintBottom_toBottomOf="@id/series_item_text_title"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="@id/series_item_text_series" />
+    app:layout_constraintTop_toTopOf="@id/series_item_text_title" />
 
   <TextView
     android:id="@+id/series_item_text_published"
@@ -43,17 +43,17 @@
     android:text="@string/published_date"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/series_item_text_series"/>
+    app:layout_constraintTop_toBottomOf="@id/series_item_text_title"/>
   <TextView
     android:id="@+id/series_item_text_published_value"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="@color/primaryDarkColor"
+    android:textColor="@color/primaryLightColor"
     app:layout_constraintBottom_toBottomOf="@id/series_item_text_published"
     app:layout_constraintStart_toEndOf="@id/series_item_text_published"
-    app:layout_constraintTop_toTopOf="@id/series_item_text_published"/>
+    app:layout_constraintTop_toTopOf="@id/series_item_text_published" />
 
   <TextView
     android:id="@+id/series_item_text_issue"
@@ -64,16 +64,16 @@
     android:text="@string/issue_owned"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toStartOf="@id/series_item_text_issue_value"
-    app:layout_constraintTop_toBottomOf="@id/series_item_text_series"/>
+    app:layout_constraintTop_toBottomOf="@id/series_item_text_title"/>
   <TextView
     android:id="@+id/series_item_text_issue_value"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="@color/primaryDarkColor"
+    android:textColor="@color/primaryLightColor"
     app:layout_constraintBottom_toBottomOf="@id/series_item_text_issue"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="@id/series_item_text_issue"/>
+    app:layout_constraintTop_toTopOf="@id/series_item_text_issue" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

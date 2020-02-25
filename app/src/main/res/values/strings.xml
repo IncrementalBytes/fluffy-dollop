@@ -8,25 +8,15 @@
   <string name="menu_logout">Log Out</string>
   <string name="logout_message">Sign out of Comic Collector?</string>
   <string name="desc_comic_list">List of comics.</string>
-  <string name="user_owns_this_comic">Owned by user.</string>
-  <string name="title_comic_library">Your Comic Library</string>
   <string name="ok">OK</string>
-  <string name="remove_book_message">Remove comic book from your library?</string>
   <string name="remove_specific_book_message">Remove \'%s\' from your library?</string>
 
-  <string name="err_photo_file_not_found">Failed to get file for photo.</string>
-  <string name="err_camera_intent_failed">Unable to create camera intent.</string>
   <string name="err_image_empty">Image was empty.</string>
   <string name="err_image_not_found">Image does not exist.</string>
-  <string name="err_image_not_loaded">Image not loaded.</string>
-  <string name="err_bar_code_task">Bar code detection task failed.</string>
-  <string name="err_no_camera_detected">Camera was not detected.</string>
   <string name="cancel">Cancel</string>
   <string name="title">Title:</string>
   <string name="product_code">Product Code:</string>
   <string name="owned">Owned</string>
-  <string name="err_add_comic_book">Could not add comic book to library, please try again later.</string>
-  <string name="err_remove_comic_book">Could not remove comic book from library, please try again later.</string>
   <string name="add">Add</string>
   <string name="err_no_data">No comic books found, try adding some.</string>
   <string name="series">Series:</string>
@@ -35,83 +25,57 @@
   <string name="search">Search</string>
   <string name="hint_search_product">12 digit Product UPC</string>
   <string name="hint_search_issue">5 digit Issue UPC</string>
-  <string name="title_comic_book">Comic Book</string>
   <string name="published_date">Published:</string>
   <string name="hint_publisher">Publishing house name</string>
-  <string name="series_id">Series Id:</string>
   <string name="series_hint">E.g. Captain Marvel, Daredevil, Friendly Neighborhood Spider-Man, X-Men</string>
-  <string name="volume_number">(Optional) Volume identifier for Series:</string>
+  <string name="volume_number">(Optional) Series Volume:</string>
   <string name="publisher_name">Publisher:</string>
   <string name="series_name">Character or story arc for Series:</string>
-  <string name="err_add_comic_series">Could not create new comic series, please try again later.</string>
   <string name="err_unknown_user">Unknown user, please try again or with a different sign-in.</string>
-  <string name="series_upc">Enter Series UPC:</string>
   <string name="issue_upc">Enter Issue UPC:</string>
   <string name="continue_button">Continue</string>
   <string name="cancel_button">Cancel</string>
-  <string name="err_manual_search">Could not continue, expected comic book details missing.</string>
   <string name="hint_image_description">Thumbnail of image from camera.</string>
   <string name="menu_settings">Settings</string>
   <string name="title_preferences">User Preferences</string>
   <string name="hint_img_issue_code">Photo hint for issue code location.</string>
   <string name="hint_img_product_code">Photo hint for product code location.</string>
   <string name="disclaimer_comic_series">Note: Comic series are subject to review and may not show up immediately.</string>
-  <string name="hint_tutorial">To add a comic book, take a photo of the bar code. An example of a bar code:</string>
-  <string name="hint_barcode">Picture of barcode.</string>
-  <string name="show_hint">Show this hint in the future.</string>
-  <string name="note_manual_bar_code">Note: if a bar code cannot be read, you will be prompted to enter the bar code manually.</string>
-  <string name="title_tutorial">Tutorial</string>
-  <string name="title_comic_series">Comic Series</string>
   <string name="read">Read:</string>
-  <string name="user_read_this_comic">User has read this comic.</string>
   <string name="toggle_not_owned">Not Owned</string>
   <string name="toggle_owned">Owned</string>
   <string name="toggle_not_read">Not Read</string>
   <string name="toggle_read">Read</string>
   <string name="err_bar_code_not_found">Barcode not found in image.</string>
-  <string name="title_gathering_data">Gathering Data</string>
   <string name="permission_storage">Permission needed for storing data locally to reduce network usage.</string>
   <string name="permission_camera">Permission needed for capturing barcode images for processing.</string>
-  <string name="unknown_request_code">Unknown request code.</string>
-  <string name="menu_cancel">Cancel</string>
   <string name="save_comic_book">Save</string>
   <string name="title_sync">Synchronize</string>
   <string name="title_export">Export</string>
   <string name="title_import">Import</string>
-  <string name="menu_sync">Sync</string>
   <string name="err_import_task">Unable to import library at this time, please try again later.</string>
   <string name="sync_import_explained">Download your library stored in the cloud.</string>
   <string name="sync_export_explained">Upload your library to the cloud temporarily.</string>
   <string name="sync_export_warning">WARNING! Uploaded library may be deleted after 30 days.</string>
   <string name="sync_import_warning">WARNING! Importing library will delete local library.</string>
-  <string name="err_storage_task_unexpected">Could not complete storage task successfully, please try again later.</string>
   <string name="err_remote_library_not_found">Comic book library not found on remote storage.</string>
   <string name="issue_owned">Issues Owned:</string>
   <string name="desc_series_list">Comic series in library.</string>
-  <string name="title_series_library">Your Comic Series</string>
   <string name="message_export_success">Export Successful!</string>
-  <string name="message_unknown_activity_result">Unfortunately an unknown error occurred. Please try again later.</string>
   <string name="desc_add_comic">Add Comic to Library</string>
   <string name="status_sync_import_success">Importing of data successful!</string>
   <string name="menu_series">Series</string>
-  <string name="menu_books">Books</string>
   <string name="err_import_unknown">Import failed with unknown error, please try again later.</string>
   <string name="err_sync_unknown_user">Setting up synchronization failed; user unknown.</string>
 
   <string name="debug_path">/storage/self/primary/DCIM/Camera</string>
   <string name="debug_prompt">Select image file to use:</string>
-  <string name="err_unknown_series">Unknown Comic Series was returned by the service.</string>
   <string name="hint_date_format">MM/YYYY</string>
-  <string name="hint_title_of_issue">(Optional) Title of issue.</string>
+  <string name="hint_title_of_issue">(Optional) Title of issue</string>
   <string name="hint_remove_comic">Remove comic from library.</string>
-  <string name="err_comic_book_details">Could not display comic book details at this time.</string>
   <string name="hint_example">Example:</string>
-  <string name="title_camera_source">Scanning for bar code…</string>
   <string name="retry">Retry</string>
-  <string name="sign_in_with">Sign-in with</string>
   <string name="beta">BETA</string>
-  <string name="signing_in">Signing in…</string>
-  <string name="try_again">Try Again?</string>
   <string-array name="debug_scenario_array">
     <item>scenario_barcode_not_found.jpg</item>
     <item>scenario_new_comic.jpg</item>
@@ -157,14 +121,7 @@
   <string name="pref_title_bypass">Detection Bypass</string>
   <string name="pref_summary_bypass" formatted="false">Bypass Barcode Detection</string>
   <string name="pref_key_exception" translatable="false">debug_exception</string>
-  <string name="pref_title_exception">Force Exception</string>
-  <string name="pref_summary_exception" formatted="false">Force exception (debug test)</string>
-  <string name="fragment_settings">Settings</string>
   <string name="menu_recent">Recent</string>
-  <string name="menu_authors">Authors</string>
-  <string name="menu_categories">Categories</string>
-  <string name="books_by_author">Books by author: %d</string>
-  <string name="books_within_category">Books within category: %d</string>
   <string name="cd_manual_button">Manually enter ISBN</string>
   <string name="perf_summary_use_camera">Use camera to detect barcode.</string>
   <string name="perf_title_use_camera">Use Camera</string>
@@ -176,11 +133,14 @@
   <string name="issue_format">Issue: %d</string>
   <string name="published_date_format">Published: %s</string>
   <string name="publisher_format">Publisher: %s</string>
-  <string name="publisher_id">Publisher Id:</string>
   <string name="hint_edit_comic">Edit properties of comic book.</string>
+  <string name="please_wait">Please wait…</string>
+  <string name="comic_upc">Enter Comic UPC:</string>
+  <string name="publisher_code">Unique Publisher Code:</string>
+  <string name="hint_publisher_code">6 digit code</string>
+  <string name="series_code">Unique Series Code:</string>
+  <string name="err_bar_code_task_failed">Failed to detect bar code in image.</string>
+  <string name="err_query_product_code">Unable to get data about product code.</string>
+  <string name="hint_volume">1, 2, etc.</string>
 
-  <plurals name="navigation_book_format">
-    <item quantity="one">You have 1 book).</item>
-    <item quantity="other">You have %d books.</item>
-  </plurals>
 </resources>

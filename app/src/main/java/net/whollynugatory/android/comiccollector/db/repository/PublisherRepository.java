@@ -16,13 +16,13 @@
 
 package net.whollynugatory.android.comiccollector.db.repository;
 
-import android.util.Log;
-import androidx.lifecycle.LiveData;
-import java.util.List;
-import net.whollynugatory.android.comiccollector.ui.BaseActivity;
-import net.whollynugatory.android.comiccollector.db.CollectorDatabase;
-import net.whollynugatory.android.comiccollector.db.dao.PublisherDao;
-import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
+  import android.util.Log;
+  import androidx.lifecycle.LiveData;
+  import java.util.List;
+  import net.whollynugatory.android.comiccollector.db.dao.PublisherDao;
+  import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
+  import net.whollynugatory.android.comiccollector.ui.BaseActivity;
+  import net.whollynugatory.android.comiccollector.db.CollectorDatabase;
 
 public class PublisherRepository {
 
@@ -51,14 +51,14 @@ public class PublisherRepository {
     return INSTANCE;
   }
 
-  public void delete(String publisherId) {
+  public void delete(String id) {
 
-    CollectorDatabase.databaseWriteExecutor.execute(() -> mPublisherDao.delete(publisherId));
+    CollectorDatabase.databaseWriteExecutor.execute(() -> mPublisherDao.delete(id));
   }
 
-  public LiveData<PublisherEntity> find(String publisherId) {
+  public LiveData<PublisherEntity> getById(String publisherId) {
 
-    return mPublisherDao.find(publisherId);
+    return mPublisherDao.getById(publisherId);
   }
 
   public LiveData<List<PublisherEntity>> getAll() {

@@ -28,13 +28,13 @@ import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
 @Dao
 public interface PublisherDao {
 
-  @Query("DELETE FROM publisher_table WHERE id == :publisherId")
-  void delete(String publisherId);
+  @Query("DELETE FROM publisher_table WHERE publisher_code == :publisherCode")
+  void delete(String publisherCode);
 
-  @Query("SELECT * from publisher_table WHERE id == :publisherId")
-  LiveData<PublisherEntity> find(String publisherId);
+  @Query("SELECT DISTINCT * from publisher_table WHERE id == :publisherId")
+  LiveData<PublisherEntity> getById(String publisherId);
 
-  @Query("SELECT * from publisher_table")
+  @Query("SELECT * from publisher_table ORDER BY name DESC")
   LiveData<List<PublisherEntity>> getAll();
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
