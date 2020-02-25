@@ -209,7 +209,7 @@ public class ResultListFragment extends Fragment {
       mSeriesTextView.setText(mComicDetails.SeriesTitle);
       mIssueTextView.setText(mComicDetails.IssueCode);
       mPublishedTextView.setText(String.format(Locale.US, getString(R.string.published_date_format), mComicDetails.Published));
-      mPublisherTextView.setText(String.format(Locale.US, getString(R.string.publisher_format), mComicDetails.PublisherName));
+      mPublisherTextView.setText(String.format(Locale.US, getString(R.string.publisher_format), mComicDetails.Publisher));
       mTitleTextView.setText(mComicDetails.Title);
     }
   }

@@ -128,22 +128,24 @@ public class ComicBookFragment extends Fragment {
     ToggleButton readButton = view.findViewById(R.id.comic_book_toggle_read);
     Button saveButton = view.findViewById(R.id.comic_book_button_save);
 
-    mCollectorViewModel.findComic(mComicDetails.ProductCode, mComicDetails.IssueCode).observe(getViewLifecycleOwner(), comicDetails -> {
+    mCollectorViewModel.getComic(mComicDetails.PublisherCode, mComicDetails.SeriesCode, mComicDetails.IssueCode).observe(
+      getViewLifecycleOwner(),
+      comicDetails -> {
 
-      if (comicDetails != null) {
-        mComicDetails = comicDetails;
-      }
+        if (comicDetails != null) {
+          mComicDetails = comicDetails;
+        }
 
-      nameEdit.setText(mComicDetails.Title);
-      publishEdit.setText(mComicDetails.Published);
-      seriesText.setText(mComicDetails.SeriesTitle);
-      publisherText.setText(mComicDetails.PublisherName);
-      volumeText.setText(String.valueOf(mComicDetails.Volume));
-      issueText.setText(String.valueOf(mComicDetails.IssueNumber));
-      productCodeText.setText(mComicDetails.ProductCode);
+        nameEdit.setText(mComicDetails.Title);
+        publishEdit.setText(mComicDetails.Published);
+        seriesText.setText(mComicDetails.SeriesTitle);
+        publisherText.setText(mComicDetails.Publisher);
+        volumeText.setText(String.valueOf(mComicDetails.Volume));
+        issueText.setText(String.valueOf(mComicDetails.getIssueNumber()));
+        productCodeText.setText(mComicDetails.getProductCode());
 
-      ownedButton.setChecked(mComicDetails.IsOwned);
-      readButton.setChecked(mComicDetails.HasRead);
+        ownedButton.setChecked(mComicDetails.IsOwned);
+        readButton.setChecked(mComicDetails.HasRead);
     });
 
     ownedButton.setChecked(false);

@@ -20,17 +20,17 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Query;
 import java.util.List;
-import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
+import net.whollynugatory.android.comiccollector.db.views.SeriesDetails;
 
 @Dao
-public interface ComicDetailsDao {
+public interface SeriesDetailsDao {
 
-  @Query("SELECT * from ComicDetails WHERE PublisherCode == :publisherCode AND SeriesCode == :seriesCode AND IssueCode == :issueCode")
-  LiveData<ComicDetails> get(String publisherCode, String seriesCode, String issueCode);
+  @Query("SELECT * from SeriesDetails WHERE PublisherCode == :publisherCode AND SeriesCode == :seriesCode")
+  LiveData<SeriesDetails> get(String publisherCode, String seriesCode);
 
-  @Query("SELECT * from ComicDetails WHERE PublisherCode == :publisherCode AND SeriesCode == :seriesCode")
-  LiveData<List<ComicDetails>> getAllByProductCode(String publisherCode, String seriesCode);
+  @Query("SELECT * from SeriesDetails")
+  LiveData<List<SeriesDetails>> getAll();
 
-  @Query("SELECT * FROM ComicDetails ORDER BY AddedDate DESC LIMIT 50")
-  LiveData<List<ComicDetails>> getRecent();
+  @Query("SELECT * FROM SeriesDetails WHERE PublisherCode == :publisherCode")
+  LiveData<List<SeriesDetails>> getAllByPublisher(String publisherCode);
 }

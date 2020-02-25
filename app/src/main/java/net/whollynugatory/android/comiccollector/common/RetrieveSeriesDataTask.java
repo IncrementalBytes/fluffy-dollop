@@ -26,30 +26,36 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Locale;
-import net.whollynugatory.android.comiccollector.ui.BaseActivity;
+import java.util.UUID;
+import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
 import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
+import net.whollynugatory.android.comiccollector.db.views.SeriesDetails;
+import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 import net.whollynugatory.android.comiccollector.ui.MainActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RetrieveSeriesDataTask extends AsyncTask<Void, Void, SeriesEntity> {
+public class RetrieveSeriesDataTask extends AsyncTask<Void, Void, SeriesDetails> {
 
   private static final String TAG = BaseActivity.BASE_TAG + "RetrieveSeriesDataTask";
 
   private WeakReference<MainActivity> mActivityWeakReference;
-  private String mQueryForSeries;
+  private SeriesDetails mSeriesDetails;
 
-  public RetrieveSeriesDataTask(MainActivity context, String productCode) {
+  public RetrieveSeriesDataTask(MainActivity context, SeriesDetails seriesDetails) {
 
     mActivityWeakReference = new WeakReference<>(context);
-    mQueryForSeries = productCode;
+    mSeriesDetails = seriesDetails;
   }
 
-  protected SeriesEntity doInBackground(Void... params) {
+  protected SeriesDetails doInBackground(Void... params) {
 
-    SeriesEntity seriesEntity = new SeriesEntity();
-    String urlString = String.format(Locale.US, "https://api.upcitemdb.com/prod/trial/lookup?upc=%s", mQueryForSeries);
+    SeriesDetails seriesDetails = new SeriesDetails();
+    String urlString = String.format(
+      Locale.US,
+      "https://api.upcitemdb.com/prod/trial/lookup?upc=%s",
+      mSeriesDetails.getProductCode());
     Log.d(TAG, "Query: " + urlString);
     HttpURLConnection connection = null;
     StringBuilder builder = new StringBuilder();
@@ -64,7 +70,7 @@ public class RetrieveSeriesDataTask extends AsyncTask<Void, Void, SeriesEntity> 
       if (responseCode != 200) {
         Log.e(TAG, "upcitemdb request failed. Response Code: " + responseCode);
         connection.disconnect();
-        return seriesEntity;
+        return seriesDetails;
       }
 
       BufferedReader responseReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -78,7 +84,7 @@ public class RetrieveSeriesDataTask extends AsyncTask<Void, Void, SeriesEntity> 
         connection.disconnect();
       }
 
-      return seriesEntity;
+      return seriesDetails;
     }
 
     JSONArray items;
@@ -87,33 +93,79 @@ public class RetrieveSeriesDataTask extends AsyncTask<Void, Void, SeriesEntity> 
       items = (JSONArray) responseJson.get("items");
     } catch (JSONException e) {
       connection.disconnect();
-      return seriesEntity;
+      return seriesDetails;
     }
 
     if (items != null) {
       for (int index = 0; index < items.length(); index++) {
+        String upc = "";
+        String title = "";
+        String brand = "";
         try { // errors parsing items should not prevent further parsing
           JSONObject item = (JSONObject) items.get(index);
           if (item.has("upc")) {
-            String upc = item.getString("upc");
-            if (!mQueryForSeries.equals(upc)) {
-              Log.e(TAG, "UPC code returned not expected: " + upc);
-              continue;
-            } else {
-              seriesEntity.Id = upc;
-            }
+            upc = item.getString("upc");
           }
 
           if (item.has("title")) {
-            seriesEntity.Name = item.getString("name");
+            title = item.getString("title");
           }
 
           if (item.has("brand")) {
-            seriesEntity.Publisher = item.getString("brand").toUpperCase();
+            brand = item.getString("brand");
           }
         } catch (JSONException e) {
           Log.d(TAG, "Failed to parse JSON object.");
           Crashlytics.logException(e);
+        }
+
+        if (!mSeriesDetails.getProductCode().equals(upc)) {
+          Log.e(TAG, "UPC code returned not expected: " + upc);
+          continue;
+        }
+
+        if (mSeriesDetails.PublisherCode.equals(BaseActivity.DEFAULT_PUBLISHER_CODE) ||
+          mSeriesDetails.PublisherCode.length() != BaseActivity.DEFAULT_PUBLISHER_CODE.length()) {
+          seriesDetails.PublisherChanged = true;
+          seriesDetails.PublisherCode = PublisherEntity.getPublisherCode(upc);
+        } else {
+          seriesDetails.PublisherCode = mSeriesDetails.PublisherCode;
+        }
+
+        if (mSeriesDetails.PublisherId.equals(BaseActivity.DEFAULT_PUBLISHER_ID) ||
+          mSeriesDetails.PublisherId.length() != BaseActivity.DEFAULT_PUBLISHER_ID.length()) {
+          seriesDetails.PublisherChanged = true;
+          seriesDetails.PublisherId = UUID.randomUUID().toString();
+        } else {
+          seriesDetails.PublisherId = mSeriesDetails.PublisherId;
+        }
+
+        if (mSeriesDetails.Publisher.isEmpty()) {
+          seriesDetails.PublisherChanged = true;
+          seriesDetails.Publisher = brand.toUpperCase();
+        } else {
+          seriesDetails.Publisher = mSeriesDetails.Publisher;
+        }
+
+        if (mSeriesDetails.SeriesCode.equals(BaseActivity.DEFAULT_SERIES_CODE) ||
+          mSeriesDetails.SeriesCode.length() != BaseActivity.DEFAULT_SERIES_CODE.length()) {
+          seriesDetails.SeriesChanged = true;
+          seriesDetails.SeriesCode = SeriesEntity.getSeriesCode(upc);
+        } else {
+          seriesDetails.SeriesCode = mSeriesDetails.SeriesCode;
+        }
+        if (mSeriesDetails.SeriesId.equals(BaseActivity.DEFAULT_SERIES_ID) ||
+          mSeriesDetails.SeriesId.length() != BaseActivity.DEFAULT_SERIES_ID.length()) {
+          seriesDetails.SeriesChanged = true;
+          seriesDetails.SeriesId = UUID.randomUUID().toString();
+        } else {
+          seriesDetails.SeriesId = mSeriesDetails.SeriesId;
+        }
+        if (mSeriesDetails.SeriesTitle.isEmpty()) {
+          seriesDetails.SeriesChanged = true;
+          seriesDetails.SeriesTitle = title;
+        } else {
+          seriesDetails.SeriesTitle = mSeriesDetails.SeriesTitle;
         }
       }
     } else {
@@ -121,18 +173,18 @@ public class RetrieveSeriesDataTask extends AsyncTask<Void, Void, SeriesEntity> 
     }
 
     connection.disconnect();
-    return seriesEntity;
+    return seriesDetails;
   }
 
-  protected void onPostExecute(SeriesEntity seriesEntity) {
+  protected void onPostExecute(SeriesDetails seriesDetails) {
 
-    Log.d(TAG, "++onPostExecute(SeriesEntity)");
+    Log.d(TAG, "++onPostExecute(SeriesDetails)");
     MainActivity activity = mActivityWeakReference.get();
     if (activity == null) {
       Log.e(TAG, "MainActivity is null or detached.");
       return;
     }
 
-    activity.retrieveComicSeriesComplete(seriesEntity);
+    activity.retrieveComicSeriesComplete(seriesDetails);
   }
 }

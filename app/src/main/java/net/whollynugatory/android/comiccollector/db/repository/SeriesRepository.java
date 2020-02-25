@@ -51,14 +51,14 @@ public class SeriesRepository {
     return INSTANCE;
   }
 
-  public void delete(String seriesId) {
+  public void delete(String id) {
 
-    CollectorDatabase.databaseWriteExecutor.execute(() -> mSeriesDao.delete(seriesId));
+    CollectorDatabase.databaseWriteExecutor.execute(() -> mSeriesDao.delete(id));
   }
 
-  public LiveData<SeriesEntity> get(String seriesId) {
+  public LiveData<SeriesEntity> get(String publisherCode, String seriesCode) {
 
-    return mSeriesDao.get(seriesId);
+    return mSeriesDao.get(publisherCode, seriesCode);
   }
 
   public LiveData<List<SeriesEntity>> getAll() {

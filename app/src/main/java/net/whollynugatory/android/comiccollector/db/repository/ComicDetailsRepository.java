@@ -50,19 +50,14 @@ public class ComicDetailsRepository {
     return INSTANCE;
   }
 
-  public void deleteById(String fullId) {
+  public LiveData<ComicDetails> get(String publisherCode, String seriesCode, String issueCode) {
 
-    mComicDetailsDao.deleteById(fullId);
+    return mComicDetailsDao.get(publisherCode, seriesCode, issueCode);
   }
 
-  public LiveData<ComicDetails> find(String productCode, String issueCode) {
+  public LiveData<List<ComicDetails>> getAllByProductCode(String publisherCode, String seriesCode) {
 
-    return mComicDetailsDao.find(productCode, issueCode);
-  }
-
-  public LiveData<List<ComicDetails>> findByProductCode(String productCode) {
-
-    return mComicDetailsDao.findByProductCode(productCode);
+    return mComicDetailsDao.getAllByProductCode(publisherCode, seriesCode);
   }
 
   public LiveData<List<ComicDetails>> getRecent() {

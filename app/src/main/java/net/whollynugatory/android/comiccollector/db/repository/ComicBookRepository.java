@@ -51,29 +51,14 @@ public class ComicBookRepository {
     return INSTANCE;
   }
 
-  public void delete(String volumeId) {
+  public void delete(String id) {
 
-    CollectorDatabase.databaseWriteExecutor.execute(() -> mComicBookDao.deleteById(volumeId));
+    CollectorDatabase.databaseWriteExecutor.execute(() -> mComicBookDao.delete(id));
   }
 
   public LiveData<List<ComicBookEntity>> exportable() {
 
     return mComicBookDao.exportable();
-  }
-
-  public LiveData<List<ComicBookEntity>> find(String productCode) {
-
-    return mComicBookDao.find(productCode);
-  }
-
-  public LiveData<ComicBookEntity> find(String productCode, String issueCode) {
-
-    return mComicBookDao.find(productCode, issueCode);
-  }
-
-  public LiveData<List<ComicBookEntity>> getRecent() {
-
-    return mComicBookDao.getAllByRecent();
   }
 
   public void insert(ComicBookEntity comicBookEntity) {

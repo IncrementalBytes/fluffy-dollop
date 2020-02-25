@@ -32,8 +32,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.List;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 import net.whollynugatory.android.comiccollector.db.viewmodel.CollectorViewModel;
+import net.whollynugatory.android.comiccollector.db.views.SeriesDetails;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 public class SeriesListFragment extends Fragment {
@@ -75,7 +75,7 @@ public class SeriesListFragment extends Fragment {
     Log.d(TAG, "++onActivityCreated()");
     SeriesAdapter seriesAdapter = new SeriesAdapter(getContext());
     mRecyclerView.setAdapter(seriesAdapter);
-    mCollectorViewModel.getRecentSeries().observe(getViewLifecycleOwner(), seriesAdapter::setSeriesDetailList);
+    mCollectorViewModel.getSeries().observe(getViewLifecycleOwner(), seriesAdapter::setSeriesDetailList);
 
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     mAddButton.setOnClickListener(pickView -> mCallback.onSeriesListAddComicBook());
@@ -142,7 +142,7 @@ public class SeriesListFragment extends Fragment {
       private final TextView mPublisherTextView;
       private final TextView mTitleTextView;
 
-      private SeriesEntity mSeriesEntity;
+      private SeriesDetails mSeriesDetails;
 
       SeriesHolder(View itemView) {
         super(itemView);
@@ -155,16 +155,16 @@ public class SeriesListFragment extends Fragment {
         itemView.setOnClickListener(this);
       }
 
-      void bind(SeriesEntity seriesEntity) {
+      void bind(SeriesDetails seriesDetails) {
 
-        mSeriesEntity = seriesEntity;
+        mSeriesDetails = seriesDetails;
 
-        if (mSeriesEntity != null) {
+        if (mSeriesDetails != null) {
 //          mCountTextView.setText(String.valueOf(mSeriesEntity.OwnedIssues));
           String publishedValue = "TBD";
           mPublishedTextView.setText(publishedValue);
-          mPublisherTextView.setText(mSeriesEntity.Publisher);
-          mTitleTextView.setText(mSeriesEntity.Name);
+          mPublisherTextView.setText(mSeriesDetails.Publisher);
+          mTitleTextView.setText(mSeriesDetails.SeriesTitle);
         }
       }
 
@@ -172,12 +172,12 @@ public class SeriesListFragment extends Fragment {
       public void onClick(View view) {
 
         Log.d(TAG, "++BookAuthorHolder::onClick(View)");
-        mCallback.onSeriesListSelected(mSeriesEntity.Id);
+        mCallback.onSeriesListSelected(mSeriesDetails.SeriesCode);
       }
     }
 
     private final LayoutInflater mInflater;
-    private List<SeriesEntity> mSeriesEntityList;
+    private List<SeriesDetails> mSeriesDetailsList;
 
     SeriesAdapter(Context context) {
 
@@ -195,9 +195,9 @@ public class SeriesListFragment extends Fragment {
     @Override
     public void onBindViewHolder(@NonNull SeriesHolder holder, int position) {
 
-      if (mSeriesEntityList != null) {
-        SeriesEntity seriesEntity = mSeriesEntityList.get(position);
-        holder.bind(seriesEntity);
+      if (mSeriesDetailsList != null) {
+        SeriesDetails seriesDetails = mSeriesDetailsList.get(position);
+        holder.bind(seriesDetails);
       } else {
         // No Series!
       }
@@ -206,17 +206,17 @@ public class SeriesListFragment extends Fragment {
     @Override
     public int getItemCount() {
 
-      if (mSeriesEntityList != null) {
-        return mSeriesEntityList.size();
+      if (mSeriesDetailsList != null) {
+        return mSeriesDetailsList.size();
       } else {
         return 0;
       }
     }
 
-    void setSeriesDetailList(List<SeriesEntity> seriesEntityList) {
+    void setSeriesDetailList(List<SeriesDetails> seriesDetailList) {
 
-      Log.d(TAG, "++setSeriesDetailList(List<SeriesEntity>)");
-      mSeriesEntityList = seriesEntityList;
+      Log.d(TAG, "++setSeriesDetailList(List<SeriesDetails>)");
+      mSeriesDetailsList = seriesDetailList;
       notifyDataSetChanged();
     }
   }

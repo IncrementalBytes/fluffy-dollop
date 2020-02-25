@@ -21,61 +21,77 @@ import androidx.room.Ignore;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.UUID;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 
 @DatabaseView(
   "SELECT Book.id AS Id, " +
-    "Book.product_code AS ProductCode, " +
+    "Publishers.id AS PublisherId, " +
+    " Publishers.publisher_code AS PublisherCode, " +
+    "Series.id AS SeriesId, " +
+    "Series.series_code AS SeriesCode, " +
     "Book.issue_code AS IssueCode," +
     "Book.title AS Title, " +
-    "Book.published_date AS Published, " +
-    "Book.issue_number AS IssueNumber, " +
-    "Book.cover_variant AS CoverVariant, " +
-    "Book.print_run AS PrintRun, " +
-    "Book.owned AS IsOwned, " +
-    "Book.read AS HasRead, " +
     "Series.name AS SeriesTitle, " +
     "Series.volume AS Volume, " +
-    "Series.Publisher AS PublisherName, " +
+    "Publishers.Name AS Publisher, " +
+    "Book.published_date AS Published, " +
+    "Book.read AS HasRead, " +
+    "Book.owned AS IsOwned, " +
     "Book.added_date AS AddedDate, " +
     "Book.updated_date AS UpdatedDate " +
   "FROM comic_book_table AS Book " +
-  "INNER JOIN series_table AS Series ON Series.id = Book.product_code")
+  "INNER JOIN series_table AS Series ON Series.id = Book.series_id " +
+  "INNER JOIN publisher_table AS Publishers ON Publishers.id = Series.publisher_id")
 public class ComicDetails implements Serializable {
 
+  @Ignore
+  private int mCoverVariant;
+
+  @Ignore
+  private int mIssueNumber;
+
+  @Ignore
+  private int mPrintRun;
+
   public String Id;
-  public String ProductCode;
+
   public String IssueCode;
   public String Title;
   public String Published;
-  public int IssueNumber;
-  public int CoverVariant;
-  public int PrintRun;
-  public boolean IsOwned;
   public boolean HasRead;
+  public boolean IsOwned;
+
+  public String SeriesCode;
+  public String SeriesId;
   public String SeriesTitle;
   public int Volume;
-  public String PublisherName;
+
+  public String PublisherCode;
+  public String PublisherId;
+  public String Publisher;
+
   public long AddedDate;
   public long UpdatedDate;
 
   public ComicDetails() {
 
-    Id = UUID.randomUUID().toString();
-    ProductCode = BaseActivity.DEFAULT_PRODUCT_CODE;
-    IssueCode = BaseActivity.DEFAULT_ISSUE_CODE;
+    Id = BaseActivity.DEFAULT_ID;
+    setIssueCode(BaseActivity.DEFAULT_ISSUE_CODE);
     Title = "";
     Published = BaseActivity.DEFAULT_PUBLISHED_DATE;
-    IssueNumber = 0;
-    CoverVariant = 0;
-    PrintRun = 0;
-    IsOwned = false;
     HasRead = false;
+    IsOwned = false;
+
+    SeriesCode = BaseActivity.DEFAULT_SERIES_CODE;
+    SeriesId = BaseActivity.DEFAULT_SERIES_ID;
     SeriesTitle = "";
     Volume = 0;
-    PublisherName = "";
+
+    PublisherCode = BaseActivity.DEFAULT_PUBLISHER_CODE;
+    PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
+    Publisher = "";
+
     AddedDate = 0;
     UpdatedDate = 0;
   }
@@ -83,18 +99,19 @@ public class ComicDetails implements Serializable {
   public ComicDetails(ComicBookEntity comicBookEntity) {
 
     Id = comicBookEntity.Id;
-    ProductCode = comicBookEntity.ProductCode;
-    IssueCode = comicBookEntity.IssueCode;
+    setIssueCode(comicBookEntity.IssueCode);
     Title = comicBookEntity.Title;
     Published = comicBookEntity.PublishedDate;
-    IssueNumber = comicBookEntity.IssueNumber;
-    CoverVariant = comicBookEntity.CoverVariant;
-    PrintRun = comicBookEntity.PrintRun;
-    IsOwned = comicBookEntity.IsOwned;
     HasRead = comicBookEntity.HasRead;
+    IsOwned = comicBookEntity.IsOwned;
+
+    SeriesId = comicBookEntity.SeriesId;
     SeriesTitle = "";
     Volume = 0;
-    PublisherName = "";
+
+    PublisherId = comicBookEntity.PublisherId;
+    Publisher = "";
+
     AddedDate = comicBookEntity.AddedDate;
     UpdatedDate = comicBookEntity.UpdatedDate;
   }
@@ -109,39 +126,70 @@ public class ComicDetails implements Serializable {
       Locale.US,
       "ComicDetails { Title=%s, ProductCode=%s, IssueCode=%s, %s, %s}",
       Title,
-      ProductCode,
+      getProductCode(),
       IssueCode,
-      IsOwned ? "Owned" : "Not Owned",
-      HasRead ? "Read" : "Unread");
+      HasRead ? "Read" : "Unread",
+      IsOwned ? "Owned" : "Not Owned");
+  }
+
+  @Ignore
+  public int getCoverVariant() {
+
+    if (mCoverVariant < 0) {
+      try {
+        String temp = IssueCode.substring(IssueCode.length() - 2, IssueCode.length() - 1);
+        mCoverVariant = Integer.parseInt(temp);
+      } catch (Exception e) {
+        return -1;
+      }
+    }
+
+    return mCoverVariant;
+  }
+
+  @Ignore
+  public int getIssueNumber() {
+
+    if (mIssueNumber < 0) {
+      try {
+        String temp = IssueCode.substring(0, IssueCode.length() - 2);
+        mIssueNumber = Integer.parseInt(temp);
+      } catch (Exception e) {
+        return -1;
+      }
+    }
+
+    return mIssueNumber;
+  }
+
+  @Ignore
+  public int getPrintRun() {
+
+    if (mPrintRun < 0) {
+      try {
+        String temp = IssueCode.substring(IssueCode.length() - 1);
+        mPrintRun = Integer.parseInt(temp);
+      } catch (Exception e) {
+        return -1;
+      }
+    }
+
+    return mPrintRun;
+  }
+
+  @Ignore
+  public String getProductCode() {
+
+    return String.format(Locale.US, "%s%s", PublisherCode, SeriesCode);
   }
 
   @Ignore
   public void setIssueCode(String issueCode) {
 
     IssueCode = issueCode;
-
-    try {
-      String temp = IssueCode.substring(IssueCode.length() - 2, IssueCode.length() - 1);
-      CoverVariant = Integer.parseInt(temp);
-    } catch (Exception e) {
-      CoverVariant = -1;
-    }
-
-    HasRead = false;
-    IsOwned = false;
-    try {
-      String temp = IssueCode.substring(0, IssueCode.length() - 2);
-      IssueNumber = Integer.parseInt(temp);
-    } catch (Exception e) {
-      IssueNumber = -1;
-    }
-
-    try {
-      String temp = IssueCode.substring(IssueCode.length() - 1);
-      PrintRun = Integer.parseInt(temp);
-    } catch (Exception e) {
-      PrintRun = -1;
-    }
+    mCoverVariant = -1;
+    mIssueNumber = -1;
+    mPrintRun = -1;
   }
 
   @Ignore
@@ -150,19 +198,32 @@ public class ComicDetails implements Serializable {
     ComicBookEntity entity = new ComicBookEntity();
 
     entity.Id = Id;
-    entity.ProductCode = ProductCode;
     entity.IssueCode = IssueCode;
-
-    entity.CoverVariant = CoverVariant;
-    entity.HasRead = HasRead;
-    entity.IssueNumber = IssueNumber;
-    entity.IsOwned = IsOwned;
-    entity.PrintRun = PrintRun;
-    entity.PublishedDate = Published;
     entity.Title = Title;
+    entity.PublishedDate = Published;
+    entity.HasRead = HasRead;
+    entity.IsOwned = IsOwned;
+
+    entity.SeriesId = SeriesId;
+
+    entity.PublisherId = PublisherId;
 
     entity.AddedDate = Calendar.getInstance().getTimeInMillis();
     entity.UpdatedDate = Calendar.getInstance().getTimeInMillis();
     return entity;
+  }
+
+  @Ignore
+  public SeriesDetails toSeriesDetails() {
+
+    SeriesDetails seriesDetails = new SeriesDetails();
+    seriesDetails.PublisherId = PublisherId;
+    seriesDetails.PublisherCode = PublisherCode;
+    seriesDetails.Publisher = Publisher;
+    seriesDetails.SeriesId = SeriesId;
+    seriesDetails.SeriesCode = SeriesCode;
+    seriesDetails.SeriesTitle = SeriesTitle;
+    seriesDetails.Volume = Volume;
+    return seriesDetails;
   }
 }

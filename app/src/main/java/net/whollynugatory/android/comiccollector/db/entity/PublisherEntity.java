@@ -19,29 +19,20 @@ package net.whollynugatory.android.comiccollector.db.entity;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
-import com.google.firebase.firestore.Exclude;
 import com.google.gson.annotations.SerializedName;
-import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
-@Entity(
-  tableName = "series_table",
-  foreignKeys = @ForeignKey(entity = PublisherEntity.class, parentColumns = "id", childColumns = "publisher_id"),
-  indices = {
-    @Index(value = "id"),
-    @Index(value = "publisher_id")
-  })
-public class SeriesEntity implements Serializable {
+@Entity(tableName = "publisher_table", indices = @Index(value = "id"))
+public class PublisherEntity {
 
   @Ignore
-  public static final String ROOT = "Series";
+  public static final String ROOT = "Publishers";
 
   @PrimaryKey()
   @NonNull
@@ -50,23 +41,14 @@ public class SeriesEntity implements Serializable {
   public String Id;
 
   @NonNull
-  @ColumnInfo(name = "series_code")
-  @SerializedName("series_code")
-  public String SeriesCode;
-
-  @NonNull
-  @ColumnInfo(name = "publisher_id")
-  @SerializedName("publisher_id")
-  public String PublisherId;
+  @ColumnInfo(name = "publisher_code")
+  @SerializedName("publisher_code")
+  public String PublisherCode;
 
   @NonNull
   @ColumnInfo(name = "name")
   @SerializedName("name")
   public String Name;
-
-  @ColumnInfo(name = "volume")
-  @SerializedName("volume")
-  public int Volume;
 
   @ColumnInfo(name = "active")
   @SerializedName("active")
@@ -83,59 +65,51 @@ public class SeriesEntity implements Serializable {
   public boolean NeedsReview;
 
   @Ignore
+  @SerializedName("submitted_date")
   public long SubmissionDate;
 
   @Ignore
+  @SerializedName("submitted_by")
   public String SubmittedBy;
 
-  public SeriesEntity() {
+  public PublisherEntity() {
 
     Id = UUID.randomUUID().toString();
-    SeriesCode = BaseActivity.DEFAULT_SERIES_CODE;
-    PublisherId = BaseActivity.DEFAULT_PUBLISHER_ID;
-
+    PublisherCode = BaseActivity.DEFAULT_PUBLISHER_CODE;
     Name = "";
-    Volume = 0;
-    AddedDate = UpdatedDate = Calendar.getInstance().getTimeInMillis();
 
     IsActive = true;
     NeedsReview = false;
-    SubmissionDate = 0;
+    AddedDate = SubmissionDate = UpdatedDate = Calendar.getInstance().getTimeInMillis();
     SubmittedBy = "";
   }
 
   /*
-    Object Override(s)
-   */
+  Object Override(s)
+ */
   @Override
   public String toString() {
 
     return String.format(
       Locale.US,
-      "Series { Name=%s, Code=%s , Volume=%d }",
+      "Publisher { Name=%s, Code=%s }",
       Name,
-      SeriesCode,
-      Volume);
+      PublisherCode);
   }
 
-  /*
-    Public Method(s)
-   */
-  @Exclude
   public boolean isValid() {
 
-    return !SeriesCode.equals(BaseActivity.DEFAULT_SERIES_CODE) &&
-      SeriesCode.length() == BaseActivity.DEFAULT_SERIES_CODE.length() &&
-      !Name.isEmpty() &&
-      Volume > 0;
+    return !PublisherCode.equals(BaseActivity.DEFAULT_PUBLISHER_CODE) &&
+      PublisherCode.length() == BaseActivity.DEFAULT_PUBLISHER_CODE.length() &&
+      !Name.isEmpty();
   }
 
-  public static String getSeriesCode(String productCode) {
+  public static String getPublisherCode(String productCode) {
 
     if (productCode.length() == BaseActivity.DEFAULT_PRODUCT_CODE.length()) {
-      return productCode.substring(BaseActivity.DEFAULT_SERIES_CODE.length());
+      return productCode.substring(0, BaseActivity.DEFAULT_PUBLISHER_CODE.length());
     }
 
-    return BaseActivity.DEFAULT_SERIES_CODE;
+    return BaseActivity.DEFAULT_PUBLISHER_CODE;
   }
 }

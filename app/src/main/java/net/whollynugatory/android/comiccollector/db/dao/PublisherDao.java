@@ -23,26 +23,26 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 import java.util.List;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
+import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
 
 @Dao
-public interface ComicBookDao {
+public interface PublisherDao {
 
-  @Query("DELETE from comic_book_table WHERE id == :id")
-  void delete(String id);
+  @Query("DELETE FROM publisher_table WHERE publisher_code == :publisherCode")
+  void delete(String publisherCode);
 
-  @Query("SELECT * from comic_book_table")
-  LiveData<List<ComicBookEntity>> exportable();
+  @Query("SELECT DISTINCT * from publisher_table WHERE id == :publisherId")
+  LiveData<PublisherEntity> getById(String publisherId);
 
-  @Query("SELECT * FROM comic_book_table ORDER BY added_date DESC LIMIT 50")
-  LiveData<List<ComicBookEntity>> getRecent();
-
-  @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void insert(ComicBookEntity comicBookEntity);
+  @Query("SELECT * from publisher_table ORDER BY name DESC")
+  LiveData<List<PublisherEntity>> getAll();
 
   @Insert(onConflict = OnConflictStrategy.REPLACE)
-  void insertAll(List<ComicBookEntity> comicBookEntityList);
+  void insert(PublisherEntity publisherEntity);
+
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  void insertAll(List<PublisherEntity> publisherEntityList);
 
   @Update
-  void update(ComicBookEntity comicBookEntity);
+  void update(PublisherEntity publisherEntity);
 }

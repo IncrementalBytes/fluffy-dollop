@@ -26,19 +26,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import java.util.Calendar;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.common.ComicCollectorException;
+import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
 import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 import net.whollynugatory.android.comiccollector.db.viewmodel.CollectorViewModel;
+import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
+import net.whollynugatory.android.comiccollector.db.views.SeriesDetails;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
 public class SeriesFragment extends Fragment {
@@ -49,40 +51,28 @@ public class SeriesFragment extends Fragment {
 
     void onSeriesCancel();
 
-    void onSeriesSearched(SeriesEntity seriesEntity);
+    void onSeriesUpdated(ComicDetails comicDetails);
   }
 
   private OnSeriesListener mCallback;
 
   private Button mContinueButton;
   private EditText mProductCodeEdit;
+  private EditText mPublisherCodeEdit;
   private EditText mPublisherNameEdit;
   private EditText mSeriesNameEdit;
   private EditText mVolumeEdit;
-  private ProgressBar mWaitProgress;
-  private TextView mWaitText;
 
   private CollectorViewModel mCollectorViewModel;
 
-  private String mProductCode;
-  private SeriesEntity mSeriesEntity;
+  private SeriesDetails mSeriesDetails;
 
-  public static SeriesFragment newInstance(String productCode) {
-
-    Log.d(TAG, "++newInstance(ComicBookEntry)");
-    SeriesFragment fragment = new SeriesFragment();
-    Bundle arguments = new Bundle();
-    arguments.putSerializable(BaseActivity.ARG_PRODUCT_CODE, productCode);
-    fragment.setArguments(arguments);
-    return fragment;
-  }
-
-  public static SeriesFragment newInstance(SeriesEntity seriesEntity) {
+  public static SeriesFragment newInstance(SeriesDetails seriesDetails) {
 
     Log.d(TAG, "++newInstance(ComicBookEntry)");
     SeriesFragment fragment = new SeriesFragment();
     Bundle arguments = new Bundle();
-    arguments.putSerializable(BaseActivity.ARG_SERIES, seriesEntity);
+    arguments.putSerializable(BaseActivity.ARG_SERIES, seriesDetails);
     fragment.setArguments(arguments);
     return fragment;
   }
@@ -111,15 +101,9 @@ public class SeriesFragment extends Fragment {
     Bundle arguments = getArguments();
     if (arguments != null) {
       if (arguments.containsKey(BaseActivity.ARG_SERIES)) {
-        mSeriesEntity = (SeriesEntity) arguments.getSerializable(BaseActivity.ARG_SERIES);
+        mSeriesDetails = (SeriesDetails) arguments.getSerializable(BaseActivity.ARG_SERIES);
       } else {
-        mSeriesEntity = null;
-      }
-
-      if (arguments.containsKey(BaseActivity.ARG_PRODUCT_CODE)) {
-        mProductCode = arguments.getString(BaseActivity.ARG_PRODUCT_CODE);
-      } else {
-        mProductCode = null;
+        mSeriesDetails = null;
       }
     } else {
       Log.e(TAG, "Arguments were null.");
@@ -150,46 +134,49 @@ public class SeriesFragment extends Fragment {
     Log.d(TAG, "++onViewCreated(View, Bundle)");
     Button cancelButton = view.findViewById(R.id.series_button_cancel);
     mContinueButton = view.findViewById(R.id.series_button_continue);
-    mProductCodeEdit = view.findViewById(R.id.series_edit_product_code_value);
-    mPublisherNameEdit = view.findViewById(R.id.series_edit_publisher_name_value);
-    mSeriesNameEdit = view.findViewById(R.id.series_edit_name_value);
+    mProductCodeEdit = view.findViewById(R.id.series_edit_product_code);
+    mPublisherCodeEdit = view.findViewById(R.id.series_edit_publisher_code);
+    mPublisherNameEdit = view.findViewById(R.id.series_edit_publisher_name);
+    mSeriesNameEdit = view.findViewById(R.id.series_edit_name);
     mVolumeEdit = view.findViewById(R.id.series_edit_volume);
-    mWaitProgress = view.findViewById(R.id.series_progress_wait);
-    mWaitText = view.findViewById(R.id.series_text_wait);
 
-    // 2 Acceptable Scenarios:
-    //   1) ProductCode - search for series
-    //   2) SeriesEntity - edit series
+    mCollectorViewModel.getPublisherById(mSeriesDetails.PublisherId).observe(getViewLifecycleOwner(), publisherEntity -> {
 
-    if (mSeriesEntity == null) {
-      mContinueButton.setVisibility(View.INVISIBLE);
-      mProductCodeEdit.setVisibility(View.INVISIBLE);
-      mPublisherNameEdit.setVisibility(View.INVISIBLE);
-      mSeriesNameEdit.setVisibility(View.INVISIBLE);
-      mVolumeEdit.setVisibility(View.INVISIBLE);
-      mWaitProgress.setIndeterminate(true);
-      mCollectorViewModel.findSeries(mProductCode).observe(getViewLifecycleOwner(), seriesEntity -> {
+      if (publisherEntity == null) {
+        PublisherEntity entity = mSeriesDetails.toPublisherEntity();
+        entity.SubmittedBy = ""; // TODO: carry over user account
+        entity.SubmissionDate = Calendar.getInstance().getTimeInMillis();
+        entity.NeedsReview = true;
+        mCollectorViewModel.insertPublisher(entity);
+        FirebaseFirestore.getInstance().collection(PublisherEntity.ROOT).document(entity.Id).set(entity, SetOptions.merge())
+          .addOnCompleteListener(task -> {
 
-        if (seriesEntity != null) {
-          mCallback.onSeriesSearched(seriesEntity);
-        } else { // gather more information about the series from the user
-          updateUI();
-        }
-      });
-    } else { // gather more information about the series from the user
-      updateUI();
-    }
+            if (!task.isSuccessful()) { // not fatal but we need to know this information for review
+              Crashlytics.logException(
+                new ComicCollectorException(
+                  String.format(
+                    Locale.US,
+                    "Could not write pending publisher: %s",
+                    entity.toString())));
+              // TODO: failed to add publisher, where should we go?
+            } else {
+              updateUI();
+            }
+          });
+      } else {
+        updateUI();
+      }
+    });
 
     cancelButton.setOnClickListener(v -> mCallback.onSeriesCancel());
-    mPublisherNameEdit.addTextChangedListener(new TextWatcher() {
+    mProductCodeEdit.addTextChangedListener(new TextWatcher() {
+
       @Override
       public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
       }
 
       @Override
       public void onTextChanged(CharSequence s, int start, int before, int count) {
-
       }
 
       @Override
@@ -217,54 +204,117 @@ public class SeriesFragment extends Fragment {
     mContinueButton.setOnClickListener(v -> {
 
       Log.d(TAG, "++onClick()");
-      SeriesEntity seriesEntity = new SeriesEntity();
-      seriesEntity.Id = mProductCode;
-      seriesEntity.Publisher = mPublisherNameEdit.getText().toString();
-      seriesEntity.Name = mSeriesNameEdit.getText().toString();
-      String volume = mVolumeEdit.getText().toString();
-      if (!volume.isEmpty()) {
-        seriesEntity.Volume = Integer.parseInt(volume);
+      if (mPublisherNameEdit.isEnabled()) {
+        PublisherEntity entity = new PublisherEntity();
+        entity.Name = mPublisherNameEdit.getText().toString();
+        entity.PublisherCode = mPublisherCodeEdit.getText().toString();
+        mCollectorViewModel.insertPublisher(entity);
+        entity.SubmissionDate = Calendar.getInstance().getTimeInMillis();
+        entity.NeedsReview = true;
+        FirebaseFirestore.getInstance().collection(PublisherEntity.ROOT).document(entity.Id).set(entity, SetOptions.merge())
+          .addOnCompleteListener(task -> {
+
+            if (!task.isSuccessful()) { // not fatal but we need to know this information for review
+              Crashlytics.logException(
+                new ComicCollectorException(
+                  String.format(
+                    Locale.US,
+                    "Could not write pending publisher: %s",
+                    entity.toString())));
+            }
+
+            mSeriesDetails.Publisher = entity.Name;
+            mSeriesDetails.PublisherCode = entity.PublisherCode;
+            mSeriesDetails.PublisherId = entity.Id;
+            insertSeriesEntity();
+          });
+      } else {
+        insertSeriesEntity();
       }
-
-      mCollectorViewModel.insertSeries(seriesEntity);
-
-      seriesEntity.NeedsReview = true;
-      FirebaseFirestore.getInstance().document(SeriesEntity.ROOT).set(seriesEntity, SetOptions.merge())
-        .addOnCompleteListener(task -> {
-
-          if (!task.isSuccessful()) { // not fatal but we need to know this information for review
-            Crashlytics.logException(
-              new ComicCollectorException(
-                String.format(
-                  Locale.US,
-                  "Could not write pending series: %s",
-                  seriesEntity.toString())));
-          }
-
-          mCallback.onSeriesSearched(seriesEntity);
-        });
     });
   }
 
+  private void insertSeriesEntity() {
+
+    Log.d(TAG, "++insertSeriesEntity()");
+    SeriesEntity entity = new SeriesEntity();
+    entity.PublisherId = mSeriesDetails.PublisherId;
+    entity.SeriesCode = mProductCodeEdit.getText().toString();
+    entity.Name = mSeriesNameEdit.getText().toString();
+    String volume = mVolumeEdit.getText().toString();
+    if (!volume.isEmpty()) {
+      entity.Volume = Integer.parseInt(volume);
+    }
+
+    mCollectorViewModel.insertSeries(entity);
+    entity.NeedsReview = true;
+    entity.SubmissionDate = Calendar.getInstance().getTimeInMillis();
+    FirebaseFirestore.getInstance().collection(SeriesEntity.ROOT).document(entity.Id).set(entity, SetOptions.merge())
+      .addOnCompleteListener(task -> {
+
+        if (!task.isSuccessful()) { // not fatal but we need to know this information for review
+          Crashlytics.logException(
+            new ComicCollectorException(
+              String.format(
+                Locale.US,
+                "Could not write pending series: %s",
+                entity.toString())));
+        }
+
+        ComicDetails comicDetails = new ComicDetails();
+        comicDetails.PublisherId = mSeriesDetails.PublisherId;
+        comicDetails.Publisher = mSeriesDetails.Publisher;
+        comicDetails.PublisherCode = mSeriesDetails.PublisherCode;
+        comicDetails.SeriesId = entity.Id;
+        comicDetails.SeriesCode = entity.SeriesCode;
+        comicDetails.SeriesTitle = entity.Name;
+        comicDetails.Volume = entity.Volume;
+        mCallback.onSeriesUpdated(comicDetails);
+      });
+  }
 
   private void updateUI() {
 
-    Log.d(TAG, "++updateUI()");
-    mContinueButton.setVisibility(View.VISIBLE);
-    mProductCodeEdit.setVisibility(View.VISIBLE);
-    mPublisherNameEdit.setVisibility(View.VISIBLE);
-    mSeriesNameEdit.setVisibility(View.VISIBLE);
-    mVolumeEdit.setVisibility(View.VISIBLE);
-    mWaitProgress.setVisibility(View.INVISIBLE);
-    mWaitText.setVisibility(View.INVISIBLE);
+    if (mSeriesDetails != null) {
+      if (mSeriesDetails.PublisherCode.equals(BaseActivity.DEFAULT_PUBLISHER_CODE) ||
+        mSeriesDetails.PublisherCode.length() != BaseActivity.DEFAULT_PUBLISHER_CODE.length()) {
+        mPublisherCodeEdit.setEnabled(true);
+      } else {
+        mPublisherCodeEdit.setEnabled(false);
+        mPublisherCodeEdit.setText(mSeriesDetails.PublisherCode);
+      }
 
-    mProductCodeEdit.setText(mProductCode);
+      if (mSeriesDetails.Publisher.isEmpty()) {
+        mPublisherNameEdit.setEnabled(true);
+      } else {
+        mPublisherNameEdit.setEnabled(false);
+        mPublisherNameEdit.setText(mSeriesDetails.Publisher);
+      }
+
+      if (!mSeriesDetails.SeriesCode.equals(BaseActivity.DEFAULT_SERIES_CODE)) {
+        mProductCodeEdit.setEnabled(false);
+        mProductCodeEdit.setText(mSeriesDetails.SeriesCode);
+      } else {
+        mProductCodeEdit.setEnabled(true);
+      }
+
+      if (!mSeriesDetails.SeriesTitle.isEmpty()) {
+        mSeriesNameEdit.setText(mSeriesDetails.SeriesTitle);
+      }
+
+      if (mSeriesDetails.Volume > 0) {
+        mVolumeEdit.setText(String.valueOf(mSeriesDetails.Volume));
+      }
+    }
   }
 
   private void validateAll() {
 
-    if ((mSeriesNameEdit.getText().toString().length() > 0) &&
-      (mPublisherNameEdit.getText().toString().length() > 0)) {
+    String productCode = mProductCodeEdit.getText().toString();
+    String productTitle = mSeriesNameEdit.getText().toString();
+    if (!productCode.equals(BaseActivity.DEFAULT_SERIES_CODE) &&
+      productCode.length() == BaseActivity.DEFAULT_SERIES_CODE.length() &&
+      !productTitle.isEmpty()) {
       mContinueButton.setEnabled(true);
     } else {
       mContinueButton.setEnabled(false);

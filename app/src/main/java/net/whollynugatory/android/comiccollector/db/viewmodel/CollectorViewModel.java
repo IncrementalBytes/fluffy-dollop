@@ -22,50 +22,58 @@ import androidx.lifecycle.LiveData;
 import java.util.List;
 import net.whollynugatory.android.comiccollector.db.CollectorDatabase;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
+import net.whollynugatory.android.comiccollector.db.entity.PublisherEntity;
 import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 import net.whollynugatory.android.comiccollector.db.repository.ComicBookRepository;
 import net.whollynugatory.android.comiccollector.db.repository.ComicDetailsRepository;
+import net.whollynugatory.android.comiccollector.db.repository.PublisherRepository;
+import net.whollynugatory.android.comiccollector.db.repository.SeriesDetailsRepository;
 import net.whollynugatory.android.comiccollector.db.repository.SeriesRepository;
 import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
+import net.whollynugatory.android.comiccollector.db.views.SeriesDetails;
 
 public class CollectorViewModel extends AndroidViewModel {
 
   private ComicBookRepository mComicBookRepository;
   private ComicDetailsRepository mComicDetailsRepository;
+  private PublisherRepository mPublisherRepository;
   private SeriesRepository mSeriesRepository;
+  private SeriesDetailsRepository mSeriesDetailsRepository;
 
   private LiveData<List<ComicDetails>> mComicDetails;
-  private LiveData<List<SeriesEntity>> mSeriesEntities;
+  private LiveData<List<SeriesDetails>> mSeriesDetails;
 
   public CollectorViewModel(Application application) {
     super(application);
 
     mComicBookRepository = ComicBookRepository.getInstance(CollectorDatabase.getInstance(application).comicBookDao());
     mComicDetailsRepository = ComicDetailsRepository.getInstance(CollectorDatabase.getInstance(application).comicDetailsDao());
+    mPublisherRepository = PublisherRepository.getInstance(CollectorDatabase.getInstance(application).publisherDao());
     mSeriesRepository = SeriesRepository.getInstance(CollectorDatabase.getInstance(application).seriesDao());
+    mSeriesDetailsRepository = SeriesDetailsRepository.getInstance(CollectorDatabase.getInstance(application).seriesDetailsDao());
 
     mComicDetails = mComicDetailsRepository.getRecent();
-    mSeriesEntities = mSeriesRepository.getAll();
+    mSeriesDetails = mSeriesDetailsRepository.getAll();
   }
 
-  public void deleteComicById(String fullId) {
+  public void deleteComicById(String id) {
 
-    mComicDetailsRepository.deleteById(fullId);
+    mComicBookRepository.delete(id);
   }
 
-  public LiveData<ComicDetails> findComic(String productCode, String issueCode) {
+  public LiveData<ComicDetails> getComic(String publisherCode, String seriesCode, String issueCode) {
 
-    return mComicDetailsRepository.find(productCode, issueCode);
+    return mComicDetailsRepository.get(publisherCode, seriesCode, issueCode);
   }
 
-  public LiveData<List<ComicDetails>> findComicsByProductCode(String productCode) {
+  public LiveData<List<ComicDetails>> getComicsByProductCode(String publisherCode, String seriesCode) {
 
-    return mComicDetailsRepository.findByProductCode(productCode);
+    return mComicDetailsRepository.getAllByProductCode(publisherCode, seriesCode);
   }
 
-  public LiveData<SeriesEntity> findSeries(String seriesId) {
+  public LiveData<PublisherEntity> getPublisherById(String publisherId) {
 
-    return mSeriesRepository.get(seriesId);
+    return mPublisherRepository.getById(publisherId);
   }
 
   public LiveData<List<ComicDetails>> getRecentComics() {
@@ -73,9 +81,19 @@ public class CollectorViewModel extends AndroidViewModel {
     return mComicDetails;
   }
 
-  public LiveData<List<SeriesEntity>> getRecentSeries() {
+  public LiveData<SeriesDetails> getSeries(String publisherCode, String seriesCode) {
 
-    return mSeriesEntities;
+    return mSeriesDetailsRepository.get(publisherCode, seriesCode);
+  }
+
+  public LiveData<List<SeriesDetails>> getSeries() {
+
+    return mSeriesDetails;
+  }
+
+  public LiveData<List<SeriesDetails>> getSeriesByPublisher(String publisherCode) {
+
+    return mSeriesDetailsRepository.getAllByPublisher(publisherCode);
   }
 
   public void insertComicBook(ComicBookEntity comicBookEntity) {
@@ -83,8 +101,18 @@ public class CollectorViewModel extends AndroidViewModel {
     mComicBookRepository.insert(comicBookEntity);
   }
 
+  public void insertPublisher(PublisherEntity publisherEntity) {
+
+    mPublisherRepository.insert(publisherEntity);
+  }
+
   public void insertSeries(SeriesEntity seriesEntity) {
 
     mSeriesRepository.insert(seriesEntity);
+  }
+
+  public void updateComic(ComicBookEntity comicBookEntity) {
+
+    mComicBookRepository.update(comicBookEntity);
   }
 }

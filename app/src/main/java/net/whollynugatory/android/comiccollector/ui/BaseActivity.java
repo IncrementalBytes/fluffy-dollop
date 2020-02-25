@@ -30,14 +30,17 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String ARG_USER = "user";
     public static final String ARG_USER_NAME = "user_name";
 
-    public static final String DEFAULT_PUBLISHER_ID = "000000";
-    public static final String DEFAULT_SERIES_ID = "000000";
+    public static final String DEFAULT_ID = "00000000-0000-0000-0000-000000000000";
     public static final String DEFAULT_EXPORT_FILE = "exportedLibrary.json";
     public static final String DEFAULT_ISSUE_CODE = "00000";
     public static final String DEFAULT_LIBRARY_FILE = "localLibrary.json";
     public static final String DEFAULT_PRODUCT_CODE = "000000000000";
+    public static final String DEFAULT_PUBLISHER_CODE = "000000";
     public static final String DEFAULT_PUBLISHED_DATE = "00/0000";
-    public static final String DEFAULT_SERIES_FILE = "Series.json";
+    public static final String DEFAULT_PUBLISHER_ID = "00000000-0000-0000-0000-000000000000";
+    public static final String DEFAULT_DATA_FILE = "PublishersAndSeries.json";
+    public static final String DEFAULT_SERIES_CODE = "000000";
+    public static final String DEFAULT_SERIES_ID = "00000000-0000-0000-0000-000000000000";
     public static final String DEFAULT_USER_ID = "0000000000000000000000000000";
 
     public static final String DATABASE_NAME = "collector-db.sqlite";

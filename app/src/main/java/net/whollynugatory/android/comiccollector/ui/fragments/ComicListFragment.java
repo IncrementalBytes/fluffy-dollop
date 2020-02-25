@@ -50,6 +50,8 @@ public class ComicListFragment extends Fragment {
 
     void onComicListAddComicBook();
 
+    void onComicListEditComicBook(ComicDetails comicDetails);
+
     void onComicListPopulated(int size);
   }
 
@@ -166,6 +168,7 @@ public class ComicListFragment extends Fragment {
     class ComicDetailsHolder extends RecyclerView.ViewHolder {
 
       private final ImageView mDeleteImage;
+      private final ImageView mEditImage;
       private final TextView mIssueTextView;
       private final Switch mOwnSwitch;
       private final Switch mReadSwitch;
@@ -178,27 +181,12 @@ public class ComicListFragment extends Fragment {
         super(itemView);
 
         mDeleteImage = itemView.findViewById(R.id.comic_item_image_delete);
+        mEditImage = itemView.findViewById(R.id.comic_item_image_edit);
         mIssueTextView = itemView.findViewById(R.id.comic_item_text_issue_value);
         mOwnSwitch = itemView.findViewById(R.id.comic_item_switch_own);
         mReadSwitch = itemView.findViewById(R.id.comic_item_switch_read);
         mSeriesNameTextView = itemView.findViewById(R.id.comic_item_text_series);
         mTitleTextView = itemView.findViewById(R.id.comic_item_text_title);
-
-        mOwnSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-          mComicBook.IsOwned = isChecked;
-          mComicBook.UpdatedDate = Calendar.getInstance().getTimeInMillis();
-          // mComicBookViewModel.update(mComicBook); // TODO: Fix
-          mOwnSwitch.setText(isChecked ? getString(R.string.owned) : getString(R.string.not_owned));
-        });
-
-        mReadSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-          mComicBook.HasRead = isChecked;
-          mComicBook.UpdatedDate = Calendar.getInstance().getTimeInMillis();
-          // mComicBookViewModel.update(mComicBook); // TODO: Fix
-          mReadSwitch.setText(isChecked ? getString(R.string.read) : getString(R.string.unread));
-        });
       }
 
       void bind(ComicDetails comicDetails) {
@@ -220,14 +208,30 @@ public class ComicListFragment extends Fragment {
             }
           });
 
+          mEditImage.setOnClickListener(v -> mCallback.onComicListEditComicBook(mComicBook));
           mOwnSwitch.setText(mComicBook.IsOwned ? getString(R.string.owned) : getString(R.string.not_owned));
           mOwnSwitch.setChecked(mComicBook.IsOwned);
+          mOwnSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
+            mComicBook.IsOwned = isChecked;
+            mComicBook.UpdatedDate = Calendar.getInstance().getTimeInMillis();
+            mCollectorViewModel.updateComic(mComicBook.toEntity());
+            mOwnSwitch.setText(isChecked ? getString(R.string.owned) : getString(R.string.not_owned));
+          });
+
           mReadSwitch.setText(mComicBook.HasRead ? getString(R.string.read) : getString(R.string.unread));
           mReadSwitch.setChecked(mComicBook.HasRead);
+          mReadSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
+            mComicBook.HasRead = isChecked;
+            mComicBook.UpdatedDate = Calendar.getInstance().getTimeInMillis();
+            mCollectorViewModel.updateComic(mComicBook.toEntity());
+            mReadSwitch.setText(isChecked ? getString(R.string.read) : getString(R.string.unread));
+          });
 
           mSeriesNameTextView.setText(mComicBook.SeriesTitle);
           mTitleTextView.setText(mComicBook.Title);
-          mIssueTextView.setText(String.valueOf(mComicBook.IssueNumber));
+          mIssueTextView.setText(String.valueOf(mComicBook.getIssueNumber()));
         }
       }
     }

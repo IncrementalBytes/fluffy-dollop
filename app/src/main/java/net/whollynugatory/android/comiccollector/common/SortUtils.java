@@ -34,7 +34,7 @@ public class SortUtils {
 
     public int compare(ComicDetails a, ComicDetails b) {
 
-      return Long.compare(a.IssueNumber, b.IssueNumber);
+      return Long.compare(a.getIssueNumber(), b.getIssueNumber());
     }
   }
 

@@ -17,7 +17,6 @@
 package net.whollynugatory.android.comiccollector.ui;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -29,7 +28,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import androidx.annotation.NonNull;
@@ -72,29 +70,32 @@ import java.util.List;
 import net.whollynugatory.android.comiccollector.PreferenceUtils;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.common.PathUtils;
+import net.whollynugatory.android.comiccollector.common.RetrieveSeriesDataTask;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
-import net.whollynugatory.android.comiccollector.db.entity.SeriesEntity;
 import net.whollynugatory.android.comiccollector.db.entity.UserEntity;
 import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
+import net.whollynugatory.android.comiccollector.db.views.SeriesDetails;
 import net.whollynugatory.android.comiccollector.ui.fragments.BarcodeScanFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.ComicBookFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.ComicListFragment;
-import net.whollynugatory.android.comiccollector.ui.fragments.ManualSearchFragment;
+import net.whollynugatory.android.comiccollector.ui.fragments.ProductLookupFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.ResultListFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.SeriesFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.SeriesListFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.SyncFragment;
+import net.whollynugatory.android.comiccollector.ui.fragments.UserInputFragment;
 import net.whollynugatory.android.comiccollector.ui.fragments.UserPreferenceFragment;
 
 public class MainActivity extends BaseActivity implements
+  BarcodeScanFragment.OnBarcodeScanListener,
   ComicBookFragment.OnComicBookListener,
   ComicListFragment.OnComicListListener,
-  BarcodeScanFragment.OnBarcodeScanListener,
-  ManualSearchFragment.OnManualSearchListener,
+  ProductLookupFragment.OnProductLookupListener,
   ResultListFragment.OnResultListListener,
   SeriesFragment.OnSeriesListener,
   SeriesListFragment.OnSeriesListListener,
-  SyncFragment.OnSyncListener {
+  SyncFragment.OnSyncListener,
+  UserInputFragment.OnUserInputListener {
 
   private static final String TAG = BaseActivity.BASE_TAG + "MainActivity";
 
@@ -254,7 +255,7 @@ public class MainActivity extends BaseActivity implements
   }
 
   @Override
-  protected void onSaveInstanceState(Bundle outState) {
+  protected void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
 
     if (mStorage != null) {
@@ -332,7 +333,7 @@ public class MainActivity extends BaseActivity implements
   public void onBarcodeManual() {
 
     Log.d(TAG, "++onBarcodeManual()");
-    replaceFragment(ManualSearchFragment.newInstance());
+    replaceFragment(UserInputFragment.newInstance());
   }
 
   @Override
@@ -346,7 +347,7 @@ public class MainActivity extends BaseActivity implements
   public void onBarcodeScanned(String barcodeValue) {
 
     Log.d(TAG, "++onBarcodeScanned(String)");
-    replaceFragment(SeriesFragment.newInstance(barcodeValue));
+    lookupBarcode(barcodeValue);
   }
 
   @Override
@@ -378,6 +379,13 @@ public class MainActivity extends BaseActivity implements
   }
 
   @Override
+  public void onComicListEditComicBook(ComicDetails comicDetails) {
+
+    Log.d(TAG, "++onComicListEditComicBook(ComicDetails)");
+    replaceFragment(ComicBookFragment.newInstance(comicDetails));
+  }
+
+  @Override
   public void onComicListPopulated(int size) {
 
     Log.d(TAG, "++onComicListPopulated(int)");
@@ -385,24 +393,23 @@ public class MainActivity extends BaseActivity implements
   }
 
   @Override
-  public void onManualSearchBookFound(ComicDetails comicDetails) {
+  public void onProductLookupCancel() {
 
-    Log.d(TAG, "++onManualSearchBookFound(ComicDetails)");
-    replaceFragment(ComicListFragment.newInstance(comicDetails));
+    Log.d(TAG, "++onProductLookupCancel()");
+    replaceFragment(ComicListFragment.newInstance());
+  }
+
+  public void onProductLookupFound(ComicDetails comicDetails) {
+
+    Log.d(TAG, "++onProductLookupFound(ComicDetail)");
+    replaceFragment(UserInputFragment.newInstance(comicDetails));
   }
 
   @Override
-  public void onManualSearchInputComplete(ComicDetails comicDetails) {
+  public void onProductLookupUnknown(SeriesDetails seriesDetails) {
 
-    Log.d(TAG, "++onManualSearchInputComplete(ComicDetails)");
-    replaceFragment(ComicBookFragment.newInstance(comicDetails));
-  }
-
-  @Override
-  public void onManualSearchRetry() {
-
-    Log.d(TAG, "++onManualSearchRetry()");
-    checkForPermission(Manifest.permission.CAMERA, BaseActivity.REQUEST_CAMERA_PERMISSIONS);
+    Log.d(TAG, "++onProductLookupUnknown(SeriesDetails)");
+    new RetrieveSeriesDataTask(this, seriesDetails).execute();
   }
 
   @Override
@@ -427,10 +434,10 @@ public class MainActivity extends BaseActivity implements
   }
 
   @Override
-  public void onSeriesSearched(SeriesEntity seriesEntity) {
+  public void onSeriesUpdated(ComicDetails comicDetails) {
 
-    Log.d(TAG, "++onSeriesSearched(SeriesEntity)");
-    replaceFragment(ManualSearchFragment.newInstance(seriesEntity));
+    Log.d(TAG, "++onSeriesUpdated(ComicDetails)");
+    replaceFragment(UserInputFragment.newInstance(comicDetails));
   }
 
   @Override
@@ -530,8 +537,8 @@ public class MainActivity extends BaseActivity implements
             List<ComicBookEntity> comics = gson.fromJson(reader, collectionType);
             List<ComicBookEntity> updatedComics = new ArrayList<>();
             for (ComicBookEntity comicBook : comics) {
-              ComicBookEntity updated = new ComicBookEntity(comicBook);
-              updatedComics.add(updated);
+//              ComicBookEntity updated = new ComicBookEntity(comicBook);
+//              updatedComics.add(updated);
             }
 
             // TODO: move to fragment
@@ -573,13 +580,38 @@ public class MainActivity extends BaseActivity implements
     showDismissableSnackbar(getString(R.string.err_sync_unknown_user));
   }
 
+  @Override
+  public void onUserInputBookFound(ComicDetails comicDetails) {
+
+    Log.d(TAG, "++onUserInputBookFound(ComicDetails)");
+    replaceFragment(ComicListFragment.newInstance(comicDetails));
+  }
+
+  @Override
+  public void onUserInputComplete(ComicDetails comicDetails) {
+
+    Log.d(TAG, "++onUserInputComplete(ComicDetails)");
+    replaceFragment(ComicBookFragment.newInstance(comicDetails));
+  }
+
+  @Override
+  public void onUserInputRetry() {
+
+    Log.d(TAG, "++onUserInputRetry()");
+    checkForPermission(Manifest.permission.CAMERA, BaseActivity.REQUEST_CAMERA_PERMISSIONS);
+  }
+
   /*
     Public Method(s)
    */
-  public void retrieveComicSeriesComplete(SeriesEntity seriesEntity) {
+  public void retrieveComicSeriesComplete(SeriesDetails seriesDetails) {
 
-    Log.d(TAG, "++retrieveComicSeriesComplete(SeriesEntry)");
-    replaceFragment(SeriesFragment.newInstance(seriesEntity));
+    Log.d(TAG, "++retrieveComicSeriesComplete(SeriesDetails)");
+    if (seriesDetails.isValid()) {
+      replaceFragment(SeriesFragment.newInstance(seriesDetails));
+    } else {
+      showDismissableSnackbar(getString(R.string.err_query_product_code));
+    }
   }
 
   /*
@@ -625,7 +657,7 @@ public class MainActivity extends BaseActivity implements
       switch (permissionId) {
         case BaseActivity.REQUEST_CAMERA_PERMISSIONS:
           if (!PreferenceUtils.getUseCamera(this)) {
-            replaceFragment(ManualSearchFragment.newInstance());
+            replaceFragment(UserInputFragment.newInstance());
           } else {
             if (PreferenceUtils.getCameraBypass(this)) {
               LayoutInflater layoutInflater = LayoutInflater.from(this);
@@ -654,19 +686,6 @@ public class MainActivity extends BaseActivity implements
           break;
       }
     }
-  }
-
-
-  private void hideKeyboard() {
-
-    Log.d(TAG, "++hideKeyboard()");
-    InputMethodManager imm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
-    View view = this.getCurrentFocus();
-    if (view == null) {
-      view = new View(this);
-    }
-
-    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
   }
 
   private void listPopulated(int size) {
@@ -701,6 +720,13 @@ public class MainActivity extends BaseActivity implements
         mSnackbar.show();
       }
     }
+  }
+
+  private void lookupBarcode(String barcodeValue) {
+
+    Log.d(TAG, "++lookupBarcode(String)");
+    Log.d(TAG, "Barcode: " + barcodeValue);
+    replaceFragment(ProductLookupFragment.newInstance(barcodeValue));
   }
 
   private void replaceFragment(Fragment fragment) {
@@ -750,7 +776,7 @@ public class MainActivity extends BaseActivity implements
 
           if (barcodeValue != null && !barcodeValue.isEmpty()) {
             mRotationAttempts = 0;
-            replaceFragment(SeriesFragment.newInstance(barcodeValue));
+            lookupBarcode(barcodeValue);
           } else if (mRotationAttempts < 3) {
             mRotationAttempts++;
             Matrix matrix = new Matrix();
@@ -766,9 +792,10 @@ public class MainActivity extends BaseActivity implements
             useFirebaseBarcodeScanning();
           } else {
             mRotationAttempts = 0;
+            showDismissableSnackbar(getString(R.string.err_bar_code_not_found));
           }
         } else {
-          // TODO: handle detectInImage failure
+          showDismissableSnackbar(getString(R.string.err_bar_code_task_failed));
         }
       });
   }

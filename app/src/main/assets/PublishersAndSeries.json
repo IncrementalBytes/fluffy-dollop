@@ -1,0 +1,102 @@
+{
+  "publishers": [
+    {
+      "id": "bf65c7ca-9a59-4d07-b4ef-59267ef54fe4",
+      "publisher_code": "761568",
+      "name": "DARK HORSE COMICS"
+    },
+    {
+      "id": "e7907c87-6b70-4ee2-a915-4bd6518f5e08",
+      "publisher_code": "761941",
+      "name": "DC COMICS"
+    },
+    {
+      "id": "62fc3c40-3448-4db4-bd80-e69c368fbad6",
+      "publisher_code": "725130",
+      "name": "DYNAMITE"
+    },
+    {
+      "id": "0538a75c-1236-4284-90df-847a8061bb45",
+      "publisher_code": "827714",
+      "name": "IDW PUBLISHING"
+    },
+    {
+      "id": "7008b377-5fa7-4f14-a86f-e38b5e2ccb63",
+      "publisher_code": "709853",
+      "name": "IMAGE COMICS"
+    },
+    {
+      "id": "4783cb43-0aef-45b8-b9a1-d5708d578902",
+      "publisher_code": "759606",
+      "name": "MARVEL COMICS"
+    },
+    {
+      "id": "2d6dce25-b3f1-41cb-bdda-6d7eb885f9b5",
+      "publisher_code": "074470",
+      "name": "TITAN"
+    },
+    {
+      "id": "c59792e3-0b82-4b94-a441-8691636fc414",
+      "publisher_code": "071486",
+      "name": "MARVEL COMICS"
+    }
+  ],
+  "series": [
+    {
+      "id": "1818eb70-f39e-4d2a-a7be-c951cbf7ffc2",
+      "publisher_id": "4783cb43-0aef-45b8-b9a1-d5708d578902",
+      "series_code": "088607",
+      "name": "Captain America",
+      "volume": 9
+    },
+    {
+      "id": "9012b1b8-26bf-442c-836f-a5dd0de57b69",
+      "publisher_id": "4783cb43-0aef-45b8-b9a1-d5708d578902",
+      "series_code": "079902",
+      "name": "Captain Marvel",
+      "volume": 8
+    },
+    {
+      "id": "b3a2622a-4c5a-45d7-8383-33466770c113",
+      "publisher_id": "4783cb43-0aef-45b8-b9a1-d5708d578902",
+      "series_code": "092680",
+      "name": "Captain Marvel",
+      "volume": 10
+    },
+    {
+      "id": "c77a442a-390f-4276-880f-db0378a25d5d",
+      "publisher_id": "4783cb43-0aef-45b8-b9a1-d5708d578902",
+      "series_code": "092635",
+      "name": "Friendly Neighborhood Spider-Man",
+      "volume": 2
+    },
+    {
+      "id": "3eaef7a2-c15e-4f21-98d9-e967b37d9859",
+      "publisher_id": "4783cb43-0aef-45b8-b9a1-d5708d578902",
+      "series_code": "086061",
+      "name": "The Mighty Captain Marvel",
+      "volume": 1
+    },
+    {
+      "id": "c7d2e106-3b4e-47f4-9879-2685e2ccbbe5",
+      "publisher_id": "4783cb43-0aef-45b8-b9a1-d5708d578902",
+      "series_code": "091218",
+      "name": "Spider-Gwen: Ghost-Spider",
+      "volume": 1
+    },
+    {
+      "id": "8bca65b9-1215-4270-8557-43638502b829",
+      "publisher_id": "4783cb43-0aef-45b8-b9a1-d5708d578902",
+      "series_code": "089680",
+      "name": "Tony Stark: IronMan",
+      "volume": 12
+    },
+    {
+      "id": "9d9f0db2-bc29-4743-aa84-e178d1eae05a",
+      "publisher_id": "4783cb43-0aef-45b8-b9a1-d5708d578902",
+      "series_code": "095025",
+      "name": "Ghost Spider",
+      "volume": 1
+    }
+  ]
+}
