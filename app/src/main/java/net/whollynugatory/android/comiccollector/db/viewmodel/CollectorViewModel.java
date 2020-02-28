@@ -56,9 +56,19 @@ public class CollectorViewModel extends AndroidViewModel {
     mSeriesDetails = mSeriesDetailsRepository.getAll();
   }
 
+  public void deleteAllComicBooks() {
+
+    mComicBookRepository.deleteAll();
+  }
+
   public void deleteComicById(String id) {
 
     mComicBookRepository.delete(id);
+  }
+
+  public LiveData<List<ComicBookEntity>> exportComics() {
+
+    return mComicBookRepository.exportable();
   }
 
   public LiveData<ComicDetails> getComic(String publisherCode, String seriesCode, String issueCode) {

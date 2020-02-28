@@ -31,6 +31,9 @@ public interface ComicBookDao {
   @Query("DELETE from comic_book_table WHERE id == :id")
   void delete(String id);
 
+  @Query("DELETE from comic_book_table")
+  void deleteAll();
+
   @Query("SELECT * from comic_book_table")
   LiveData<List<ComicBookEntity>> exportable();
 

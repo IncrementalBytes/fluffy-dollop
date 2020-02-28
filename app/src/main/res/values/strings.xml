@@ -61,12 +61,13 @@
   <string name="err_remote_library_not_found">Comic book library not found on remote storage.</string>
   <string name="issue_owned">Issues Owned:</string>
   <string name="desc_series_list">Comic series in library.</string>
-  <string name="message_export_success">Export Successful!</string>
+  <string name="status_sync_export_success">Export Successful!</string>
   <string name="desc_add_comic">Add Comic to Library</string>
   <string name="status_sync_import_success">Importing of data successful!</string>
   <string name="menu_series">Series</string>
   <string name="err_import_unknown">Import failed with unknown error, please try again later.</string>
   <string name="err_sync_unknown_user">Setting up synchronization failed; user unknown.</string>
+  <string name="err_storage_task_unexpected">Could not complete storage task successfully, please try again later.</string>
 
   <string name="debug_path">/storage/self/primary/DCIM/Camera</string>
   <string name="debug_prompt">Select image file to use:</string>
@@ -142,5 +143,6 @@
   <string name="err_bar_code_task_failed">Failed to detect bar code in image.</string>
   <string name="err_query_product_code">Unable to get data about product code.</string>
   <string name="hint_volume">1, 2, etc.</string>
+  <string name="menu_sync">Sync</string>
 
 </resources>
