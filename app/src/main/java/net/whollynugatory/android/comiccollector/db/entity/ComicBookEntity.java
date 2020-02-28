@@ -85,10 +85,11 @@ public class ComicBookEntity implements Serializable {
   public String PublishedDate;
 
   @ColumnInfo(name = "added_date")
-  public long AddedDate;
+  public transient long AddedDate;
+
 
   @ColumnInfo(name = "updated_date")
-  public long UpdatedDate;
+  public transient long UpdatedDate;
 
   public ComicBookEntity() {
 

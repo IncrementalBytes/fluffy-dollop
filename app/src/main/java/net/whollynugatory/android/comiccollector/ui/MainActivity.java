@@ -55,23 +55,14 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOption
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.Reader;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import net.whollynugatory.android.comiccollector.PreferenceUtils;
 import net.whollynugatory.android.comiccollector.R;
-import net.whollynugatory.android.comiccollector.common.PathUtils;
 import net.whollynugatory.android.comiccollector.common.RetrieveSeriesDataTask;
-import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 import net.whollynugatory.android.comiccollector.db.entity.UserEntity;
 import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
 import net.whollynugatory.android.comiccollector.db.views.SeriesDetails;
@@ -106,7 +97,6 @@ public class MainActivity extends BaseActivity implements
   private StorageReference mStorage;
 
   private Bitmap mImageBitmap;
-  private String mRemotePath;
   private int mRotationAttempts;
   private UserEntity mUser;
 
@@ -151,6 +141,9 @@ public class MainActivity extends BaseActivity implements
         case R.id.navigation_series:
           replaceFragment(SeriesListFragment.newInstance());
           return true;
+        case R.id.navigation_sync:
+          replaceFragment(SyncFragment.newInstance(mUser));
+          return true;
         case R.id.navigation_settings:
           replaceFragment(UserPreferenceFragment.newInstance());
           return true;
@@ -169,11 +162,9 @@ public class MainActivity extends BaseActivity implements
 //    mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
 //    mUser.UseImageCapture = preferences.getBoolean(UserPreferenceFragment.USE_IMAGE_PREVIEW_PREFERENCE, false);
     if (UserEntity.isValid(mUser)) { // get most recent publisher and series data
-      mRemotePath = PathUtils.combine(UserEntity.ROOT, mUser.Id, BaseActivity.DEFAULT_LIBRARY_FILE);
-      mStorage = FirebaseStorage.getInstance().getReference().child(mRemotePath);
       checkForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, BaseActivity.REQUEST_STORAGE_PERMISSIONS);
     } else {
-      showDismissableSnackbar(getString(R.string.err_unknown_user));
+      showSnackbar(getString(R.string.err_unknown_user));
     }
   }
 
@@ -203,6 +194,9 @@ public class MainActivity extends BaseActivity implements
         break;
       case R.id.action_add:
         addComicBook();
+        break;
+      case R.id.action_sync:
+        replaceFragment(SyncFragment.newInstance(mUser));
         break;
       case R.id.action_settings:
         replaceFragment(UserPreferenceFragment.newInstance());
@@ -250,7 +244,7 @@ public class MainActivity extends BaseActivity implements
     List<FileDownloadTask> tasks = mStorage.getActiveDownloadTasks();
     if (tasks.size() > 0) {
       FileDownloadTask task = tasks.get(0);
-      task.addOnSuccessListener(this, state -> showDismissableSnackbar(getString(R.string.message_export_success)));
+      task.addOnSuccessListener(this, state -> showSnackbar(getString(R.string.status_sync_export_success)));
     }
   }
 
@@ -416,7 +410,7 @@ public class MainActivity extends BaseActivity implements
   public void onResultListActionComplete(String message) {
 
     Log.d(TAG, "++onResultListActionComplete(String)");
-    showDismissableSnackbar(message);
+    showSnackbar(message);
   }
 
   @Override
@@ -463,121 +457,23 @@ public class MainActivity extends BaseActivity implements
   // TODO: add comparison
   @Override
   public void onSyncExport() {
-
-    Log.d(TAG, "++onSyncExport()");
-    // TODO: move to fragment
-//    mCollectorViewModel.exportable().observe(this, comicBookList -> {
-//
-//      if (comicBookList != null) {
-//        FileOutputStream outputStream;
-//        try {
-//          outputStream = getApplicationContext().openFileOutput(BaseActivity.DEFAULT_EXPORT_FILE, Context.MODE_PRIVATE);
-//          Gson gson = new Gson();
-//          Type collectionType = new TypeToken<ArrayList<ComicBook>>() {}.getType();
-//          ArrayList<ComicBook> booksWritten = new ArrayList<>(comicBookList);
-//          outputStream.write(gson.toJson(booksWritten, collectionType).getBytes());
-//          Log.d(TAG, "Comic books written: " + booksWritten.size());
-//        } catch (Exception e) {
-//          Log.w(TAG, "Exception when exporting local database.");
-//          Crashlytics.logException(e);
-//        }
-//      }
-//
-//      try { // look for file output
-//        InputStream stream = getApplicationContext().openFileInput(BaseActivity.DEFAULT_EXPORT_FILE);
-//        UploadTask uploadTask = mStorage.putStream(stream);
-//        uploadTask.addOnCompleteListener(task -> {
-//
-//          if (task.isSuccessful()) {
-//            if (task.getResult() != null) {
-//              showDismissableSnackbar(getString(R.string.message_export_success));
-//            } else {
-//              Log.w(TAG, "Storage task results were null; this is unexpected.");
-//              showDismissableSnackbar(getString(R.string.err_storage_task_unexpected));
-//            }
-//          } else {
-//            if (task.getException() != null) {
-//              Log.e(TAG, "Could not export library.", task.getException());
-//            }
-//          }
-//        });
-//      } catch (FileNotFoundException fnfe) {
-//        Log.w(TAG, "Could not export library.", fnfe);
-//        Crashlytics.logException(fnfe);
-//      } finally {
-//        File tempFile = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
-//        if (tempFile.exists()) {
-//          if (tempFile.delete()) {
-//            Log.d(TAG, "Removed temporary local export file.");
-//          } else {
-//            Log.w(TAG, "Temporary file was not removed.");
-//          }
-//        }
-//      }
-//    });
+    Log.d(TAG, "++onSyncExport");
+    replaceFragment(ComicListFragment.newInstance());
+    showSnackbar(getString(R.string.status_sync_export_success));
   }
 
-  // TODO: add comparison
   @Override
   public void onSyncImport() {
-
-    Log.d(TAG, "++onSyncImport()");
-    File localFile = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
-    FirebaseStorage.getInstance().getReference().child(mRemotePath).getFile(localFile).addOnCompleteListener(task -> {
-
-      if (task.isSuccessful() && task.getException() == null) {
-        File file = new File(getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
-        Log.d(TAG, "Loading " + file.getAbsolutePath());
-        if (file.exists() && file.canRead()) {
-          try (Reader reader = new FileReader(file.getAbsolutePath())) {
-            // TODO: move to fragment
-//            mCollectorViewModel.deleteAllComicBooks();
-            Gson gson = new Gson();
-            Type collectionType = new TypeToken<ArrayList<ComicBookEntity>>() {}.getType();
-            List<ComicBookEntity> comics = gson.fromJson(reader, collectionType);
-            List<ComicBookEntity> updatedComics = new ArrayList<>();
-            for (ComicBookEntity comicBook : comics) {
-//              ComicBookEntity updated = new ComicBookEntity(comicBook);
-//              updatedComics.add(updated);
-            }
-
-            // TODO: move to fragment
-//            mCollectorViewModel.insertAll(updatedComics);
-            showDismissableSnackbar(getString(R.string.status_sync_import_success));
-          } catch (Exception e) {
-            Log.w(TAG, "Failed reading local library.", e);
-            Crashlytics.logException(e);
-          } finally {
-            if (file.delete()) { // remove temporary file
-              Log.d(TAG, "Removed temporary local import file.");
-            } else {
-              Log.w(TAG, "Could not remove temporary file after importing.");
-            }
-          }
-        } else {
-          Log.d(TAG, "%s does not exist yet: " + BaseActivity.DEFAULT_EXPORT_FILE);
-        }
-      } else {
-        if (task.getException() != null) {
-          StorageException exception = (StorageException) task.getException();
-          if (exception.getErrorCode() == StorageException.ERROR_OBJECT_NOT_FOUND) {
-            showDismissableSnackbar(getString(R.string.err_remote_library_not_found));
-          } else {
-            Log.e(TAG, "Could not import library.", task.getException());
-            showDismissableSnackbar(getString(R.string.err_import_task));
-          }
-        } else {
-          showDismissableSnackbar(getString(R.string.err_import_unknown));
-        }
-      }
-    });
+    Log.d(TAG, "++onSyncImport");
+    replaceFragment(ComicListFragment.newInstance());
+    showSnackbar(getString(R.string.status_sync_import_success));
   }
 
   @Override
-  public void onSyncFail() {
+  public void onSyncErrorStatus(String message) {
 
-    Log.d(TAG, "++onSyncFail()");
-    showDismissableSnackbar(getString(R.string.err_sync_unknown_user));
+    Log.d(TAG, "++onSyncStatus(String)");
+    showErrorSnackbar(message);
   }
 
   @Override
@@ -610,7 +506,7 @@ public class MainActivity extends BaseActivity implements
     if (seriesDetails.isValid()) {
       replaceFragment(SeriesFragment.newInstance(seriesDetails));
     } else {
-      showDismissableSnackbar(getString(R.string.err_query_product_code));
+      showSnackbar(getString(R.string.err_query_product_code));
     }
   }
 
@@ -739,9 +635,14 @@ public class MainActivity extends BaseActivity implements
       .commit();
   }
 
-  private void showDismissableSnackbar(String message) {
+  private void showErrorSnackbar(String message) {
 
-    Log.w(TAG, message);
+    Log.e(TAG, message);
+    showSnackbar(message);
+  }
+
+  private void showSnackbar(String message) {
+
     mSnackbar = Snackbar.make(
       findViewById(R.id.main_fragment_container),
       message,
@@ -792,10 +693,10 @@ public class MainActivity extends BaseActivity implements
             useFirebaseBarcodeScanning();
           } else {
             mRotationAttempts = 0;
-            showDismissableSnackbar(getString(R.string.err_bar_code_not_found));
+            showSnackbar(getString(R.string.err_bar_code_not_found));
           }
         } else {
-          showDismissableSnackbar(getString(R.string.err_bar_code_task_failed));
+          showSnackbar(getString(R.string.err_bar_code_task_failed));
         }
       });
   }

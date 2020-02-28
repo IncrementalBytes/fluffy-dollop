@@ -56,6 +56,11 @@ public class ComicBookRepository {
     CollectorDatabase.databaseWriteExecutor.execute(() -> mComicBookDao.delete(id));
   }
 
+  public void deleteAll() {
+
+    CollectorDatabase.databaseWriteExecutor.execute(() -> mComicBookDao.deleteAll());
+  }
+
   public LiveData<List<ComicBookEntity>> exportable() {
 
     return mComicBookDao.exportable();
