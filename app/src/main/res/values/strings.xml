@@ -41,7 +41,7 @@
   <string name="hint_img_issue_code">Photo hint for issue code location.</string>
   <string name="hint_img_product_code">Photo hint for product code location.</string>
   <string name="disclaimer_comic_series">Note: Comic series are subject to review and may not show up immediately.</string>
-  <string name="read">Read:</string>
+  <string name="read">Read</string>
   <string name="toggle_not_owned">Not Owned</string>
   <string name="toggle_owned">Owned</string>
   <string name="toggle_not_read">Not Read</string>

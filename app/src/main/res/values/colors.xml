@@ -3,6 +3,7 @@
   <color name="primaryColor">#3145B7</color>
   <color name="primaryLightColor">#458BEA</color>
   <color name="primaryDarkColor">#001386</color>
+  <color name="background">#40000000</color>
 
   <color name="primaryTextColor">#FFFFFF</color>
   <color name="secondaryTextColor">#000000</color>
@@ -10,6 +11,7 @@
 
   <color name="accent">@color/primaryLightColor</color>
   <color name="warningTextColor">#FF0000</color>
+  <color name="itemColor">#ff424242</color>
 
   <color name="transparent">#00000000</color>
   <color name="white">#FFFFFFFF</color>

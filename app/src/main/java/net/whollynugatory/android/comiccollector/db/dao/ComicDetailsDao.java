@@ -28,9 +28,9 @@ public interface ComicDetailsDao {
   @Query("SELECT * from ComicDetails WHERE PublisherCode == :publisherCode AND SeriesCode == :seriesCode AND IssueCode == :issueCode")
   LiveData<ComicDetails> get(String publisherCode, String seriesCode, String issueCode);
 
-  @Query("SELECT * from ComicDetails WHERE PublisherCode == :publisherCode AND SeriesCode == :seriesCode")
-  LiveData<List<ComicDetails>> getAllByProductCode(String publisherCode, String seriesCode);
+  @Query("SELECT * from ComicDetails WHERE SeriesId == :seriesId ORDER BY UpdatedDate DESC")
+  LiveData<List<ComicDetails>> getBySeriesId(String seriesId);
 
-  @Query("SELECT * FROM ComicDetails ORDER BY AddedDate DESC LIMIT 50")
+  @Query("SELECT * FROM ComicDetails ORDER BY UpdatedDate DESC LIMIT 50")
   LiveData<List<ComicDetails>> getRecent();
 }

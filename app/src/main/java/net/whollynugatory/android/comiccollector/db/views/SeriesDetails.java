@@ -32,10 +32,13 @@ import net.whollynugatory.android.comiccollector.ui.BaseActivity;
     "Series.name AS SeriesTitle, " +
     "Series.volume AS Volume, " +
     "Publishers.Name AS Publisher, " +
+    "COUNT(Series.series_code) AS BookCount, " +
     "Series.added_date AS AddedDate, " +
     "Series.updated_date AS UpdatedDate " +
     "FROM series_table AS Series " +
-    "INNER JOIN publisher_table AS Publishers ON Publishers.id = Series.publisher_id")
+    "INNER JOIN publisher_table AS Publishers ON Publishers.id = Series.publisher_id " +
+    "INNER JOIN comic_book_table AS Comics ON Comics.series_id = Series.id " +
+    "GROUP BY Series.series_code")
 public class SeriesDetails implements Serializable {
 
   public String PublisherId;
@@ -45,6 +48,7 @@ public class SeriesDetails implements Serializable {
   public String SeriesTitle;
   public int Volume;
   public String Publisher;
+  public int BookCount;
   public long AddedDate;
   public long UpdatedDate;
 
@@ -63,6 +67,7 @@ public class SeriesDetails implements Serializable {
     SeriesTitle = "";
     Volume = -1;
     Publisher = "";
+    BookCount = 0;
     AddedDate = 0;
     UpdatedDate = 0;
 

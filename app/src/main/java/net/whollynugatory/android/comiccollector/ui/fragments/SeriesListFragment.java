@@ -138,9 +138,9 @@ public class SeriesListFragment extends Fragment {
     class SeriesHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
       private final TextView mCountTextView;
-      private final TextView mPublishedTextView;
       private final TextView mPublisherTextView;
       private final TextView mTitleTextView;
+      private final TextView mVolumeTextView;
 
       private SeriesDetails mSeriesDetails;
 
@@ -148,9 +148,9 @@ public class SeriesListFragment extends Fragment {
         super(itemView);
 
         mCountTextView = itemView.findViewById(R.id.series_item_text_issue_value);
-        mPublishedTextView = itemView.findViewById(R.id.series_item_text_published_value);
         mPublisherTextView =  itemView.findViewById(R.id.series_item_text_publisher);
         mTitleTextView = itemView.findViewById(R.id.series_item_text_title);
+        mVolumeTextView = itemView.findViewById(R.id.series_item_text_volume_value);
 
         itemView.setOnClickListener(this);
       }
@@ -160,11 +160,10 @@ public class SeriesListFragment extends Fragment {
         mSeriesDetails = seriesDetails;
 
         if (mSeriesDetails != null) {
-//          mCountTextView.setText(String.valueOf(mSeriesEntity.OwnedIssues));
-          String publishedValue = "TBD";
-          mPublishedTextView.setText(publishedValue);
+          mCountTextView.setText(String.valueOf(mSeriesDetails.BookCount));
           mPublisherTextView.setText(mSeriesDetails.Publisher);
           mTitleTextView.setText(mSeriesDetails.SeriesTitle);
+          mVolumeTextView.setText(String.valueOf(mSeriesDetails.Volume));
         }
       }
 
@@ -172,7 +171,7 @@ public class SeriesListFragment extends Fragment {
       public void onClick(View view) {
 
         Log.d(TAG, "++BookAuthorHolder::onClick(View)");
-        mCallback.onSeriesListSelected(mSeriesDetails.SeriesCode);
+        mCallback.onSeriesListSelected(mSeriesDetails.SeriesId);
       }
     }
 
@@ -217,6 +216,7 @@ public class SeriesListFragment extends Fragment {
 
       Log.d(TAG, "++setSeriesDetailList(List<SeriesDetails>)");
       mSeriesDetailsList = seriesDetailList;
+      mCallback.onSeriesListPopulated(seriesDetailList.size());
       notifyDataSetChanged();
     }
   }

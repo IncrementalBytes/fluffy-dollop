@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
   android:layout_margin="1dp"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:background="@color/itemColor"
   android:orientation="vertical">
 
   <TextView
@@ -30,9 +30,9 @@
     android:layout_margin="@dimen/default_view_margin"
     android:ellipsize="end"
     android:text="@string/placeholder"
+    app:layout_constraintBottom_toTopOf="@id/result_text_publisher"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/result_text_title"
-    app:layout_constraintBottom_toTopOf="@id/result_text_publisher"/>
+    app:layout_constraintTop_toBottomOf="@+id/result_text_title" />
 
   <TextView
     android:id="@+id/result_text_publisher"
@@ -63,9 +63,9 @@
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/issue_format"
     android:textAlignment="viewStart"
-    app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintBottom_toTopOf="@id/result_button_add"
     app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/result_text_publisher" />
 
   <Button
@@ -74,7 +74,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/add_to_library"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintBottom_toBottomOf="parent"/>
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

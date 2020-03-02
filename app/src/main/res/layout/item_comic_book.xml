@@ -3,20 +3,21 @@
   xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
-  android:layout_marginTop="2dp"
   android:layout_marginStart="2dp"
-  android:layout_marginEnd="2dp">
+  android:layout_marginTop="2dp"
+  android:layout_marginEnd="2dp"
+  android:background="@color/itemColor">
 
   <TextView
     android:id="@+id/comic_item_text_title"
-    android:textStyle="bold"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:ellipsize="end"
     android:text="@string/placeholder"
     android:textSize="14sp"
-    app:layout_constraintEnd_toStartOf="@id/comic_item_image_edit"
+    android:textStyle="bold"
+    app:layout_constraintEnd_toStartOf="@id/comic_item_image_delete"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
 
@@ -26,26 +27,13 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="@color/primaryLightColor"
+    android:textColor="@android:color/holo_blue_light"
     android:textSize="14sp"
     android:textStyle="bold"
-    app:layout_constraintEnd_toStartOf="@id/comic_item_image_edit"
+    app:layout_constraintEnd_toStartOf="@id/comic_item_image_delete"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@id/comic_item_text_title" />
 
-  <ImageButton
-    android:id="@+id/comic_item_image_edit"
-    style="@android:style/Widget.Holo.Light.ImageButton"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/default_view_margin"
-    android:background="@color/transparent"
-    android:contentDescription="@string/hint_edit_comic"
-    android:padding="8dp"
-    android:src="@drawable/ic_edit_dark"
-    app:layout_constraintBottom_toBottomOf="@id/comic_item_text_series"
-    app:layout_constraintEnd_toStartOf="@id/comic_item_image_delete"
-    app:layout_constraintTop_toTopOf="@id/comic_item_text_title"/>
   <ImageButton
     android:id="@+id/comic_item_image_delete"
     style="@android:style/Widget.Holo.Light.ImageButton"
@@ -60,46 +48,47 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toTopOf="@id/comic_item_text_title" />
 
-  <Switch
-    android:id="@+id/comic_item_switch_own"
+  <CheckBox
+    android:id="@+id/comic_item_check_own"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/default_image_margin"
+    android:layout_margin="@dimen/default_view_margin"
+    android:clickable="false"
     android:includeFontPadding="false"
-    android:showText="false"
-    android:splitTrack="false"
     android:switchPadding="@dimen/default_view_margin"
     android:text="@string/owned"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_series"/>
-  <Switch
-    android:id="@+id/comic_item_switch_read"
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_series" />
+  <CheckBox
+    android:id="@+id/comic_item_check_read"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
+    android:clickable="false"
     android:switchPadding="@dimen/default_view_margin"
     android:text="@string/read"
     app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toEndOf="@id/comic_item_switch_own"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_series"/>
+    app:layout_constraintStart_toEndOf="@id/comic_item_check_own"
+    app:layout_constraintTop_toBottomOf="@id/comic_item_text_series" />
 
   <TextView
     android:id="@+id/comic_item_text_issue"
-    android:textStyle="bold"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/issue_number"
+    android:textStyle="bold"
     app:layout_constraintEnd_toStartOf="@id/comic_item_text_issue_value"
-    app:layout_constraintTop_toBottomOf="@id/comic_item_text_series"/>
+    app:layout_constraintTop_toTopOf="@id/comic_item_check_read"
+    app:layout_constraintBottom_toBottomOf="@id/comic_item_check_read"/>
   <TextView
     android:id="@+id/comic_item_text_issue_value"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_view_margin"
     android:text="@string/placeholder"
-    android:textColor="@color/primaryLightColor"
+    android:textColor="@android:color/holo_blue_light"
     app:layout_constraintBottom_toBottomOf="@id/comic_item_text_issue"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintTop_toTopOf="@id/comic_item_text_issue" />

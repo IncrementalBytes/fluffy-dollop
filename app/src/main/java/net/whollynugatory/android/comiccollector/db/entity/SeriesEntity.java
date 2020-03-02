@@ -73,19 +73,23 @@ public class SeriesEntity implements Serializable {
   public boolean IsActive;
 
   @ColumnInfo(name = "added_date")
-  public long AddedDate;
+  @SerializedName("added_date")
+  public transient long AddedDate;
 
   @ColumnInfo(name = "updated_date")
-  public long UpdatedDate;
+  @SerializedName("updated_date")
+  public transient long UpdatedDate;
 
   @Ignore
   @SerializedName("needs_review")
   public boolean NeedsReview;
 
   @Ignore
+  @SerializedName("submission_date")
   public long SubmissionDate;
 
   @Ignore
+  @SerializedName("submitted_by")
   public String SubmittedBy;
 
   public SeriesEntity() {

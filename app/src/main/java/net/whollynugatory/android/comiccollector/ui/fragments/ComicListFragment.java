@@ -22,8 +22,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -33,7 +33,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -63,6 +62,7 @@ public class ComicListFragment extends Fragment {
   private CollectorViewModel mCollectorViewModel;
 
   private ComicDetails mComicDetails;
+  private String mSeriesId;
 
   public static ComicListFragment newInstance() {
 
@@ -75,10 +75,20 @@ public class ComicListFragment extends Fragment {
 
   public static ComicListFragment newInstance(ComicDetails comicDetails) {
 
-    Log.d(TAG, "++newInstance(BookEntity)");
+    Log.d(TAG, "++newInstance(ComicDetails)");
     ComicListFragment fragment = new ComicListFragment();
     Bundle arguments = new Bundle();
     arguments.putSerializable(BaseActivity.ARG_COMIC_BOOK, comicDetails);
+    fragment.setArguments(arguments);
+    return fragment;
+  }
+
+  public static ComicListFragment newInstance(String seriesId) {
+
+    Log.d(TAG, "++newInstance(String)");
+    ComicListFragment fragment = new ComicListFragment();
+    Bundle arguments = new Bundle();
+    arguments.putString(BaseActivity.ARG_SERIES_ID, seriesId);
     fragment.setArguments(arguments);
     return fragment;
   }
@@ -93,7 +103,9 @@ public class ComicListFragment extends Fragment {
     Log.d(TAG, "++onActivityCreated()");
     ComicDetailsAdapter comicDetailsAdapter = new ComicDetailsAdapter(getContext());
     mRecyclerView.setAdapter(comicDetailsAdapter);
-    if (mComicDetails == null) {
+    if (mSeriesId != null && !mSeriesId.isEmpty()) {
+      mCollectorViewModel.getComicsBySeriesId(mSeriesId).observe(getViewLifecycleOwner(), comicDetailsAdapter::setComicDetailsList);
+    } else if (mComicDetails == null) {
       mCollectorViewModel.getRecentComics().observe(getViewLifecycleOwner(), comicDetailsAdapter::setComicDetailsList);
     } else { // TODO: only show passed comic book in list
       comicDetailsAdapter.setComicDetailsList(Collections.singletonList(mComicDetails));
@@ -122,10 +134,15 @@ public class ComicListFragment extends Fragment {
 
     Log.d(TAG, "++onCreate(Bundle)");
     mComicDetails = null;
+    mSeriesId = null;
     Bundle arguments = getArguments();
     if (arguments != null) {
       if (arguments.containsKey(BaseActivity.ARG_COMIC_BOOK)) {
         mComicDetails = (ComicDetails) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);
+      }
+
+      if (arguments.containsKey(BaseActivity.ARG_SERIES_ID)) {
+        mSeriesId = arguments.getString(BaseActivity.ARG_SERIES_ID);
       }
     }
 
@@ -165,13 +182,12 @@ public class ComicListFragment extends Fragment {
     /*
       Holder class for ComicDetails objects
      */
-    class ComicDetailsHolder extends RecyclerView.ViewHolder {
+    class ComicDetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
       private final ImageView mDeleteImage;
-      private final ImageView mEditImage;
       private final TextView mIssueTextView;
-      private final Switch mOwnSwitch;
-      private final Switch mReadSwitch;
+      private final CheckBox mOwnCheck;
+      private final CheckBox mReadCheck;
       private final TextView mSeriesNameTextView;
       private final TextView mTitleTextView;
 
@@ -181,12 +197,13 @@ public class ComicListFragment extends Fragment {
         super(itemView);
 
         mDeleteImage = itemView.findViewById(R.id.comic_item_image_delete);
-        mEditImage = itemView.findViewById(R.id.comic_item_image_edit);
         mIssueTextView = itemView.findViewById(R.id.comic_item_text_issue_value);
-        mOwnSwitch = itemView.findViewById(R.id.comic_item_switch_own);
-        mReadSwitch = itemView.findViewById(R.id.comic_item_switch_read);
+        mOwnCheck = itemView.findViewById(R.id.comic_item_check_own);
+        mReadCheck = itemView.findViewById(R.id.comic_item_check_read);
         mSeriesNameTextView = itemView.findViewById(R.id.comic_item_text_series);
         mTitleTextView = itemView.findViewById(R.id.comic_item_text_title);
+
+        itemView.setOnClickListener(this);
       }
 
       void bind(ComicDetails comicDetails) {
@@ -208,31 +225,19 @@ public class ComicListFragment extends Fragment {
             }
           });
 
-          mEditImage.setOnClickListener(v -> mCallback.onComicListEditComicBook(mComicBook));
-          mOwnSwitch.setText(mComicBook.IsOwned ? getString(R.string.owned) : getString(R.string.not_owned));
-          mOwnSwitch.setChecked(mComicBook.IsOwned);
-          mOwnSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-            mComicBook.IsOwned = isChecked;
-            mComicBook.UpdatedDate = Calendar.getInstance().getTimeInMillis();
-            mCollectorViewModel.updateComic(mComicBook.toEntity());
-            mOwnSwitch.setText(isChecked ? getString(R.string.owned) : getString(R.string.not_owned));
-          });
-
-          mReadSwitch.setText(mComicBook.HasRead ? getString(R.string.read) : getString(R.string.unread));
-          mReadSwitch.setChecked(mComicBook.HasRead);
-          mReadSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-            mComicBook.HasRead = isChecked;
-            mComicBook.UpdatedDate = Calendar.getInstance().getTimeInMillis();
-            mCollectorViewModel.updateComic(mComicBook.toEntity());
-            mReadSwitch.setText(isChecked ? getString(R.string.read) : getString(R.string.unread));
-          });
-
+          mOwnCheck.setChecked(mComicBook.IsOwned);
+          mReadCheck.setChecked(mComicBook.HasRead);
           mSeriesNameTextView.setText(mComicBook.SeriesTitle);
           mTitleTextView.setText(mComicBook.Title);
           mIssueTextView.setText(String.valueOf(mComicBook.getIssueNumber()));
         }
+      }
+
+      @Override
+      public void onClick(View view) {
+
+        Log.d(TAG, "++ComicDetailsHolder::onClick(View)");
+        mCallback.onComicListEditComicBook(mComicBook);
       }
     }
 

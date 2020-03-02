@@ -445,13 +445,14 @@ public class MainActivity extends BaseActivity implements
   public void onSeriesListSelected(String seriesId) {
 
     Log.d(TAG, "++onSeriesListSelected(String)");
-    // TODO:
+    replaceFragment(ComicListFragment.newInstance(seriesId));
   }
 
   @Override
   public void onSeriesListPopulated(int size) {
 
     Log.d(TAG, "++onSeriesListPopulated(int)");
+    listPopulated(size);
   }
 
   // TODO: add comparison
@@ -602,6 +603,11 @@ public class MainActivity extends BaseActivity implements
       if (item != null) {
         item.setEnabled(true);
       }
+
+      item = mMainToolbar.getMenu().findItem(R.id.action_sync);
+      if (item != null) {
+        item.setEnabled(true);
+      }
     }
 
     if (size == 0) {
@@ -693,6 +699,7 @@ public class MainActivity extends BaseActivity implements
             useFirebaseBarcodeScanning();
           } else {
             mRotationAttempts = 0;
+            replaceFragment(UserInputFragment.newInstance());
             showSnackbar(getString(R.string.err_bar_code_not_found));
           }
         } else {

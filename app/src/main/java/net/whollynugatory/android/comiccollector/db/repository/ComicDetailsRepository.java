@@ -55,9 +55,9 @@ public class ComicDetailsRepository {
     return mComicDetailsDao.get(publisherCode, seriesCode, issueCode);
   }
 
-  public LiveData<List<ComicDetails>> getAllByProductCode(String publisherCode, String seriesCode) {
+  public LiveData<List<ComicDetails>> getBySeriesId(String seriesId) {
 
-    return mComicDetailsDao.getAllByProductCode(publisherCode, seriesCode);
+    return mComicDetailsDao.getBySeriesId(seriesId);
   }
 
   public LiveData<List<ComicDetails>> getRecent() {

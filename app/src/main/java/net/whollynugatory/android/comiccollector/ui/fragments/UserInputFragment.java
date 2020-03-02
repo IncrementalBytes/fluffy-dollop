@@ -97,6 +97,7 @@ public class UserInputFragment extends Fragment {
 
     Log.d(TAG, "++onCreate(Bundle)");
     Bundle arguments = getArguments();
+    mComicDetails = null;
     if (arguments != null) {
       if (arguments.containsKey(BaseActivity.ARG_COMIC_BOOK)) {
         mComicDetails = (ComicDetails) arguments.getSerializable(BaseActivity.ARG_COMIC_BOOK);

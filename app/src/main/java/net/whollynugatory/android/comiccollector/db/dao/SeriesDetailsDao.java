@@ -28,9 +28,9 @@ public interface SeriesDetailsDao {
   @Query("SELECT * from SeriesDetails WHERE PublisherCode == :publisherCode AND SeriesCode == :seriesCode")
   LiveData<SeriesDetails> get(String publisherCode, String seriesCode);
 
-  @Query("SELECT * from SeriesDetails")
+  @Query("SELECT * from SeriesDetails ORDER BY UpdatedDate DESC")
   LiveData<List<SeriesDetails>> getAll();
 
-  @Query("SELECT * FROM SeriesDetails WHERE PublisherCode == :publisherCode")
+  @Query("SELECT * FROM SeriesDetails WHERE PublisherCode == :publisherCode ORDER BY UpdatedDate DESC")
   LiveData<List<SeriesDetails>> getAllByPublisher(String publisherCode);
 }

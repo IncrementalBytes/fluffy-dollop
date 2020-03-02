@@ -76,9 +76,9 @@ public class CollectorViewModel extends AndroidViewModel {
     return mComicDetailsRepository.get(publisherCode, seriesCode, issueCode);
   }
 
-  public LiveData<List<ComicDetails>> getComicsByProductCode(String publisherCode, String seriesCode) {
+  public LiveData<List<ComicDetails>> getComicsBySeriesId(String seriesId) {
 
-    return mComicDetailsRepository.getAllByProductCode(publisherCode, seriesCode);
+    return mComicDetailsRepository.getBySeriesId(seriesId);
   }
 
   public LiveData<PublisherEntity> getPublisherById(String publisherId) {

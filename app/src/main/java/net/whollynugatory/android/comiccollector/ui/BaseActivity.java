@@ -27,6 +27,7 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String ARG_LIST_BOOK = "list_book";
     public static final String ARG_PRODUCT_CODE = "product_code";
     public static final String ARG_SERIES = "series";
+    public static final String ARG_SERIES_ID = "series_id";
     public static final String ARG_USER = "user";
     public static final String ARG_USER_NAME = "user_name";
 
