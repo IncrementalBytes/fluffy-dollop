@@ -27,7 +27,9 @@ import com.google.firebase.firestore.Exclude;
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
@@ -132,6 +134,19 @@ public class SeriesEntity implements Serializable {
       SeriesCode.length() == BaseActivity.DEFAULT_SERIES_CODE.length() &&
       !Name.isEmpty() &&
       Volume > 0;
+  }
+
+  public Map<String, Object> toMapping() {
+
+    Map<String, Object> entity = new HashMap<>();
+    entity.put("PublisherId", PublisherId);
+    entity.put("SeriesCode", SeriesCode);
+    entity.put("Name", Name);
+    entity.put("Volume", Volume);
+    entity.put("NeedsReview", NeedsReview);
+    entity.put("SubmissionDate", SubmissionDate);
+    entity.put("Id", Id);
+    return entity;
   }
 
   public static String getSeriesCode(String productCode) {

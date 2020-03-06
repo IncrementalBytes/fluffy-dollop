@@ -30,6 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import java.util.Locale;
+import java.util.UUID;
 import net.whollynugatory.android.comiccollector.R;
 import net.whollynugatory.android.comiccollector.db.entity.ComicBookEntity;
 import net.whollynugatory.android.comiccollector.db.viewmodel.CollectorViewModel;
@@ -156,6 +157,10 @@ public class ComicBookFragment extends Fragment {
 
       Log.d(TAG, "++onClick()");
       ComicBookEntity comicBookEntity = mComicDetails.toEntity();
+      if (comicBookEntity.Id.equals(BaseActivity.DEFAULT_ID) || comicBookEntity.Id.length() != BaseActivity.DEFAULT_ID.length()) {
+        comicBookEntity.Id = UUID.randomUUID().toString();
+      }
+
       comicBookEntity.Title = nameEdit.getText().toString();
       comicBookEntity.IsOwned = ownedButton.isChecked();
       comicBookEntity.HasRead = readButton.isChecked();

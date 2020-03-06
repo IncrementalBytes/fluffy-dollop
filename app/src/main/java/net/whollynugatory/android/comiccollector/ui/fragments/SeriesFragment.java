@@ -148,7 +148,7 @@ public class SeriesFragment extends Fragment {
         entity.SubmissionDate = Calendar.getInstance().getTimeInMillis();
         entity.NeedsReview = true;
         mCollectorViewModel.insertPublisher(entity);
-        FirebaseFirestore.getInstance().collection(PublisherEntity.ROOT).document(entity.Id).set(entity, SetOptions.merge())
+        FirebaseFirestore.getInstance().collection(PublisherEntity.ROOT).document(entity.Id).set(entity.toMapping(), SetOptions.merge())
           .addOnCompleteListener(task -> {
 
             if (!task.isSuccessful()) { // not fatal but we need to know this information for review
@@ -211,7 +211,7 @@ public class SeriesFragment extends Fragment {
         mCollectorViewModel.insertPublisher(entity);
         entity.SubmissionDate = Calendar.getInstance().getTimeInMillis();
         entity.NeedsReview = true;
-        FirebaseFirestore.getInstance().collection(PublisherEntity.ROOT).document(entity.Id).set(entity, SetOptions.merge())
+        FirebaseFirestore.getInstance().collection(PublisherEntity.ROOT).document(entity.Id).set(entity.toMapping(), SetOptions.merge())
           .addOnCompleteListener(task -> {
 
             if (!task.isSuccessful()) { // not fatal but we need to know this information for review
@@ -249,7 +249,7 @@ public class SeriesFragment extends Fragment {
     mCollectorViewModel.insertSeries(entity);
     entity.NeedsReview = true;
     entity.SubmissionDate = Calendar.getInstance().getTimeInMillis();
-    FirebaseFirestore.getInstance().collection(SeriesEntity.ROOT).document(entity.Id).set(entity, SetOptions.merge())
+    FirebaseFirestore.getInstance().collection(SeriesEntity.ROOT).document(entity.Id).set(entity.toMapping(), SetOptions.merge())
       .addOnCompleteListener(task -> {
 
         if (!task.isSuccessful()) { // not fatal but we need to know this information for review

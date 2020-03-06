@@ -82,6 +82,7 @@
     <item>scenario_new_comic.jpg</item>
     <item>scenario_unknown_publisher.jpg</item>
     <item>scenario_unknown_series.jpg</item>
+    <item>scenario_unknown_series_2.jpg</item>
   </string-array>
 
   <string name="cd_settings_button">Settings</string>

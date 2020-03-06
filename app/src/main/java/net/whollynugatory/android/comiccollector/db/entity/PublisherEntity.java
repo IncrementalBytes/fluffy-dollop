@@ -24,7 +24,9 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
 
@@ -102,6 +104,18 @@ public class PublisherEntity {
     return !PublisherCode.equals(BaseActivity.DEFAULT_PUBLISHER_CODE) &&
       PublisherCode.length() == BaseActivity.DEFAULT_PUBLISHER_CODE.length() &&
       !Name.isEmpty();
+  }
+
+  public Map<String, Object> toMapping() {
+
+    Map<String, Object> entity = new HashMap<>();
+    entity.put("Id", Id);
+    entity.put("PublisherCode", PublisherCode);
+    entity.put("SubmittedBy", SubmittedBy);
+    entity.put("Name", Name);
+    entity.put("SubmissionDate", SubmissionDate);
+    entity.put("NeedsReview", NeedsReview);
+    return entity;
   }
 
   public static String getPublisherCode(String productCode) {
