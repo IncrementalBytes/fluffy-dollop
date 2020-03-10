@@ -19,6 +19,7 @@ package net.whollynugatory.android.comiccollector.ui.fragments;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
+import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.SwitchPreference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -55,6 +56,11 @@ public class UserPreferenceFragment extends PreferenceFragmentCompat {
     if (BuildConfig.DEBUG) {
       setUpBypassPreference();
       setUpExceptionPreference();
+    }
+
+    EditTextPreference versionPreference = findPreference(getString(R.string.perf_key_app_version));
+    if (versionPreference != null) {
+      versionPreference.setSummary(BuildConfig.VERSION_NAME);
     }
   }
 

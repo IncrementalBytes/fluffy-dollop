@@ -1,6 +1,8 @@
 <resources>
   <dimen name="default_view_margin">8dp</dimen>
   <dimen name="default_image_margin">4dp</dimen>
+  <dimen name="default_check_margin">4dp</dimen>
+  <dimen name="narrow_margin">2dp</dimen>
 
   <dimen name="image_height_thumbnail">48dp</dimen>
   <dimen name="image_width_thumbnail">48dp</dimen>

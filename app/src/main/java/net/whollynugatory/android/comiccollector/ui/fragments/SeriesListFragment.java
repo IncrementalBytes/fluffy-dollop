@@ -22,6 +22,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -32,6 +35,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.List;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.R;
+import net.whollynugatory.android.comiccollector.common.SortUtils.ByNumberOfIssues;
+import net.whollynugatory.android.comiccollector.common.SortUtils.BySeriesTitle;
+import net.whollynugatory.android.comiccollector.common.SortUtils.ByVolume;
 import net.whollynugatory.android.comiccollector.db.viewmodel.CollectorViewModel;
 import net.whollynugatory.android.comiccollector.db.views.SeriesDetails;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
@@ -53,6 +59,7 @@ public class SeriesListFragment extends Fragment {
 
   private FloatingActionButton mAddButton;
   private RecyclerView mRecyclerView;
+  private Spinner mSortSpinner;
 
   private CollectorViewModel mCollectorViewModel;
 
@@ -73,12 +80,10 @@ public class SeriesListFragment extends Fragment {
     super.onActivityCreated(savedInstanceState);
 
     Log.d(TAG, "++onActivityCreated()");
-    SeriesAdapter seriesAdapter = new SeriesAdapter(getContext());
-    mRecyclerView.setAdapter(seriesAdapter);
-    mCollectorViewModel.getSeries().observe(getViewLifecycleOwner(), seriesAdapter::setSeriesDetailList);
-
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     mAddButton.setOnClickListener(pickView -> mCallback.onSeriesListAddComicBook());
+
+    updateUI();
   }
 
   @Override
@@ -107,8 +112,22 @@ public class SeriesListFragment extends Fragment {
 
     Log.d(TAG, "++onCreateView(LayoutInflater, ViewGroup, Bundle)");
     View view = inflater.inflate(R.layout.fragment_series_list, container, false);
-    mAddButton = view.findViewById(R.id.series_fab_add);
+    mAddButton = view.findViewById(R.id.series_list_fab_add);
     mRecyclerView = view.findViewById(R.id.series_list_view);
+    mSortSpinner = view.findViewById(R.id.series_list_spinner_sort);
+
+    mSortSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        updateUI();
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+
+      }
+    });
+
     return view;
   }
 
@@ -125,6 +144,13 @@ public class SeriesListFragment extends Fragment {
     super.onResume();
 
     Log.d(TAG, "++onResume()");
+  }
+
+  private void updateUI() {
+
+    SeriesAdapter seriesAdapter = new SeriesAdapter(getContext());
+    mRecyclerView.setAdapter(seriesAdapter);
+    mCollectorViewModel.getSeries().observe(getViewLifecycleOwner(), seriesAdapter::setSeriesDetailList);
   }
 
   /*
@@ -216,6 +242,18 @@ public class SeriesListFragment extends Fragment {
 
       Log.d(TAG, "++setSeriesDetailList(List<SeriesDetails>)");
       mSeriesDetailsList = seriesDetailList;
+      switch (mSortSpinner.getSelectedItemPosition()) {
+        case 1:
+          mSeriesDetailsList.sort(new ByVolume());
+          break;
+        case 2:
+          mSeriesDetailsList.sort(new ByNumberOfIssues());
+          break;
+        default:
+          mSeriesDetailsList.sort(new BySeriesTitle());
+          break;
+      }
+
       mCallback.onSeriesListPopulated(seriesDetailList.size());
       notifyDataSetChanged();
     }

@@ -6,6 +6,57 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
+  <View
+    android:id="@+id/list_divider"
+    android:layout_width="1dp"
+    android:layout_height="match_parent"
+    android:background="?android:attr/listDivider"
+    android:visibility="invisible"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.6"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/list_text_sort"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/narrow_margin"
+    android:text="@string/sort_by"
+    app:layout_constraintTop_toTopOf="@id/list_spinner_sort"
+    app:layout_constraintBottom_toBottomOf="@id/list_spinner_sort"
+    app:layout_constraintStart_toStartOf="parent"/>
+  <Spinner
+    android:id="@+id/list_spinner_sort"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/narrow_margin"
+    android:entries="@array/sort_array"
+    android:gravity="center_vertical|end"
+    android:textAlignment="gravity"
+    app:layout_constraintEnd_toStartOf="@id/list_divider"
+    app:layout_constraintTop_toTopOf="parent" />
+  <TextView
+    android:id="@+id/list_text_filter"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/narrow_margin"
+    android:text="@string/filter_by"
+    app:layout_constraintTop_toTopOf="@id/list_spinner_filter"
+    app:layout_constraintBottom_toBottomOf="@id/list_spinner_filter"
+    app:layout_constraintStart_toEndOf="@id/list_divider"/>
+  <Spinner
+    android:id="@+id/list_spinner_filter"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/narrow_margin"
+    android:entries="@array/filter_array"
+    android:gravity="center_vertical|end"
+    android:textAlignment="gravity"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
   <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/list_view"
     android:layout_width="0dp"
@@ -15,7 +66,7 @@
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/list_text_sort"
     tools:listitem="@layout/item_comic_book" />
 
   <com.google.android.material.floatingactionbutton.FloatingActionButton

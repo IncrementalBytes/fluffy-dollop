@@ -19,16 +19,33 @@ package net.whollynugatory.android.comiccollector.common;
 import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
 
 import java.util.Comparator;
+import net.whollynugatory.android.comiccollector.db.views.SeriesDetails;
 
 public class SortUtils {
 
-//  public static class ByNumberOfIssues implements Comparator<SeriesDetails> {
-//
-//    public int compare(SeriesDetails a, SeriesDetails b) {
-//
-//      return Long.compare(b.OwnedIssues.size(), a.OwnedIssues.size());
-//    }
-//  }
+  public static class ByNumberOfIssues implements Comparator<SeriesDetails> {
+
+    public int compare(SeriesDetails a, SeriesDetails b) {
+
+      return Long.compare(b.BookCount, a.BookCount);
+    }
+  }
+
+  public static class BySeriesTitle implements Comparator<SeriesDetails> {
+
+    public int compare(SeriesDetails a, SeriesDetails b) {
+
+      return a.SeriesTitle.compareTo(b.SeriesTitle);
+    }
+  }
+
+  public static class ByVolume implements Comparator<SeriesDetails> {
+
+    public int compare(SeriesDetails a, SeriesDetails b) {
+
+      return Long.compare(b.Volume, a.Volume);
+    }
+  }
 
   public static class ByIssueNumber implements Comparator<ComicDetails> {
 
@@ -38,11 +55,27 @@ public class SortUtils {
     }
   }
 
-  public static class ByYearAscending implements Comparator<Integer> {
+  public static class ByAddedDate implements Comparator<ComicDetails> {
 
-    public int compare(Integer a, Integer b) {
+    public int compare(ComicDetails a, ComicDetails b) {
 
-      return Integer.compare(a, b);
+      return Long.compare(a.AddedDate, b.AddedDate);
+    }
+  }
+
+  public static class ByTitle implements Comparator<ComicDetails> {
+
+    public int compare(ComicDetails a, ComicDetails b) {
+
+      return a.Title.compareTo(b.Title);
+    }
+  }
+
+  public static class ByUpdatedDate implements Comparator<ComicDetails> {
+
+    public int compare(ComicDetails a, ComicDetails b) {
+
+      return Long.compare(a.UpdatedDate, b.UpdatedDate);
     }
   }
 }

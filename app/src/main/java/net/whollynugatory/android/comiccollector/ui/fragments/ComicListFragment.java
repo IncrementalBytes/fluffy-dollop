@@ -22,8 +22,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -37,6 +40,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import net.whollynugatory.android.comiccollector.R;
+import net.whollynugatory.android.comiccollector.common.SortUtils;
+import net.whollynugatory.android.comiccollector.common.SortUtils.ByIssueNumber;
 import net.whollynugatory.android.comiccollector.db.viewmodel.CollectorViewModel;
 import net.whollynugatory.android.comiccollector.db.views.ComicDetails;
 import net.whollynugatory.android.comiccollector.ui.BaseActivity;
@@ -58,6 +63,8 @@ public class ComicListFragment extends Fragment {
 
   private FloatingActionButton mAddButton;
   private RecyclerView mRecyclerView;
+  private Spinner mFilterSpinner;
+  private Spinner mSortSpinner;
 
   private CollectorViewModel mCollectorViewModel;
 
@@ -101,18 +108,10 @@ public class ComicListFragment extends Fragment {
     super.onActivityCreated(savedInstanceState);
 
     Log.d(TAG, "++onActivityCreated()");
-    ComicDetailsAdapter comicDetailsAdapter = new ComicDetailsAdapter(getContext());
-    mRecyclerView.setAdapter(comicDetailsAdapter);
-    if (mSeriesId != null && !mSeriesId.isEmpty()) {
-      mCollectorViewModel.getComicsBySeriesId(mSeriesId).observe(getViewLifecycleOwner(), comicDetailsAdapter::setComicDetailsList);
-    } else if (mComicDetails == null) {
-      mCollectorViewModel.getRecentComics().observe(getViewLifecycleOwner(), comicDetailsAdapter::setComicDetailsList);
-    } else { // TODO: only show passed comic book in list
-      comicDetailsAdapter.setComicDetailsList(Collections.singletonList(mComicDetails));
-    }
-
     mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     mAddButton.setOnClickListener(pickView -> mCallback.onComicListAddComicBook());
+
+    updateUI();
   }
 
   @Override
@@ -123,8 +122,7 @@ public class ComicListFragment extends Fragment {
     try {
       mCallback = (OnComicListListener) context;
     } catch (ClassCastException e) {
-      throw new ClassCastException(
-        String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
+      throw new ClassCastException(String.format(Locale.US, "Missing interface implementations for %s", context.toString()));
     }
   }
 
@@ -156,6 +154,33 @@ public class ComicListFragment extends Fragment {
     View view = inflater.inflate(R.layout.fragment_list, container, false);
     mAddButton = view.findViewById(R.id.fab_add);
     mRecyclerView = view.findViewById(R.id.list_view);
+    mFilterSpinner = view.findViewById(R.id.list_spinner_filter);
+    mSortSpinner = view.findViewById(R.id.list_spinner_sort);
+
+    mFilterSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        updateUI();
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+
+      }
+    });
+
+    mSortSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        updateUI();
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+
+      }
+    });
+
     return view;
   }
 
@@ -172,6 +197,19 @@ public class ComicListFragment extends Fragment {
     super.onResume();
 
     Log.d(TAG, "++onResume()");
+  }
+
+  private void updateUI() {
+
+    ComicDetailsAdapter comicDetailsAdapter = new ComicDetailsAdapter(getContext());
+    mRecyclerView.setAdapter(comicDetailsAdapter);
+    if (mSeriesId != null && !mSeriesId.isEmpty()) {
+      mCollectorViewModel.getComicsBySeriesId(mSeriesId).observe(getViewLifecycleOwner(), comicDetailsAdapter::setComicDetailsList);
+    } else if (mComicDetails == null) {
+      mCollectorViewModel.getRecentComics().observe(getViewLifecycleOwner(), comicDetailsAdapter::setComicDetailsList);
+    } else { // TODO: only show passed comic book in list
+      comicDetailsAdapter.setComicDetailsList(Collections.singletonList(mComicDetails));
+    }
   }
 
   /*
@@ -213,7 +251,11 @@ public class ComicListFragment extends Fragment {
         if (mComicBook != null) {
           mDeleteImage.setOnClickListener(v -> {
             if (getActivity() != null) {
-              String message = String.format(Locale.US, getString(R.string.remove_specific_book_message), mComicBook.Title);
+              String message = "Remove comic from your library?";
+              if (!mComicBook.Title.isEmpty()) {
+                message = String.format(Locale.US, getString(R.string.remove_specific_book_message), mComicBook.Title);
+              }
+
               AlertDialog removeBookDialog = new AlertDialog.Builder(getActivity())
                 .setMessage(message)
                 .setPositiveButton(android.R.string.yes, (dialog, which) -> mCollectorViewModel.deleteComicById(mComicBook.Id))
@@ -228,7 +270,12 @@ public class ComicListFragment extends Fragment {
           mOwnCheck.setChecked(mComicBook.IsOwned);
           mReadCheck.setChecked(mComicBook.HasRead);
           mSeriesNameTextView.setText(mComicBook.SeriesTitle);
-          mTitleTextView.setText(mComicBook.Title);
+          if (mComicBook.Title.isEmpty()) {
+            mTitleTextView.setText(R.string.no_title);
+          } else {
+            mTitleTextView.setText(mComicBook.Title);
+          }
+
           mIssueTextView.setText(String.valueOf(mComicBook.getIssueNumber()));
         }
       }
@@ -281,7 +328,53 @@ public class ComicListFragment extends Fragment {
     void setComicDetailsList(List<ComicDetails> comicDetailsList) {
 
       Log.d(TAG, "++setComicDetailsList(List<ComicDetails>)");
-      mComicDetailsList = new ArrayList<>(comicDetailsList);
+      mComicDetailsList = new ArrayList<>();
+      for(ComicDetails comicDetail : comicDetailsList) {
+        switch (mFilterSpinner.getSelectedItemPosition()) {
+          case 1:
+            if (comicDetail.IsOwned) {
+              mComicDetailsList.add(comicDetail);
+            }
+
+            break;
+          case 2:
+            if (!comicDetail.IsOwned) {
+              mComicDetailsList.add(comicDetail);
+            }
+
+            break;
+          case 3:
+            if (comicDetail.HasRead) {
+              mComicDetailsList.add(comicDetail);
+            }
+
+            break;
+          case 4:
+            if (!comicDetail.HasRead) {
+              mComicDetailsList.add(comicDetail);
+            }
+
+            break;
+          default:
+            mComicDetailsList.add(comicDetail);
+            break;
+        }
+      }
+
+      switch (mSortSpinner.getSelectedItemPosition()) {
+        case 1:
+          mComicDetailsList.sort(new SortUtils.ByAddedDate());
+          break;
+        case 2:
+          mComicDetailsList.sort(new SortUtils.ByTitle());
+          break;
+        case 3:
+          mComicDetailsList.sort(new ByIssueNumber());
+          break;
+        default:
+          mComicDetailsList.sort(new SortUtils.ByUpdatedDate());
+          break;
+      }
       mCallback.onComicListPopulated(comicDetailsList.size());
       notifyDataSetChanged();
     }

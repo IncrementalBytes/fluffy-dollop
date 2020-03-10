@@ -156,11 +156,6 @@ public class MainActivity extends BaseActivity implements
     mUser.Id = getIntent().getStringExtra(BaseActivity.ARG_FIREBASE_USER_ID);
     mUser.Email = getIntent().getStringExtra(BaseActivity.ARG_EMAIL);
     mUser.FullName = getIntent().getStringExtra(BaseActivity.ARG_USER_NAME);
-    // TODO: Update
-//    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-//    mUser.IsGeek = preferences.getBoolean(UserPreferenceFragment.IS_GEEK_PREFERENCE, false);
-//    mUser.ShowBarcodeHint = preferences.getBoolean(UserPreferenceFragment.SHOW_TUTORIAL_PREFERENCE, true);
-//    mUser.UseImageCapture = preferences.getBoolean(UserPreferenceFragment.USE_IMAGE_PREVIEW_PREFERENCE, false);
     if (UserEntity.isValid(mUser)) { // get most recent publisher and series data
       checkForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, BaseActivity.REQUEST_STORAGE_PERMISSIONS);
     } else {

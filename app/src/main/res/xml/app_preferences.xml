@@ -83,11 +83,13 @@
       android:title="Force Exception (DEBUG)"/>
   </androidx.preference.PreferenceCategory>
 
-  <androidx.preference.EditTextPreference
-    android:key="preference_app_version"
-    android:singleLine="true"
-    android:title="App Version"
-    android:summary=""
-    android:enabled="false"/>
+  <androidx.preference.PreferenceCategory android:title="@string/pref_category_about">
+    <androidx.preference.EditTextPreference
+      android:key="@string/perf_key_app_version"
+      android:singleLine="true"
+      android:title="@string/perf_title_app_version"
+      android:summary=""
+      android:enabled="false"/>
+  </androidx.preference.PreferenceCategory>
 
 </PreferenceScreen>

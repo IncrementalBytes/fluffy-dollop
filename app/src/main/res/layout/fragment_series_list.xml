@@ -5,6 +5,38 @@
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools">
 
+  <View
+    android:id="@+id/series_list_divider"
+    android:layout_width="1dp"
+    android:layout_height="match_parent"
+    android:background="?android:attr/listDivider"
+    android:visibility="invisible"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.55"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/series_list_text_sort"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/narrow_margin"
+    android:text="@string/sort_by"
+    app:layout_constraintTop_toTopOf="@id/series_list_spinner_sort"
+    app:layout_constraintBottom_toBottomOf="@id/series_list_spinner_sort"
+    app:layout_constraintStart_toStartOf="parent"/>
+  <Spinner
+    android:id="@+id/series_list_spinner_sort"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/narrow_margin"
+    android:entries="@array/series_sort_array"
+    android:gravity="center_vertical|end"
+    android:textAlignment="gravity"
+    app:layout_constraintEnd_toStartOf="@id/series_list_divider"
+    app:layout_constraintTop_toTopOf="parent" />
+
   <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/series_list_view"
     android:layout_width="0dp"
@@ -13,11 +45,11 @@
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/series_list_text_sort"
     tools:listitem="@layout/item_series"/>
 
   <com.google.android.material.floatingactionbutton.FloatingActionButton
-    android:id="@+id/series_fab_add"
+    android:id="@+id/series_list_fab_add"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
@@ -26,7 +58,7 @@
     android:contentDescription="@string/desc_add_comic"
     android:elevation="5dp"
     android:focusable="true"
-    app:backgroundTint="@color/primaryColor"
+    app:backgroundTint="@color/accent"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:srcCompat="@drawable/ic_add_dark"/>
