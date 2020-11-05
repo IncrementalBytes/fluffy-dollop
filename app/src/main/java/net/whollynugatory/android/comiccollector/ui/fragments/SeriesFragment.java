@@ -29,7 +29,7 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import java.util.Calendar;
@@ -152,7 +152,7 @@ public class SeriesFragment extends Fragment {
           .addOnCompleteListener(task -> {
 
             if (!task.isSuccessful()) { // not fatal but we need to know this information for review
-              Crashlytics.logException(
+              FirebaseCrashlytics.getInstance().recordException(
                 new ComicCollectorException(
                   String.format(
                     Locale.US,
@@ -215,7 +215,7 @@ public class SeriesFragment extends Fragment {
           .addOnCompleteListener(task -> {
 
             if (!task.isSuccessful()) { // not fatal but we need to know this information for review
-              Crashlytics.logException(
+              FirebaseCrashlytics.getInstance().recordException(
                 new ComicCollectorException(
                   String.format(
                     Locale.US,
@@ -253,7 +253,7 @@ public class SeriesFragment extends Fragment {
       .addOnCompleteListener(task -> {
 
         if (!task.isSuccessful()) { // not fatal but we need to know this information for review
-          Crashlytics.logException(
+          FirebaseCrashlytics.getInstance().recordException(
             new ComicCollectorException(
               String.format(
                 Locale.US,

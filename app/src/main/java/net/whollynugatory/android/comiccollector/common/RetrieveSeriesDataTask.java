@@ -18,7 +18,7 @@ package net.whollynugatory.android.comiccollector.common;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -116,7 +116,7 @@ public class RetrieveSeriesDataTask extends AsyncTask<Void, Void, SeriesDetails>
           }
         } catch (JSONException e) {
           Log.d(TAG, "Failed to parse JSON object.");
-          Crashlytics.logException(e);
+          FirebaseCrashlytics.getInstance().recordException(e);
         }
 
         if (!mSeriesDetails.getProductCode().equals(upc)) {

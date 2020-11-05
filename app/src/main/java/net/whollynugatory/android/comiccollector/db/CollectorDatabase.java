@@ -175,7 +175,7 @@ public abstract class CollectorDatabase extends RoomDatabase {
               message = String.format(Locale.US, "%s %d...", message, ++count);
             }
           } catch (Exception e) {
-            Log.w(TAG, "Could not process publisher data: " + e);
+            Log.w(TAG, "Could not process publisher data.", e);
           } finally {
             Log.d(TAG, message);
           }

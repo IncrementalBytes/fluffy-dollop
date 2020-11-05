@@ -31,7 +31,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import androidx.annotation.NonNull;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
@@ -266,7 +266,7 @@ public class MainActivity extends BaseActivity implements
         try {
           mImageBitmap = BitmapFactory.decodeStream(new FileInputStream(f));
         } catch (FileNotFoundException e) {
-          Crashlytics.logException(e);
+          FirebaseCrashlytics.getInstance().recordException(e);
         }
 
         if (mImageBitmap != null) {

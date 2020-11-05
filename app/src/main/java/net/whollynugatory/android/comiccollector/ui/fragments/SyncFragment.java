@@ -26,7 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
@@ -157,7 +157,7 @@ public class SyncFragment extends Fragment {
           Log.d(TAG, "Comic books written: " + booksWritten.size());
         } catch (Exception e) {
           Log.w(TAG, "Exception when exporting local database.");
-          Crashlytics.logException(e);
+          FirebaseCrashlytics.getInstance().recordException(e);
         }
       }
 
@@ -181,7 +181,7 @@ public class SyncFragment extends Fragment {
         });
       } catch (FileNotFoundException fnfe) {
         Log.w(TAG, "Could not export library.", fnfe);
-        Crashlytics.logException(fnfe);
+        FirebaseCrashlytics.getInstance().recordException(fnfe);
       } finally {
         File tempFile = new File(getActivity().getFilesDir(), BaseActivity.DEFAULT_EXPORT_FILE);
         if (tempFile.exists()) {
@@ -222,7 +222,7 @@ public class SyncFragment extends Fragment {
             mCallback.onSyncImport();
           } catch (Exception e) {
             Log.w(TAG, "Failed reading local library.", e);
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
           } finally {
             if (file.delete()) { // remove temporary file
               Log.d(TAG, "Removed temporary local import file.");

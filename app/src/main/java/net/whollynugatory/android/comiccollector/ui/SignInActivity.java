@@ -20,12 +20,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
-import com.crashlytics.android.core.CrashlyticsCore;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.android.material.snackbar.Snackbar;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -33,13 +32,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import com.google.firebase.storage.FirebaseStorage;
-import io.fabric.sdk.android.Fabric;
 import java.io.File;
 
 import java.util.Calendar;
@@ -53,8 +50,6 @@ public class SignInActivity extends BaseActivity {
   private static final String TAG = BaseActivity.BASE_TAG + "SignInActivity";
 
   private static final int RC_SIGN_IN = 4701;
-
-  private FirebaseAnalytics mFirebaseAnalytics;
 
   private ProgressBar mProgressBar;
   private SignInButton mSignInWithGoogleButton;
@@ -72,10 +67,6 @@ public class SignInActivity extends BaseActivity {
     super.onCreate(savedInstanceState);
 
     Log.d(TAG, "++onCreate(Bundle)");
-    CrashlyticsCore crashlyticsCore = new CrashlyticsCore.Builder()
-      .disabled(BuildConfig.DEBUG)
-      .build();
-    Fabric.with(this, crashlyticsCore);
 
     setContentView(R.layout.activity_sign_in);
 
@@ -95,8 +86,6 @@ public class SignInActivity extends BaseActivity {
         }
       });
     }
-
-    mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
     mProgressBar = findViewById(R.id.sign_in_progress);
     mProgressBar.setVisibility(View.GONE);
@@ -185,10 +174,8 @@ public class SignInActivity extends BaseActivity {
       Log.d(TAG, "User: " + mAuth.getCurrentUser().getDisplayName());
       Log.d(TAG, "Timestamp: " + Calendar.getInstance().getTimeInMillis());
       Log.d(TAG, "Build: " + BuildConfig.VERSION_NAME);
-      Crashlytics.setUserIdentifier(mAuth.getCurrentUser().getUid());
-      Bundle bundle = new Bundle();
-      bundle.putString(FirebaseAnalytics.Param.METHOD, "onAuthenticateSuccess");
-      mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle);
+      FirebaseCrashlytics.getInstance().setUserId(mAuth.getCurrentUser().getUid());
+      FirebaseCrashlytics.getInstance().log("onAuthenticateSuccess");
 
       File localFile = new File(getFilesDir(), BaseActivity.DEFAULT_DATA_FILE);
       String appDataPath = PathUtils.combine(BaseActivity.REMOTE_PATH, BaseActivity.DEFAULT_DATA_FILE);
@@ -218,12 +205,10 @@ public class SignInActivity extends BaseActivity {
     mAuth.signInWithCredential(credential).addOnCompleteListener(this, task -> {
 
       if (task.isSuccessful() && mAuth.getCurrentUser() != null) {
-        Bundle bundle = new Bundle();
-        bundle.putString(FirebaseAnalytics.Param.METHOD, "firebaseAuthenticateWithGoogle");
-        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle);
+        FirebaseCrashlytics.getInstance().log("firebaseAuthenticateWithGoogle");
         onAuthenticateSuccess();
       } else {
-        Crashlytics.logException(task.getException());
+        FirebaseCrashlytics.getInstance().recordException(task.getException());
         String message = "Authenticating with Google account failed.";
         showErrorInSnackBar(message);
       }
